@@ -1,0 +1,86 @@
+﻿
+<!DOCTYPE html>
+@{
+
+}
+
+<html>
+<head runat="server">
+    <title>IAM Logout</title>
+    <style type="text/css">
+
+        .headerText {
+            font-size: 30px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .header_customTxt-wrapper {
+            position: absolute;
+            display: inline-block;
+            top: 22%;
+            left: 52%;
+        }
+
+            .header_customTxt-wrapper a {
+                color: #fff;
+                font-weight: bold;
+                font-size: 24px;
+            }
+
+        .quick-area {
+            display: inline-block;
+            width: 80%;
+        }
+
+        header {
+            position: fixed;
+            top: 40%;
+            left: 0;
+            width: 100%;
+            padding-top: 10px;
+            background: right 0 #3367d6;
+            height: 65px;
+            box-shadow: 1px 3px 1px rgba(0, 0, 0, 0.2);
+            display: block;
+            z-index: 999;
+            box-sizing: border-box;
+        }
+
+        .headerText {
+            font-size: 30px;
+            font-weight: bold;
+            color: white;
+        }
+
+        input {
+            font-family: monospace;
+        }
+
+        label {
+            display: block;
+        }
+
+        div {
+            margin: 0 0 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+
+        <header>
+            <center>
+
+                <a href="/Account/IMLogin" class="headerText" id="headerCustText">You are successfully logged out of the application</a>
+            </center>
+
+        </header>
+        <div class="quick-area">
+        </div>
+    </form>
+
+
+
+</body>
+</html>

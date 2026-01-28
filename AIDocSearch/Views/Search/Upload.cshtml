@@ -1,0 +1,135 @@
+﻿@model DataTransferObject.DTO.Requests.DTOUploadRequest
+
+<div class="container mt-2">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Upload PDF File For Indexing</h4>
+                </div>
+
+                <div class="card-body">
+                    <form asp-controller="Search"
+                          asp-action="Upload"
+                          method="post"
+                          enctype="multipart/form-data"
+                          autocomplete="off">
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <label class="fw-bold">Upload (PDF)</label>
+                            </div>
+
+                            <div class="col-md-5">
+                                <input asp-for="FileName" required
+                                       type="file"
+                                       class="form-control"
+                                       accept=".pdf" />
+
+                                <span asp-validation-for="FileName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-upload"></i> Upload
+                                </button>
+                            </div>
+                        </div>
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fa fa-check-circle"></i>
+                                @TempData["SuccessMessage"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                Please fix the errors below.
+                                <ul class="mb-0 mt-2">
+                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                    </form>
+                    @{
+                        int srNo = 1;
+                    }
+                    <div class="container mt-3">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-file-pdf-o me-2"></i> Uploaded PDF Files
+                                </h5>
+                            </div>
+
+                            <div class="card-body p-0">
+                                <table class="table table-hover mb-0 align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width:80px">Sr. No</th>
+                                            <th>File Name</th>
+                                            <th>CreateOn</th>
+                                            <th style="width:120px" class="text-center">View</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        @foreach (var item in ViewBag.AllData)
+                        {
+                                            <tr>
+                                                <td>@srNo</td>
+                                                <td>
+                                                    <i class="fa fa-file-pdf-o text-danger me-2"></i>
+                                                    <a href="@Url.Action("WatermarkPdfWithFolder", "Master", new { fileName = item.FileName })"
+                                                       class="text-decoration-none fw-semibold"
+                                                       target="_blank">
+                                                        @{
+                                                            var name = item.FileName ?? "";
+                                                            var result = name;
+
+                                                            if (name.Length > 20)
+                                                            {
+                                                                result = name.Substring(0, name.Length - 20);
+                                                            }
+                                                        }
+
+                                                        @result
+
+
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    @item.CreatedOn.ToString("dd/MM/yyyy HH:mm")
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="@Url.Action("WatermarkPdfWithFolder", "Master", new { fileName = item.FileName })"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       title="View PDF"
+                                                       target="_blank">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            srNo++;
+                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

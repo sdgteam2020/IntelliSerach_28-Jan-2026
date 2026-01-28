@@ -1,0 +1,100 @@
+﻿@model DataTransferObject.DTO.Requests.DTOLoginRequest
+
+
+@{
+    ViewData["Title"] = "Login Page";
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+    <!--Made with love by Mutiullah Samim -->
+    <!--Bootsrap 4 CDN-->
+    <link href="\bootstrap\css\bootstrap.min.css" rel="stylesheet" />
+
+    <!--Fontawesome CDN-->
+
+    <link href="~/fontawesome/css/all.min.css" rel="stylesheet" />
+    <!--Custom styles-->
+    <link href="\css\login.css" rel="stylesheet" />
+    <script src="~/js/crypto-js.min.js"></script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="container">
+        <div class="d-flex justify-content-center h-100">
+            <div class="card">
+                <div class="card-header text-center">
+                    <img src="~/images/logo.png"
+                         alt="Logo"
+                         class="app-logo mx-auto d-block" />
+
+                    <h3>Log in</h3>
+                    @* <div class="d-flex justify-content-end social_icon">
+                        <span><i class="fa-solid fa-file-pdf"></i></span>
+                        <span><i class="fa-solid fa-file-word"></i></span>
+                    </div> *@
+                </div>
+                <div class="card-body">
+                    <form asp-action="Login" asp-controller="Account" method="post" novalidate>
+                        <input type="hidden" id="aesKey" value="@ViewBag.hdns" />
+                        @Html.AntiForgeryToken()
+
+                        <div class="input-group mb-3 input-group-prepend">
+                            <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                            <input asp-for="UserName" class="form-control" value="@Model.UserName" required/>
+                           
+                        </div>
+
+                        <div class="input-group mb-3 input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                            <input asp-for="Password" class="form-control" value="Admin@123" required />
+                           
+                        </div>
+                        <div class="input-group mb-3 input-group-prepend">
+                            <span class="input-group-text"><i class="fa-solid fa-user-tie"></i></span>
+                            <select asp-for="RoleName" class="form-select" required>
+                                <option value="">Select Role</option>
+                                <option value="User" selected>User</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                           
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-warning">Login</button>
+                        </div>
+                        <div class="alert  mt-2" role="alert">
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <div class="text-danger">@modelError.ErrorMessage</div>
+                                }
+                            }
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                            <span asp-validation-for="RoleName" class="text-danger"></span>
+                            <div class="text-danger d-none" id="txterrormsg"></div>
+
+                        </div>
+                    </form>
+                </div>
+
+                @* <div class="card-footer">
+					<div class="d-flex justify-content-center links">
+						Don't have an account?<a href="#">Sign Up</a>
+					</div>
+					<div class="d-flex justify-content-center">
+						<a href="#">Forgot your password?</a>
+					</div>
+				</div> *@
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script src="~/devjs/login.js"></script>

@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Indian Army IntelliSearch</title>
+    <!--Bootstrap 4 CDN-->
+    <link href="~/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+   
+    <!--Fontawesome CDN-->
+    <link href="~/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3 custom-navbar">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Dashboard">
+                    <img src="~/images/logo.png"
+                         alt="Logo"
+                         class="app-logo-white" />
+
+                    @* <span class="font-weight-bold" style="font-size:1.3rem;">Search Document AI</span> *@
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Dashboard">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Search" ? "active" : "")" asp-area="" asp-controller="Search" asp-action="Index">Search</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Upload" ? "active" : "")" asp-area="" asp-controller="Search" asp-action="Upload">Upload</a>
+                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white @(ViewContext.RouteData.Values["action"]?.ToString() == "RegistrationRequest" ? "active" : "")" asp-area="" asp-controller="Account" asp-action="RegistrationRequest">Registration</a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["action"]?.ToString() == "Scraper" ? "active" : "")" asp-area="" asp-controller="Scraper" asp-action="index">Scraper</a>
+                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="form-inline m-0 p-0">
+                                    <button type="submit"
+                                            class="nav-link btn btn-link text-white btn-no-decoration">
+                                        Logout
+                                    </button>
+
+                                </form>
+                            </li>
+                        }
+                       
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item d-flex align-items-center">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <span class="navbar-text text-white"> <h4 class="alert-heading">Welcome , @User.Identity.Name!</h4> </span>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+   
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    
+        <footer class="border-top footer text-muted fixed-bottom bg-white">
+            <div class="container text-center">
+            <h3 class="ai-tagline">
+                🚀 Unlock Knowledge with Indian Army IntelliSearch !
+            </h3>
+
+            </div>
+        </footer>
+    
+
+    <!-- Ensure jQuery is loaded before Bootstrap JS -->
+   
+    <script src="~/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/sweetalert2/sweetalert2.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

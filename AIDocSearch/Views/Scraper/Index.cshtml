@@ -1,0 +1,100 @@
+﻿@model DataTransferObject.DTO.Requests.DTOScraperRequest
+@{
+    ViewData["Title"] = "Scraper";
+}
+<link asp-href-include="~/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/responsive.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/responsive.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/buttons.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/fixedHeader.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/jquery.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/css/stylesheetfordatatable.css" rel="stylesheet" />
+
+
+<script asp-src-include="~/js/datatables/jquery.datatables.min.js"></script>
+<script asp-src-include="~/js/datatables/dataTables.responsive.min.js"></script>
+<script asp-src-include="~/js/datatables/responsive.dataTables.min.js"></script>
+<script asp-src-include="~/js/datatables/dataTables.bootstrap4.min.js"></script>
+<script asp-src-include="~/js/datatables/responsive.bootstrap4.min.js"></script> <!-- DataTables Responsive extension and specifically integrates Responsive behavior with Bootstrap 4 styling. -->
+<script asp-src-include="~/js/datatables/dataTables.buttons.min.js"></script> <!-- It adds the foundational functionality needed to add custom buttons (like Export, Print, or custom actions) to a DataTable.-->
+<script asp-src-include="~/js/datatables/buttons.bootstrap4.min.js"></script> <!-- Export buttons (like Copy, CSV, Excel, PDF, Print) to match Bootstrap 4 design and layout. -->
+@* <script asp-src-include="~/js/datatables/jszip.min.js"></script> *@ <!-- for Excel export -->
+@* <script asp-src-include="~/js/datatables/pdfmake.min.js"></script> *@ <!-- for PDF export -->
+@* <script asp-src-include="~/js/datatables/vfs_fonts.js"></script> *@ <!-- required by pdfmake -->
+<script asp-src-include="~/js/datatables/buttons.html5.min.js"></script> <!-- All HTML5 export buttons -->
+<script asp-src-include="~/js/datatables/buttons.print.min.js"></script> <!-- Adds a "Print" button to DataTables toolbar for print preview and printing -->
+<script asp-src-include="~/js/datatables/datatables-call.js"></script>
+<div class="container mt-1">
+    <div id="loading" class="loader">
+        <div class="loader-container">
+            <img src="/Images/load.gif" width="100">
+            <div>
+                <h4 class="mt--20">Loading...</h4>
+                <span>Please wait. This may take few seconds.</span>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>Scraper</h4>
+                </div>
+                <div class="card-body">
+                     <form id="ScraperForm" class=" align-items-center gap-3">
+                       
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            @Html.AntiForgeryToken()
+                           
+                            <div class="form-group row mb-3">
+                                <label asp-for="Url" class="col-md-3 col-form-label"></label>
+                                <div class="col-md-6">
+                                <input asp-for="Url" class="form-control" value="https://192.168.10.40" required />
+                                    <span asp-validation-for="Url" class="text-danger"></span>
+                                </div>
+
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary mt-0" id="btnsave">Go Scrap</button>
+
+                            </div>
+                            </div>
+                            
+                        
+                    </form>
+
+                    <div class="container mt-4">
+
+                        <!-- Summary -->
+                        <div id="summary" class="mb-3">
+                            <h5>Website: <span id="websiteUrl"></span></h5>
+                            <p>
+                                Downloaded PDFs: <strong id="downloadCount"></strong><br />
+                              @*   Download Path: <span id="downloadDir"></span> *@
+                            </p>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="pdfTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>File Name</th>
+                                    <th>Source Page</th>
+                                    <th>Size (KB)</th>
+                                    <th>Downloaded At</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/devjs/scraper.js"></script>

@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewData["Title"] = "Elastic Search";
+}
+
+<script src="~/devjs/search.js"></script>
+<script src="~/devjs/suggestion.js"></script>
+<link href="~/css/search.css" rel="stylesheet" />
+<div class="container mt-1">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>Search Result</h4>
+                </div>
+                <div class="card-body">
+                   
+                        <div class="input-group mb-3">
+                        <div class="input-group input-group-lg mb-4">
+                            <span class="input-group-text bg-white border-end-0">
+                                <img src="~/images/Search.png"
+                                     alt="Search"
+                                     class="search-icon" />
+                            </span>
+
+                            <input type="text"
+                                   name="searchInput"
+                                   id="searchInput"
+                                   value="@ViewBag.query"
+                                   class="form-control border-start-0"
+                                   placeholder="Search..."
+                                   aria-label="Search"
+                                   autofocus
+                                   autocomplete="off" />
+
+                            <div id="suggestions" class="search-suggestions"></div>
+
+                            <button class="btn btn-primary" id="btnSearch" type="button">Search</button>
+                           
+                        </div>
+                        <span class="msgerror alert alert-danger ml-4 d-none"></span>
+                        
+                           
+                        </div>
+                    <div class="mb-2 d-flex alert alert-success d-none" id="CountSearch">
+                           
+                          <span id="resultCount" class="text-muted me-2"> </span>
+                        <span id="resultTime" class="text-muted ml-4"></span>
+                        </div>
+                    <div id="paginationTop" class="pagination d-none"></div>
+                    <div id="results"></div>
+                    <div id="paginationBottom" class="pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

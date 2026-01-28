@@ -1,0 +1,224 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+.bg-primary {
+    background-color: #044C92 !important;
+}
+.custom-navbar {
+    background: linear-gradient(90deg, #0056b3 0%, #007bff 100%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.navbar-nav .nav-link {
+    color: #fff !important;
+    font-weight: 500;
+    margin-right: 10px;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+    padding: 0.5rem 1rem;
+}
+
+    .navbar-nav .nav-link.active, .navbar-nav .nav-link:focus, .navbar-nav .nav-link:hover {
+        background: rgba(255,255,255,0.15);
+        color: #fff !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+
+.navbar-brand span {
+    letter-spacing: 1px;
+}
+footer {
+    background: linear-gradient(90deg, #0056b3 0%, #007bff 100%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    color:white;
+}
+#suggestions {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #dfe1e5;
+    border-top: none;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 4px 6px rgba(32,33,36,0.28);
+    max-height: 300px;
+    overflow-y: auto;
+    width: 79%;
+    margin-left: 58px;
+    font-family: Arial,sans-serif;
+}
+
+    #suggestions ul li {
+        padding: 12px 20px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        #suggestions ul li:hover,
+        #suggestions .ul li .active {
+            background: #D3D3D3;
+        }
+
+.app-logo-white {
+    height: 70px;
+    width: auto;
+    margin-right: 10px;
+    filter: brightness(0) invert(1);
+}
+/* Logo */
+.app-logo-large {
+    height: 120px;
+    width: auto;
+    margin-bottom: 24px;
+}
+
+/* Headings */
+.welcome-title {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 2.5rem;
+    padding: 18px 0 10px 0;
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+}
+
+.welcome-subtitle {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    padding: 8px 0 14px 0;
+    margin-bottom: 20px;
+}
+
+/* Search Form */
+.search-form {
+    max-width: 700px;
+}
+
+/* Search icon */
+.search-icon {
+    height: 32px;
+    width: auto;
+}
+
+/* Suggestions (optional future use) */
+#suggestions {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+}
+.btn-no-decoration {
+    text-decoration: none;
+}
+.ai-tagline {
+    color: #ffffff;
+    font-weight: bold;
+    letter-spacing: 1px;
+    /*text-shadow: 0px 0px 8px #b3d1ff;*/
+}
+/* Search icon */
+.search-icon {
+    height: 32px;
+    width: auto;
+}
+
+/* Suggestions dropdown */
+.search-suggestions {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #ffffff;
+    border: 1px solid #dfe1e5;
+    border-top: none;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 4px 6px rgba(32, 33, 36, 0.28);
+    max-height: 300px;
+    overflow-y: auto;
+    width: 88%;
+    margin-left: 58px;
+    font-family: Arial, sans-serif;
+}
+.icon-website{
+    height:30px;
+}
+.loader {
+    overflow-x: hidden;
+    overflow-y: hidden;
+    vertical-align: middle;
+    position: fixed;
+    display: table;
+    width: 100%;
+    top: 0;
+    height: 100%;
+    min-height: 100%;
+    z-index: 99999;
+    left: 0;
+}
+
+.loader-container {
+    position: relative;
+    display: table-cell;
+    vertical-align: middle;
+    z-index: 12;
+    text-align: center;
+}
+
+    .loader-container img {
+        width: 60px;
+    }
+
+.loader {
+    vertical-align: top;
+}
+.highlightQuery {
+    background: #5efbba;
+    padding: 4px;
+}
+.page-btn {
+    padding: 6px 12px;
+    margin: 2px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+}
+
+    .page-btn.active {
+        background: #007bff;
+        color: #fff;
+        border-color: #007bff;
+    }
+
+.dots {
+    padding: 0 6px;
+    color: #999;
+}
+.search-highlight-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.search-highlight-item {
+    padding: 5px;
+    cursor: pointer;
+}
+
+    .search-highlight-item:hover {
+        background-color: #f1f1f1;
+    }

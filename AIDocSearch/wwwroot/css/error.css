@@ -1,0 +1,18 @@
+﻿:root {
+    color-scheme: light dark;
+}
+
+body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+}
+
+.error-card {
+    max-width: 620px;
+}
+
+.code-badge {
+    font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,71 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model DataTransferObject.DTO.Requests.DTORegisterRequest
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<link asp-href-include="~/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/responsive.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/responsive.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/buttons.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/fixedHeader.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/jquery.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/css/stylesheetfordatatable.css" rel="stylesheet" />
+
+
+<script asp-src-include="~/js/datatables/jquery.datatables.min.js"></script>
+<script asp-src-include="~/js/datatables/dataTables.responsive.min.js"></script>
+<script asp-src-include="~/js/datatables/responsive.dataTables.min.js"></script>
+<script asp-src-include="~/js/datatables/dataTables.bootstrap4.min.js"></script>
+<script asp-src-include="~/js/datatables/responsive.bootstrap4.min.js"></script> <!-- DataTables Responsive extension and specifically integrates Responsive behavior with Bootstrap 4 styling. -->
+<script asp-src-include="~/js/datatables/dataTables.buttons.min.js"></script> <!-- It adds the foundational functionality needed to add custom buttons (like Export, Print, or custom actions) to a DataTable.-->
+<script asp-src-include="~/js/datatables/buttons.bootstrap4.min.js"></script> <!-- Export buttons (like Copy, CSV, Excel, PDF, Print) to match Bootstrap 4 design and layout. -->
+@* <script asp-src-include="~/js/datatables/jszip.min.js"></script> *@ <!-- for Excel export -->
+@* <script asp-src-include="~/js/datatables/pdfmake.min.js"></script> *@ <!-- for PDF export -->
+@* <script asp-src-include="~/js/datatables/vfs_fonts.js"></script> *@ <!-- required by pdfmake -->
+<script asp-src-include="~/js/datatables/buttons.html5.min.js"></script> <!-- All HTML5 export buttons -->
+<script asp-src-include="~/js/datatables/buttons.print.min.js"></script> <!-- Adds a "Print" button to DataTables toolbar for print preview and printing -->
+<script asp-src-include="~/js/datatables/datatables-call.js"></script> <!-- your custom JS that calls and configures the DataTables plugin -->
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>User Register</h4>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="table-responsive p-2">
+                        <table class="table border border-purple " role="grid" id="tbldata">
+                            <thead>
+                                <tr>
+                                    <th class="wd-40-f">SerialNumber</th>
+                                    <th class="nowrap">Domain ID</th>
+                                    <th class="nowrap">Role</th>
+                                    <th class="nowrap">Name</th>
+                                    <th class="noExport nowrap">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="DetailBody">
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+               
+              
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/devjs/registrationrequest.js"></script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

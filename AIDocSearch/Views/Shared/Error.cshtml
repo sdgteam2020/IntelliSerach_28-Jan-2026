@@ -1,0 +1,50 @@
+﻿@model ErrorViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Error";
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Something went wrong</title>
+
+    <link href="~/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/error.css" rel="stylesheet" />
+</head>
+<body>
+    <main class="error-card card shadow-lg border-0">
+        <div class="card-body p-4 p-md-5 text-center">
+            <div class="mb-3">
+                <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle rounded-pill code-badge">
+                    Error
+                </span>
+            </div>
+            <h1 class="h3 mb-3">Something went wrong</h1>
+            <p class="text-secondary mb-4">
+                We’re sorry—an unexpected error occurred. Please try again in a moment.
+                If the problem continues, contact support and include the reference ID below.
+            </p>
+
+            <!-- Optional: show a friendly reference id if you have one -->
+            <div class="mb-4 small text-muted" id="ref">
+                Reference ID: <span id="ref-id">—</span>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-center">
+                <button id="btnGoBack" class="btn btn-outline-secondary">
+                    Go back
+                </button>
+                <a class="btn btn-primary" href="/">Go to Home</a>
+                @* <a class="btn btn-outline-primary" href="/Account/ContactUs">Contact support</a> *@
+            </div>
+        </div>
+
+        
+    </main>
+
+    <script src="~/DevJs/error.js"></script>
+</body>
+</html>
