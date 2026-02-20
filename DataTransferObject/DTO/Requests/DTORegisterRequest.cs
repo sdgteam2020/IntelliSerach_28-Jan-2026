@@ -1,12 +1,7 @@
 ﻿using DataTransferObject.Localize;
 using DataTransferObject.Model;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataTransferObject.DTO.Requests
 {
@@ -19,22 +14,18 @@ namespace DataTransferObject.DTO.Requests
         [Display(Name = "Domain Name")]
         public string UserName { get; set; } = string.Empty;
 
-     
         [DataType(DataType.Password)]
         [StringLength(250)]
         [Required(ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "RequiredError")]
         [MinLength(1, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MinLengthError")]
         [MaxLength(250, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MaxLengthError")]
-        
         public string Password { get; set; } = string.Empty;
 
-       
         [DataType(DataType.Password)]
         [StringLength(250)]
         [Required(ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "RequiredError")]
         [MinLength(1, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MinLengthError")]
         [MaxLength(250, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MaxLengthError")]
-       
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
@@ -45,8 +36,8 @@ namespace DataTransferObject.DTO.Requests
         [Required]
         [ForeignKey("MRank")]
         [RegularExpression(@"^[\d]+$", ErrorMessage = "RankId is number.")]
-        
         public short RankId { get; set; }
+
         public MRank? MRank { get; set; }
 
         [StringLength(50)]
@@ -54,7 +45,6 @@ namespace DataTransferObject.DTO.Requests
         [MinLength(1, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MinLengthError")]
         [MaxLength(50, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MaxLengthError")]
         [RegularExpression(@"^[a-zA-Z]+( [a-zA-Z]+)*$", ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "Alphawithspace")]
-
         public string Name { get; set; } = string.Empty;
     }
 }

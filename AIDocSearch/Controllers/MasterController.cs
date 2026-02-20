@@ -2,36 +2,32 @@
 using DataTransferObject.Constants;
 using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Drawing;
-using System.Reflection.PortableExecutable;
+using iText.IO.Font.Constants;
 using iText.Kernel.Colors;
 using iText.Kernel.Font;
-using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Annot;
 using iText.Kernel.Pdf.Canvas;
-using iText.Kernel.Pdf.Canvas.Parser;
-using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using iText.Kernel.Pdf.Extgstate;
 using iText.Kernel.Pdf.Xobject;
-using iText.Layout;
-using iText.Layout.Element;
-using iText.Layout.Properties;
-using iText.IO.Font.Constants;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
 namespace AIDocSearch.Controllers
 {
     public class MasterController : Controller
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IWebHostEnvironment _env;
+
         public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env)
         {
-            this.unitOfWork = unitOfWork; 
+            this.unitOfWork = unitOfWork;
             _env = env;
         }
-        #region Master Table 
+
+        #region Master Table
+
         [AllowAnonymous]
         public async Task<IActionResult> GetAllMMaster(DTOMasterRequest Data)
         {
@@ -47,10 +43,9 @@ namespace AIDocSearch.Controllers
                 return Json(response);
             }
         }
+
         #endregion Master Table
 
-
-       
         [HttpGet]
         public IActionResult WatermarkPdfWithFolder(string fileName, string? folderPath)
         {
@@ -73,18 +68,26 @@ namespace AIDocSearch.Controllers
             string outFileName = System.IO.Path.GetFileName(fileName);
 
             // ===== CLIENT IP HANDLING (SAFE) =====
-            string clientIP = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var connection = HttpContext?.Connection;
+            if (connection == null)
+            {
+                // background task / non-HTTP context / edge case
+                return NotFound("IP Not Found");
+            }
 
-            string forwardedHeader = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            string clientIP = connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            var forwardedHeader = Request?.Headers["X-Forwarded-For"].FirstOrDefault();
+
             if (!string.IsNullOrWhiteSpace(forwardedHeader))
             {
                 clientIP = forwardedHeader
                     .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(ip => ip.Trim())
                     .FirstOrDefault()
-                    ?.Trim();
+                    ?? clientIP;
             }
 
-            clientIP ??= "Unknown IP";
 
             // DateTime stamp
             string dateTimeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -156,7 +159,6 @@ namespace AIDocSearch.Controllers
             // ===== INLINE PDF VIEW =====
             Response.Headers["Content-Disposition"] = $"inline; filename=\"{outFileName}\"";
             return File(outputStream.ToArray(), "application/pdf");
-
         }
     }
 }

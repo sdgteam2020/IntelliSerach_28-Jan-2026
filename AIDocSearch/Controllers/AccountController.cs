@@ -1,6 +1,4 @@
 ﻿using AIDocSearch.Helpers;
-using AIDocSearch.Models;
-using Azure.Core;
 using BusinessLogicsLayer.Account;
 using BusinessLogicsLayer.Ranks;
 using DataTransferObject.CommonModel;
@@ -11,11 +9,8 @@ using DataTransferObject.IdentityModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace AIDocSearch.Controllers
 {
@@ -25,30 +20,33 @@ namespace AIDocSearch.Controllers
         private readonly RoleManager<ApplicationRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly IAccount _account; 
+        private readonly IAccount _account;
         public const string SessionKeySalt = "_Salt";
         public readonly IRank _rank;
-        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,IAccount _account, IRank rank)
+
+        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAccount _account, IRank rank)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             _logger = logger;
             this.signInManager = signInManager;
             this._account = _account;
-            _rank=rank;
+            _rank = rank;
         }
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Login()
         {
             string GetSalt = AESEncrytDecry.GenerateKey();
-            HttpContext.Session.SetString(SessionKeySalt, GetSalt);
-            ViewBag.hdns = GetSalt;
+            //HttpContext.Session.SetString(SessionKeySalt, GetSalt);
+            ViewBag.hdns = "jYDtHxUEIOk9v0Xpv5XftQnzgtJSlNKjeZNHw9tBz7o=";
             await signInManager.SignOutAsync();
             DTOLoginRequest model = new DTOLoginRequest();
             model.UserName = "Admin";
             return View(model); // Ensure a return statement is present
         }
+
         /// <summary>
         /// Handles the POST request for user login.
         /// Validates the login model, checks user credentials, and signs in the user if successful.
@@ -67,7 +65,7 @@ namespace AIDocSearch.Controllers
             // Check if the model state is valid
             if (ModelState.IsValid)
             {
-                string? GetSalt = HttpContext.Session.GetString(SessionKeySalt); // Get Salt from Session
+                string? GetSalt = "jYDtHxUEIOk9v0Xpv5XftQnzgtJSlNKjeZNHw9tBz7o=";//HttpContext.Session.GetString(SessionKeySalt); // Get Salt from Session
                 if (GetSalt != null)
                 {
                     ViewBag.hdns = GetSalt;
@@ -76,13 +74,14 @@ namespace AIDocSearch.Controllers
                     string username = AESEncrytDecry.DecryptAES(model.UserName, GetSalt);  //decrypt password
                     model.UserName = username;
                 }
+
                 // Get the user's IP address and the current request URL (for logging or auditing)
                 string ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
                 var url = $"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}";
 
                 // Attempt to find the user by username
                 var selectedUser = await userManager.FindByNameAsync(model.UserName);
-                if (selectedUser !=null && !selectedUser.Active)
+                if (selectedUser != null && !selectedUser.Active)
                 {
                     return RedirectToAction("ContactUs", "Account");
                 }
@@ -94,7 +93,8 @@ namespace AIDocSearch.Controllers
                     TempData["RoleName"] = model.RoleName;
                     return RedirectToAction("Register", "Account");
                 }
-
+                if (string.IsNullOrWhiteSpace(selectedUser.UserName))
+                    throw new InvalidOperationException("UserName cannot be null.");
                 // Get the user's roles
                 var roles = await userManager.GetRolesAsync(selectedUser);
 
@@ -105,12 +105,10 @@ namespace AIDocSearch.Controllers
                     return View(model);
                 }
 
-
                 // Attempt to sign in the user with the provided password
                 var result = await signInManager.PasswordSignInAsync(model.UserName, model.Password, false, true);
                 if (result.Succeeded)
                 {
-                   
                     HttpContext.Session.Clear();
 
                     // Delete the session cookie so ASP.NET Core issues a NEW session ID
@@ -120,11 +118,10 @@ namespace AIDocSearch.Controllers
                         Response.Cookies.Delete(sessionCookieName);
                     }
 
-
                     await userManager.UpdateSecurityStampAsync(selectedUser);
 
                     // 2) Re-issue THIS session’s cookie so it contains the fresh stamp
-                    await signInManager.SignOutAsync();
+                    //await signInManager.SignOutAsync();
                     await signInManager.SignInAsync(selectedUser, isPersistent: false);
                     // If a valid returnUrl is provided, redirect to it
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -132,13 +129,15 @@ namespace AIDocSearch.Controllers
                         return Redirect(returnUrl);
                     }
                     var ret = await _rank.GetByshort(selectedUser.RankId);
+                   
+
                     var dTOSession = new DTOSession
                     {
                         UserId = selectedUser.Id,
                         RoleName = string.Join(",", await userManager.GetRolesAsync(selectedUser)),
                         UserName = selectedUser.UserName,
                         Name = selectedUser.Name,
-                        RankName = ret.RankAbbreviation,
+                        RankName = ret.RankAbbreviation
                     };
 
                     SessionHeplers.SetObject(HttpContext.Session, "Users", dTOSession);
@@ -149,22 +148,15 @@ namespace AIDocSearch.Controllers
                 else if (result.IsLockedOut)
                 {
                     ModelState.AddModelError(string.Empty, "Account Locked Out Please Try after 10 minutes.");
-
-
                 }
                 else if (result.IsNotAllowed)
                 {
                     ModelState.AddModelError(string.Empty, "Already Login \" + user.UserName + \" Please Try Some Time.");
-
-
                 }
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Not Valid User / Password. Access Failed Count " + selectedUser.AccessFailedCount + " Max Access Attempts 3");
-
-
                 }
-               
             }
             // Return the login view with the model and any error messages
             return View(model);
@@ -180,8 +172,8 @@ namespace AIDocSearch.Controllers
         {
             return View();
         }
-        [AllowAnonymous]
 
+        [AllowAnonymous]
         public IActionResult Register()
         {
             string GetSalt = AESEncrytDecry.GenerateKey();
@@ -193,6 +185,7 @@ namespace AIDocSearch.Controllers
                 return RedirectToAction("Login");
             return View(new DTORegisterRequest());
         }
+
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public IActionResult RegistrationRequest()
@@ -218,6 +211,11 @@ namespace AIDocSearch.Controllers
             if (GetSalt != null)
             {
                 ViewBag.hdns = GetSalt;
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Salt is null");
+                return View(model);
 
             }
             if (ModelState.IsValid)
@@ -229,7 +227,7 @@ namespace AIDocSearch.Controllers
                     ModelState.AddModelError(string.Empty, "User already exists.");
                     return View(model);
                 }
-               
+
                 string Password = AESEncrytDecry.DecryptAES(model.ConfirmPassword, GetSalt);  //decrypt password
                 model.ConfirmPassword = Password;
                 var user = new ApplicationUser
@@ -239,13 +237,12 @@ namespace AIDocSearch.Controllers
                     Active = false,
                     Updatedby = 1,
                     UpdatedOn = DateTime.UtcNow,
-                    Name=model.Name,
-                    RankId=model.RankId,
+                    Name = model.Name,
+                    RankId = model.RankId,
 
                     // model.Email
                     // Add other properties as needed
                 };
-
 
                 var result = await userManager.CreateAsync(user, model.ConfirmPassword);
                 // Replace this block in the Register POST action after successful registration
@@ -264,7 +261,6 @@ namespace AIDocSearch.Controllers
                     var claims = new List<Claim>()
                     {
                         new Claim("Role", model.Role),
-                       
                     };
                     await userManager.AddClaimsAsync(user, claims);
                     // ✅ Insert into AspNetUserLogins
@@ -283,11 +279,9 @@ namespace AIDocSearch.Controllers
                         tokenValue: Guid.NewGuid().ToString()
                     );
 
-
                     // Redirect to the same page (Register) after successful registration
                     TempData["SuccessMessage"] = "Registration successful!";
                     return RedirectToAction("ContactUs", "Account");
-
                 }
                 foreach (var error in result.Errors)
                 {
@@ -296,12 +290,13 @@ namespace AIDocSearch.Controllers
             }
             return View(model);
         }
+        [Authorize(Roles = "Admin")]
 
         public async Task<IActionResult> GetAllUser(DTODataTablesRequest request)
         {
-            
             return Json(await _account.GetAllUsers(request));
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
@@ -310,17 +305,20 @@ namespace AIDocSearch.Controllers
             await signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
+
         [HttpGet]
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {
             return View();
         }
+
         [AllowAnonymous]
         public IActionResult ContactUs()
         {
             return View(); // Create an AccessDenied.cshtml under Views/Account
         }
+
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken] // add this if not using AJAX; for AJAX use header token
         public async Task<IActionResult> UpdateApprovalStatus([FromBody] DTOUserApprovalRequest dTOUserApprovalRequest)
@@ -328,7 +326,7 @@ namespace AIDocSearch.Controllers
             if (ModelState.IsValid)
             {
                 // Get the user ID from the ClaimsPrincipal (the logged-in user)
-              
+
                 var data = await _account.Get(dTOUserApprovalRequest.Id);
                 if (data != null)
                 {
@@ -336,11 +334,21 @@ namespace AIDocSearch.Controllers
                     var retdata = await _account.UpdateWithReturn(data);
                     return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.SuccessMessage, true));
                 }
-
             }
             return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.IncorrectDataMessage, true));
-
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetSalt()
+        {
+            var key = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)); // 256-bit
+            var iv = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16));
+
+            HttpContext.Session.SetString("AES_KEY", key);
+            HttpContext.Session.SetString("AES_IV", iv);
+
+            return Ok(new { key, iv });
+        }
     }
 }

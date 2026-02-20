@@ -15,10 +15,8 @@ $(document).ready(function () {
     });
 });
 function BindData() {
-   
     if ($.fn.DataTable.isDataTable("#tbldata")) {
         $("#tbldata").DataTable().destroy();
-       
     }
     table = $("#tbldata").DataTable({
         processing: true,
@@ -37,7 +35,7 @@ function BindData() {
                 sortDirection: data.order.length > 0 ? data.order[0].dir : '',
             };
             try {
-                let response = await fetch("/Account/GetAllUser", {
+                let response = await fetch("/IntelliSearch/Account/GetAllUser", {
                     method: "POST",
                     headers: { "Content-Type": "application/x-www-form-urlencoded" },
                     body: new URLSearchParams(requestData).toString()
@@ -67,7 +65,6 @@ function BindData() {
                 name: "Id",
                 orderable: false,
                 render: function (data, type, row) {
-
                     if (!data) return "NA";
 
                     let isActive = row.Active === true;
@@ -108,27 +105,23 @@ function BindData() {
                 title: 'User Reg',
                 exportOptions: { columns: "thead th:not(.noExport)" },
                 customize: function (doc) {
-                   // WaterMarkOnPdf(doc);
+                    // WaterMarkOnPdf(doc);
                 }
             }
         ],
         drawCallback: function (settings) {
             $("#tbldata tbody").off("click", ".cls-btnedit").on("click", ".cls-btnedit", function () {
-               
                 var rowData = table.row($(this).closest("tr")).data();
                 if (rowData != null) {
-                 
                     $("#UserName").val(rowData.DomainId);
-                   
+
                     $("#Role").val(rowData.RoleNames);
                 }
             });
         }
     });
-
 }
 $(document).on('change', '.updateuser', async function () {
-
     const result = await Swal.fire({
         title: "Are you sure?",
         text: "You want to update Status",
@@ -141,11 +134,11 @@ $(document).on('change', '.updateuser', async function () {
     if (result.isConfirmed) {
         var userId = $(this).data('id');
         var isActive = $(this).prop('checked');
-       
+
         const token = $('input[name="__RequestVerificationToken"]').val();
-       
+
         try {
-            const resp = await fetch("/Account/UpdateApprovalStatus", {
+            const resp = await fetch("/IntelliSearch/Account/UpdateApprovalStatus", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",  // Ensure content-type is set to JSON
@@ -168,7 +161,6 @@ $(document).on('change', '.updateuser', async function () {
                     timer: 1500
                 });
 
-
                 return;
             }
 
@@ -183,7 +175,6 @@ $(document).on('change', '.updateuser', async function () {
                     showConfirmButton: false,
                     timer: 1500
                 });
-
             } else {
                 Swal.fire({
                     position: "top-end",
@@ -192,11 +183,8 @@ $(document).on('change', '.updateuser', async function () {
                     showConfirmButton: false,
                     timer: 1500
                 });
-
-
             }
         } catch (err) {
-
             Swal.fire({
                 position: "top-end",
                 icon: "error",
@@ -206,5 +194,4 @@ $(document).on('change', '.updateuser', async function () {
             });
         }
     }
-
 });

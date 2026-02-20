@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
 
 namespace DataTransferObject.DTO.Requests
 {
@@ -37,7 +31,41 @@ namespace DataTransferObject.DTO.Requests
     public class BoolQuery
     {
         public List<object> should { get; set; }
+        public List<object> filter { get; set; }   // ✅ ADD THIS
     }
+    public class IndexTermFilter
+    {
+        public string _index { get; set; }
+    }
+
+    public class IndexTermsFilter
+    {
+        public List<string> _index { get; set; }
+    }
+    public class BoolFilter
+    {
+        public List<object> should { get; set; }
+
+
+        [JsonProperty("minimum_should_match")]
+        public int minimum_should_match { get; set; }
+    }
+
+    public class WildcardWrapper
+    {
+        [JsonProperty("wildcard")]
+        public object Wildcard { get; set; }
+    }
+
+    public class BoolWrapper
+    {
+        [JsonProperty("should")]
+        public List<object> Should { get; set; }
+
+        [JsonProperty("minimum_should_match")]
+        public int MinimumShouldMatch { get; set; }
+    }
+
     public class MatchPhraseWrapper
     {
         public MatchPhraseQuerywithoutfuzzy match_phrase { get; set; }
@@ -52,10 +80,12 @@ namespace DataTransferObject.DTO.Requests
     {
         public ContentQuery content { get; set; }
     }
+
     public class MatchPhraseQuerywithoutfuzzy
     {
         public ContentQuerywithoutfuzzy content { get; set; }
     }
+
     public class MatchQuery
     {
         public ContentQuery content { get; set; }
@@ -68,12 +98,13 @@ namespace DataTransferObject.DTO.Requests
         public string fuzziness { get; set; }
         public bool fuzzy_transpositions { get; set; }
     }
+
     public class ContentQuerywithoutfuzzy
     {
         public string query { get; set; }
         public int boost { get; set; }
-
     }
+
     public class Highlight
     {
         public string[] pre_tags { get; set; }
@@ -87,7 +118,6 @@ namespace DataTransferObject.DTO.Requests
         public int number_of_fragments { get; set; }
     }
 
-
     //public class DTOSearchQueryRequest
     //{
     //    public int from { get; set; }
@@ -97,7 +127,6 @@ namespace DataTransferObject.DTO.Requests
     //}
     //public class Query
     //{
-
     //    public BoolQuery Bool { get; set; }
     //}
     //public class BoolQuery
@@ -127,5 +156,4 @@ namespace DataTransferObject.DTO.Requests
     //{
     //    public Dictionary<string, object> fields { get; set; }
     //}
-
 }

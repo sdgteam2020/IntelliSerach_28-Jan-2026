@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BusinessLogicsLayer.Service
 {
-    public class ServiceRepository: IService
+    public class ServiceRepository : IService
     {
         public string ProcessUploadedFile(IFormFile UploadDoc, string FileAddress, string FileName)
         {
             string? uniqueFileName = null;
             string ext = System.IO.Path.GetExtension(UploadDoc.FileName);
-           // uniqueFileName = FileName + ext;// Guid.NewGuid().ToString() + ext;
+            // uniqueFileName = FileName + ext;// Guid.NewGuid().ToString() + ext;
             string filePath = Path.Combine(FileAddress, FileName);
             using (var fileStream = new FileStream(filePath, FileMode.Create))
             {

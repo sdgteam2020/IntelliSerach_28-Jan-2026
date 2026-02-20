@@ -1,20 +1,21 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .bg-primary {
     background-color: #044C92 !important;
 }
+
 .custom-navbar {
     background: linear-gradient(90deg, #0056b3 0%, #007bff 100%);
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
@@ -38,11 +39,13 @@ html {
 .navbar-brand span {
     letter-spacing: 1px;
 }
+
 footer {
     background: linear-gradient(90deg, #0056b3 0%, #007bff 100%);
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    color:white;
+    color: white;
 }
+
 #suggestions {
     display: none;
     position: absolute;
@@ -120,9 +123,11 @@ footer {
     z-index: 1000;
     width: 100%;
 }
+
 .btn-no-decoration {
     text-decoration: none;
 }
+
 .ai-tagline {
     color: #ffffff;
     font-weight: bold;
@@ -154,9 +159,11 @@ footer {
     margin-left: 58px;
     font-family: Arial, sans-serif;
 }
-.icon-website{
-    height:30px;
+
+.icon-website {
+    height: 30px;
 }
+
 .loader {
     overflow-x: hidden;
     overflow-y: hidden;
@@ -186,10 +193,12 @@ footer {
 .loader {
     vertical-align: top;
 }
+
 .highlightQuery {
     background: #5efbba;
     padding: 4px;
 }
+
 .page-btn {
     padding: 6px 12px;
     margin: 2px;
@@ -208,6 +217,7 @@ footer {
     padding: 0 6px;
     color: #999;
 }
+
 .search-highlight-list {
     list-style: none;
     margin: 0;

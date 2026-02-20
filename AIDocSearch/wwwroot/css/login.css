@@ -1,6 +1,5 @@
 ﻿/* Made with love by Mutiullah Samim*/
 
-
 html, body {
     height: 100%;
     margin: 0;
@@ -8,8 +7,8 @@ html, body {
     font-family: 'Numans', sans-serif;
     background-size: cover; /* Optional: if you still want a CSS background on body */
     background-repeat: no-repeat; /* Optional */
-    
 }
+
 body {
     margin: 0;
     font-family: var(--bs-body-font-family);
@@ -39,20 +38,24 @@ body {
     /* Optional: Add a border for visibility during development */
     /* border: 1px solid blue; */
 }
-        #overlay-content {
-            position: relative; /* Essential for content to be above canvas */
-            z-index: 1; /* Ensures it's above the canvas */
-            color: white;
-            text-align: center;
-            padding-top: 50px;
-        }
+
+#overlay-content {
+    position: relative; /* Essential for content to be above canvas */
+    z-index: 1; /* Ensures it's above the canvas */
+    color: white;
+    text-align: center;
+    padding-top: 50px;
+}
+
 .container {
     height: 100%;
     align-content: center;
 }
+
 .fa-file-word {
-   background-image: url('../images/logo.png');
+    background-image: url('../images/logo.png');
 }
+
 .card {
     min-height: 350px;
     margin-top: auto;
@@ -80,7 +83,6 @@ body {
     margin: 11px 131px;
     position: relative;
     top: -51px;
-   
 }*/
 .card-header img {
     display: block;
@@ -89,6 +91,7 @@ body {
     top: -51px;
     /* margin-left: 31px; */
 }
+
 .social_icon {
     position: absolute;
     right: 20px;
@@ -136,6 +139,7 @@ input:focus {
     .links a {
         margin-left: 4px;
     }
+
 .app-logo {
     height: 100px;
     width: auto;

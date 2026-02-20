@@ -2,11 +2,6 @@
 using DataTransferObject.Model;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccessLayer
 {
@@ -15,8 +10,8 @@ namespace DataAccessLayer
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         { }
 
-        public DbSet<MRank> MRank { get; set; } = null!; 
-        public DbSet<TrnUploadFiles> trnUploadFiles { get; set; } = null!; 
+        public DbSet<MRank> MRank { get; set; } = null!;
+        public DbSet<TrnUploadFiles> trnUploadFiles { get; set; } = null!;
         public DbSet<ExceptionLog> Log { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -34,9 +29,6 @@ namespace DataAccessLayer
                 .WithMany()
                 .HasForeignKey(x => x.UpdatedBy)
                 .OnDelete(DeleteBehavior.Restrict);
-
-
         }
-
     }
 }

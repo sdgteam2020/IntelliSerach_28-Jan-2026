@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccessLayer.GenericRepository
 {
@@ -15,6 +10,7 @@ namespace DataAccessLayer.GenericRepository
         {
             _context = context;
         }
+
         public async Task<T> Get(int id)
         {
             var entity = await _context.Set<T>().FindAsync(id);
@@ -23,8 +19,8 @@ namespace DataAccessLayer.GenericRepository
                 throw new ArgumentNullException(nameof(id));
             }
             return entity;
-
         }
+
         public async Task<T> GetByGen<T2>(T2 val1)
         {
             var entity = await _context.Set<T>().FindAsync(val1);
@@ -36,6 +32,7 @@ namespace DataAccessLayer.GenericRepository
 
             return entity;
         }
+
         public async Task<T> GetByshort(short id)
         {
             // Use FindAsync to search for the entity by the provided id
@@ -50,6 +47,7 @@ namespace DataAccessLayer.GenericRepository
 
             // return await _context.Set<T>().FindAsync(id);
         }
+
         public async Task<T> GetById(int id)
         {
             // Use FindAsync to search for the entity by the provided id
@@ -64,6 +62,7 @@ namespace DataAccessLayer.GenericRepository
 
             // return await _context.Set<T>().FindAsync(id);
         }
+
         public async Task<IEnumerable<T>> GetAll()
         {
             var result = await _context.Set<T>().ToListAsync();
@@ -87,6 +86,7 @@ namespace DataAccessLayer.GenericRepository
             await _context.Set<T>().AddAsync(entity);
             await SaveAsync();
         }
+
         public async Task<T> AddWithReturn(T entity)
         { // Validate the entity (optional)
             if (entity == null)
@@ -103,6 +103,7 @@ namespace DataAccessLayer.GenericRepository
         {
             await _context.SaveChangesAsync();
         }
+
         public async Task Delete(T entity)
         { // Validate the entity (optional)
             if (entity == null)
@@ -124,6 +125,7 @@ namespace DataAccessLayer.GenericRepository
             _context.Entry(entity).State = EntityState.Modified;
             await SaveAsync();
         }
+
         public async Task<T> UpdateWithReturn(T entity)
         { // Validate the entity (optional)
             if (entity == null)
@@ -135,6 +137,7 @@ namespace DataAccessLayer.GenericRepository
             await _context.SaveChangesAsync();
             return entity;
         }
+
         public async Task<T> Delete(int id)
         {
             var entity = await _context.Set<T>().FindAsync(id);
@@ -148,8 +151,5 @@ namespace DataAccessLayer.GenericRepository
 
             return entity;
         }
-
-
-
     }
 }

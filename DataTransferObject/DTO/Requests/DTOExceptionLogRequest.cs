@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DataTransferObject.DTO.Requests
+﻿namespace DataTransferObject.DTO.Requests
 {
     public class DTOExceptionLogRequest
     {

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace DataTransferObject.Model
 {
@@ -9,6 +6,7 @@ namespace DataTransferObject.Model
     {
         [Key]
         public int Id { get; set; }
+
         public DateTime OccurredAtUtc { get; set; }
         public string CorrelationId { get; set; } = Guid.NewGuid().ToString();
 

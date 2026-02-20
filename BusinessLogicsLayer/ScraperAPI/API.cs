@@ -1,23 +1,21 @@
 ﻿using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BusinessLogicsLayer.ScraperAPI
 {
     public class API : IAPI
     {
-        private readonly string APILoginURL = "https://192.168.10.206/pdf/api/login/";
-        private readonly string APIcrawlURL = "https://192.168.10.206/pdf/api/crawl/";
+        //private readonly string APILoginURL = "https://mpcrs.army.mil/webscraper1/api/login/";
+        //private readonly string APIcrawlURL = "https://mpcrs.army.mil/webscraper1/api/crawl/";
+        //private readonly string APIcrawlseoURL = "https://mpcrs.army.mil/webscraper1/web/api/crawl/";
 
-        public async Task<DTOLoginAPIResponse> Getauthentication(DTOAPILoginRequest data)
+        //private readonly string APILoginURL = "https://192.168.10.219/pdf/api/login/";
+        //private readonly string APIcrawlURL = "https://192.168.10.219/pdf/api/crawl/";
+        //private readonly string APIcrawlseoURL = "https://192.168.10.219/seo/api/crawl/";
+
+        public async Task<DTOLoginAPIResponse> Getauthentication(DTOAPILoginRequest data, string APILoginURL)
         {
             try
             {
@@ -52,11 +50,20 @@ namespace BusinessLogicsLayer.ScraperAPI
 
                 var result = JsonSerializer.Deserialize<DTOLoginAPIResponse>(rawResponse);
 
-                return result ?? new DTOLoginAPIResponse
+                if (result == null)
                 {
-                    Status = false,
-                    Message = "Empty response from API."
-                };
+                    return result ?? new DTOLoginAPIResponse
+                    {
+                        Status = false,
+                        Message = "Empty response from API."
+                    };
+                }
+                else
+                {
+                    result.message = "Login successful.";
+                    result.Status = true;
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -68,7 +75,7 @@ namespace BusinessLogicsLayer.ScraperAPI
             }
         }
 
-        public async Task<DTOScraperDataResponse> GetData(DTOScraperDataRequest Data)
+        public async Task<DTOScraperDataResponse> GetData(DTOScraperDataRequest Data, string APIcrawlURL)
         {
             try
             {
@@ -82,13 +89,14 @@ namespace BusinessLogicsLayer.ScraperAPI
 
                 // ===== Headers (Same as JS) =====
                 client.DefaultRequestHeaders.Add("X-CSRFToken", Data.CSRFToken);
-                client.DefaultRequestHeaders.Add("Cookie","csrftoken="+Data.CSRFToken+"; sessionid="+Data.session_key+"");
+                client.DefaultRequestHeaders.Add("Cookie", "csrftoken=" + Data.CSRFToken + "; sessionid=" + Data.session_key + "");
 
                 // ===== Body =====
                 var payload = new
                 {
                     url = Data.url,
-                    max_pdfs = Data.max_pdfs
+                    max_pdfs = Data.max_pdfs,
+                    abbr=Data.Abbreviation
                 };
 
                 var json = JsonSerializer.Serialize(payload);
@@ -120,6 +128,114 @@ namespace BusinessLogicsLayer.ScraperAPI
             catch (Exception ex)
             {
                 return new DTOScraperDataResponse
+                {
+                    //Status = false,
+                    message = ex.Message
+                };
+            }
+        }
+
+        public async Task<DTOWebScraperDataResponse> GetData(DTOWebScraperDataRequest Data, string APIcrawlseoURL)
+        {
+            try
+            {
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                };
+
+                using var client = new HttpClient(handler);
+
+                // ===== Headers (Same as JS) =====
+                client.DefaultRequestHeaders.Add("X-CSRFToken", Data.CSRFToken);
+                client.DefaultRequestHeaders.Add("Cookie", "csrftoken=" + Data.CSRFToken + "; sessionid=" + Data.session_key + "");
+
+                // ===== Body =====
+                var payload = new
+                {
+                    url = Data.url,
+                    max_pages = Data.max_pages,
+                    abbr = Data.Abbreviation
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                // ===== POST Request =====
+                var response = await client.PostAsync(APIcrawlseoURL, content);
+
+                var rawResponse = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new DTOWebScraperDataResponse
+                    {
+                        //Status = false,
+                        message = $"API Error {(int)response.StatusCode}: {rawResponse}"
+                    };
+                }
+
+                var result = JsonSerializer.Deserialize<DTOWebScraperDataResponse>(rawResponse);
+
+                return result ?? new DTOWebScraperDataResponse
+                {
+                    //Status = false,
+                    message = "Empty response from API."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DTOWebScraperDataResponse
+                {
+                    //Status = false,
+                    message = ex.Message
+                };
+            }
+        }
+
+        public async Task<DTOFilterResponse> GetFilter(DTOWebScraperDataRequest Data, string APIuniqueurls)
+        {
+            try
+            {
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                };
+
+                using var client = new HttpClient(handler);
+
+                // ===== Headers (Same as JS) =====
+                client.DefaultRequestHeaders.Add("X-CSRFToken", Data.CSRFToken);
+                client.DefaultRequestHeaders.Add("Cookie", "csrftoken=" + Data.CSRFToken + "; sessionid=" + Data.session_key + "");
+
+                // ===== POST Request =====
+                var response = await client.GetAsync(APIuniqueurls);
+
+                var rawResponse = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new DTOFilterResponse
+                    {
+                        //Status = false,
+                        message = $"API Error {(int)response.StatusCode}: {rawResponse}"
+                    };
+                }
+
+                var result = JsonSerializer.Deserialize<DTOFilterResponse>(rawResponse);
+
+                return result ?? new DTOFilterResponse
+                {
+                    //Status = false,
+                    message = "Empty response from API."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DTOFilterResponse
                 {
                     //Status = false,
                     message = ex.Message

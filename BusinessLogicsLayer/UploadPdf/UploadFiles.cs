@@ -1,34 +1,29 @@
 ﻿using BusinessLogicsLayer.Service;
-using DataAccessLayer;
-using DataAccessLayer.GenericRepository;
 using DataAccessLayer.UploadFiles;
 using DataTransferObject.Constants;
 using DataTransferObject.DTO.Response;
 using DataTransferObject.Model;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BusinessLogicsLayer.UploadPdf
 {
-    public class UploadFiles:IUploadFiles
+    public class UploadFiles : IUploadFiles
     {
         private readonly IService _service;
         private readonly IUploadFilesDB _uploadFilesDB;
+
         public UploadFiles(IService service, IUploadFilesDB uploadFilesDB)
         {
             _service = service;
-           _uploadFilesDB = uploadFilesDB;
+            _uploadFilesDB = uploadFilesDB;
         }
 
         public Task<DTOGenericResponse<object>> GetUploadFileByUserId(int UserId)
         {
-           return _uploadFilesDB.GetUploadFileByUserId(UserId);
+            return _uploadFilesDB.GetUploadFileByUserId(UserId);
         }
 
-        public async Task<DTOGenericResponse<object>> UploadFileAsync(IFormFile file, string uploadPath,int UserId)
+        public async Task<DTOGenericResponse<object>> UploadFileAsync(IFormFile file, string uploadPath, int UserId)
         {
             if (uploadPath != null)
             {
@@ -52,14 +47,13 @@ namespace BusinessLogicsLayer.UploadPdf
                         false
                     );
                 }
-                
 
                 string originalName = Path.GetFileNameWithoutExtension(file.FileName);
                 string extension = Path.GetExtension(file.FileName);
 
                 // Add datetime (yyyyMMdd_HHmmss)
                 string filename = $"{originalName}_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";
-                FileName =_service.ProcessUploadedFile(file, uploadPath, filename);
+                FileName = _service.ProcessUploadedFile(file, uploadPath, filename);
 
                 string path = Path.Combine(uploadPath, FileName);
                 bool pdfcontentresult = _service.IsPdf(file);
@@ -81,10 +75,8 @@ namespace BusinessLogicsLayer.UploadPdf
                     IsDeleted = false
                 };
 
-
-               await _uploadFilesDB.AddWithReturn(trnUploadFiles);
+                await _uploadFilesDB.AddWithReturn(trnUploadFiles);
                 return new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.UploadSucess, true);
-
             }
             return new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.UploadSucess, true);
         }

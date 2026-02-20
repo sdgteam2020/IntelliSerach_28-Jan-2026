@@ -1,13 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DataTransferObject.Localize;
+﻿using DataTransferObject.Localize;
 using DataTransferObject.Model;
+using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataTransferObject.IdentityModel
 {
@@ -18,14 +13,15 @@ namespace DataTransferObject.IdentityModel
         [MinLength(1, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MinLengthError")]
         [MaxLength(50, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MaxLengthError")]
         [RegularExpression(@"^[a-zA-Z]+( [a-zA-Z]+)*$", ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "SpecialChars")]
-
         public string Name { get; set; } = string.Empty;
+
         [Required]
-     
         [RegularExpression(@"^[\d]+$", ErrorMessage = "RankId is number.")]
         public short RankId { get; set; }
+
         [ForeignKey(nameof(RankId))]
         public MRank? MRank { get; set; }   // ✅ Navigation Property must be PUBLIC
+
         public bool Active { get; set; } = false;
 
         [Display(Name = "Updated By")]

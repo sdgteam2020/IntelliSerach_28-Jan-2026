@@ -87,7 +87,6 @@ var particle_count = 70,
     particles = [],
     couleurs = ["#3a0088", "#930077", "#e61c5d", "#ffbd39"];
 function Particle() {
-
     this.radius = Math.round((Math.random() * 3) + 5);
     this.x = Math.floor((Math.random() * ((+getComputedStyle(canvas).getPropertyValue("width").slice(0, -2) * dpi) - this.radius + 1) + this.radius));
     this.y = Math.floor((Math.random() * ((+getComputedStyle(canvas).getPropertyValue("height").slice(0, -2) * dpi) - this.radius + 1) + this.radius));
@@ -115,7 +114,6 @@ function Particle() {
     }
 
     this.move = function () {
-
         context.beginPath();
         context.globalCompositeOperation = 'source-over';
         context.fillStyle = this.color;
@@ -167,7 +165,6 @@ for (var i = 0; i < particle_count; i++) {
     particles.push(particle);
 }
 
-
 function animate() {
     fix_dpi();
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -176,8 +173,5 @@ function animate() {
     }
     requestAnimFrame(animate);
 }
-
-
-
 
 animate();

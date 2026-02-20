@@ -1,9 +1,6 @@
 ﻿using DataTransferObject.Helpers;
 using DataTransferObject.Localize;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DataTransferObject.DTO.Requests
 {
@@ -12,6 +9,6 @@ namespace DataTransferObject.DTO.Requests
         [AllowedExtensions(new[] { ".pdf" })]
         [AllowedContentType(new[] { "application/pdf" })]
         [MaxFileNameLength(100)]
-        public required IFormFile? FileName { get; set; }
+        public IFormFile? FileName { get; set; }
     }
 }

@@ -3,9 +3,6 @@ using DataTransferObject.Constants;
 using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
 using DataTransferObject.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DataAccessLayer.Logers
 {
@@ -34,7 +31,6 @@ namespace DataAccessLayer.Logers
             exceptionLog.Roles = Log.Roles;
             exceptionLog.RemoteIp = Log.RemoteIp;
             exceptionLog.UserAgent = Log.UserAgent;
-
 
             var rettrnmov = await AddWithReturn(exceptionLog);
             // Return success if both operations succeed

@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace DataTransferObject.Helpers
 {
     public class AllowedContentTypeAttribute : ValidationAttribute
     {
         private readonly string[] _contenttype;
+
         public AllowedContentTypeAttribute(string[] contenttype)
         {
             _contenttype = contenttype;

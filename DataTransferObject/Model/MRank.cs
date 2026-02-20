@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using DataTransferObject.CommonModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DataTransferObject.CommonModel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataTransferObject.Model
 {
@@ -30,8 +25,5 @@ namespace DataTransferObject.Model
 
         [RegularExpression(@"^[\d]+$", ErrorMessage = "RankId is number.")]
         public short Orderby { get; set; }
-
-
     }
 }
-

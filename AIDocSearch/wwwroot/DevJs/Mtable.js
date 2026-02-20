@@ -1,12 +1,11 @@
 ﻿async function mMsater(sectid = '', ddl, TableId, ParentId) {
-
     const userdata = new URLSearchParams({
         id: TableId,
         ParentId: ParentId
     });
 
     try {
-        const response = await fetch('/Master/GetAllMMaster', {
+        const response = await fetch('/IntelliSearch/Master/GetAllMMaster', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -22,10 +21,7 @@
                     text: errormsg
                 });
             } else if (data.Code == 200) {
-
-
                 let listItemddl = "";
-
 
                 listItemddl += '<option value="0">Please Select</option>';
 
@@ -45,7 +41,6 @@
             //     text: "No data found Offrs"
             // });
         }
-
     } catch (error) {
         Swal.fire({
             text: errormsg002

@@ -15,7 +15,6 @@ namespace AIDocSearch.CustomMiddleware
         "/Account/Login",
         "/Account/FinalLogin",
         "/Account/Logout",
-
         };
 
         public GlobalExceptionMiddleware(
@@ -24,20 +23,17 @@ namespace AIDocSearch.CustomMiddleware
         {
             _next = next;
             _logger = logger;
-
         }
 
         //public async Task InvokeAsync(HttpContext context, IExceptionLogService logService)
         public async Task InvokeAsync(HttpContext context, ILoger _iloger)
         {
-
             try
             {
                 await _next(context);
             }
             catch (Exception ex)
             {
-
                 var endpoint = context.GetEndpoint();
                 var routeVals = context.GetRouteData()?.Values;
                 var controller = routeVals != null && routeVals.TryGetValue("controller", out var c) ? c?.ToString() : null;
@@ -65,7 +61,6 @@ namespace AIDocSearch.CustomMiddleware
 
                 var data = await _iloger.AddAsync(log);
 
-
                 // Different behavior for API/AJAX vs MVC
                 if (IsApiRequest(context))
                 {
@@ -75,7 +70,6 @@ namespace AIDocSearch.CustomMiddleware
                     await context.Response.WriteAsJsonAsync(new
                     {
                         error = "An unexpected error occurred.",
-
                     });
                     return;
                 }

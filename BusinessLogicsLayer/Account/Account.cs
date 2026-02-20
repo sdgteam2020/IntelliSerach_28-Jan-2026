@@ -4,15 +4,10 @@ using DataAccessLayer.GenericRepository;
 using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
 using DataTransferObject.IdentityModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BusinessLogicsLayer.Account
 {
-    public class Account :GenericRepository<ApplicationUser>, IAccount
+    public class Account : GenericRepository<ApplicationUser>, IAccount
     {
         private readonly IAccountDL accountDL;
 
@@ -23,7 +18,7 @@ namespace BusinessLogicsLayer.Account
 
         public Task<DTODataTablesResponse<DTOUserDataResponse>> GetAllUsers(DTODataTablesRequest request)
         {
-           return accountDL.GetAllUsers(request);
+            return accountDL.GetAllUsers(request);
         }
     }
 }

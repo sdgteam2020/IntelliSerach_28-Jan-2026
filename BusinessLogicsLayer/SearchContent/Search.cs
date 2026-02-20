@@ -1,15 +1,8 @@
 ﻿using DataTransferObject.DTO.Requests;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BusinessLogicsLayer.SearchContent
 {
@@ -17,12 +10,130 @@ namespace BusinessLogicsLayer.SearchContent
     {
         public async Task<string> GetResponse(DTOSerchRequest Request, string Url, string UserName, string Password)
         {
+            Request.Filter = Request.Filter == "All" ? "*" : Request.Filter;
+            Request.Filter = Request.Filter.Replace("https://", "").Replace("http://", "").Trim();
+            
+
+            var filters = new List<object>();
+
+            // ✅ CASE 1: ALL → path filter on asdc_new ONLY
+            if (Request.Filter == "*!")
+            {
+                filters.Add(new
+                {
+                    terms = new
+                    {
+                        _index = new List<string> { "*" }
+                    }
+                });
+
+                filters.Add(new
+                {
+                    @bool = new BoolFilter
+                    {
+                        should = new List<object>
+            {
+                new WildcardWrapper
+                {
+                    Wildcard = new Dictionary<string, string>
+                    {
+                       { "path.real", $"*\\\\{Request.Filter}\\\\*" }
+
+                    }
+                }
+            },
+                        minimum_should_match = 1
+                    }
+                });
+            }
+            else if (Request.Filter == "*")
+            {
+                // ✅ CASE 2: Specific domain → index filter ONLY
+                var indexList = new List<string> { "*" };
+
+                filters.Add(new
+                {
+                    terms = new
+                    {
+                        _index = indexList
+                    }
+                });
+            }
+            else if (!string.IsNullOrWhiteSpace(Request.Filter))
+            {
+                filters.Add(new
+                {
+                    @bool = new
+                    {
+                        should = new List<object>
+            {
+                // 🔹 1. seo_{Filter} → full index
+                new
+                {
+                    @bool = new
+                    {
+                        filter = new List<object>
+                        {
+                            new
+                            {
+                                terms = new
+                                {
+                                    _index = new List<string> { $"seo_{Request.Filter}" }
+                                }
+                            }
+                        }
+                    }
+                },
+
+                // 🔹 2. asdc_new → ONLY path.real contains "asdc_new"
+                new
+                {
+                    @bool = new
+                    {
+                        filter = new List<object>
+                        {
+                            new
+                            {
+                                terms = new
+                                {
+                                    _index = new List<string> { "asdc_new" }
+                                }
+                            },
+                            new
+                            {
+                                wildcard = new Dictionary<string, string>
+                                {
+                                     { "path.real", $"*\\\\{Request.Filter}\\\\*" }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+                        minimum_should_match = 1
+                    }
+                });
+            }
+
+            //else if (!string.IsNullOrWhiteSpace(Request.Filter))
+            //{
+            //    // ✅ CASE 2: Specific domain → index filter ONLY
+            //    var indexList = new List<string> { $"seo_{Request.Filter}" };
+
+            //    filters.Add(new
+            //    {
+            //        terms = new
+            //        {
+            //            _index = indexList
+            //        }
+            //    });
+            //}
 
             // Convert the elasticsearchQuery object to a JSON string
             var dto = new DTOSearchQueryRequest
             {
-                from=Request.from,
-                size=Request.size,
+                from = Request.from,
+                size = Request.size,
                 min_score = 1.1,   // ✅ FILTER LOW RELEVANCE RESULTS
                 query = new Query
                 {
@@ -44,7 +155,6 @@ namespace BusinessLogicsLayer.SearchContent
                                 {
                                     query = Request.DataString,
                                     boost = 1
-                                   
                                 }
                             }
                         },
@@ -61,7 +171,9 @@ namespace BusinessLogicsLayer.SearchContent
                                 }
                             }
                         }
-                    }
+                    },
+
+                                filter = filters.Any() ? filters : null   // 👈 OPTIONAL FILTER
                             }
                         }
                     }
@@ -71,7 +183,7 @@ namespace BusinessLogicsLayer.SearchContent
                 highlight = new Highlight
                 {
                     pre_tags = new[]
-         {
+          {
             "<mark class=\"marks\">"
         },
                     post_tags = new[] { "</mark>" },
@@ -89,13 +201,11 @@ namespace BusinessLogicsLayer.SearchContent
                 }
             };
 
-
             //"content", new
             //{
             //    pre_tags = new[] { "<strong style=\"background-color:green;color:white; font-weight:bold; padding:1px;\">" },
             //    post_tags = new[] { "</strong>" }
             //}
-
 
             string jsonBody = JsonConvert.SerializeObject(dto);
 
@@ -112,7 +222,6 @@ namespace BusinessLogicsLayer.SearchContent
             {
                 // With the following corrected line:
 
-
                 return responseString;
             }
             else
@@ -120,6 +229,7 @@ namespace BusinessLogicsLayer.SearchContent
                 return "Not Found";
             }
         }
+
         private static HttpClient CreateHttpClient(string username, string password)
         {
             var handler = new HttpClientHandler

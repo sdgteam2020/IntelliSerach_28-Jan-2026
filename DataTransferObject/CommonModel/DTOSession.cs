@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DataTransferObject.CommonModel
+﻿namespace DataTransferObject.CommonModel
 {
     public class DTOSession
     {
@@ -11,7 +7,5 @@ namespace DataTransferObject.CommonModel
         public string Name { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public string RankName { get; set; } = string.Empty;
-       
-
     }
 }

@@ -1,16 +1,45 @@
 ﻿$(document).ready(function () {
+    $("#pdfOption").change(function () {
+        if ($(this).is(":checked")) {
+            $(".pdfviewcontainer").removeClass("d-none");
+            $(".webviewcontainer").addClass("d-none");
+            $("#pdfTable tbody").empty();
+            if ($.fn.DataTable.isDataTable('#pdfTable')) {
+                $('#pdfTable').DataTable().destroy();
+            }
+        }
+        
+    });
+    $("#webOption").change(function () {
+       
+        if ($(this).is(":checked")) {
+            $(".pdfviewcontainer").addClass("d-none");
+            $(".webviewcontainer").removeClass("d-none");
+            $("#webTable tbody").empty();
 
-
+            if ($.fn.DataTable.isDataTable('#webTable')) {
+                $('#webTable').DataTable().destroy();
+            }
+        }
+    });
 
     $("#ScraperForm").on("submit", async function (e) {
-
+        // $(".pdfviewcontainer").addClass("d-none");
+        // $(".webviewcontainer").addClass("d-none");
         $("#websiteUrl").text("");
         $("#downloadCount").text("");
         /*$("#downloadDir").text(scraper.download_directory);*/
 
         // ===== Clear Old Rows =====
-        $("#pdfTable tbody").empty();
+        if ($.fn.DataTable.isDataTable('#pdfTable')) {
+            $('#pdfTable').DataTable().destroy();
+        }
 
+        $("#websitewebUrl").text("");
+        $("#pages_crawled").text("");
+        if ($.fn.DataTable.isDataTable('#webTable')) {
+            $('#webTable').DataTable().destroy();
+        }
 
         e.preventDefault(); // stop normal submit
 
@@ -18,14 +47,25 @@
         if (typeof $(this).valid === "function" && !$(this).valid()) {
             return;
         }
-
+        const token = $('input[name="__RequestVerificationToken"]').val();
         const form = this;
 
         // build FormData (includes files)
         const fd = new FormData(form);
-        const token = $('input[name="__RequestVerificationToken"]').val();
+
+        const dto = {
+            Url: $("#Url").val(),
+            Abbreviation: $("#Abbreviation").val(),
+            IsPdf: $('input[name="IsPdf"]:checked').val() === "true"
+        };
+       
+      
+
+
+
+        
         Swal.fire({
-            title: "Do you want to Scrapering?",
+            title: "Do you want to Scrap?",
             text: "You won't be able to revert this!",
             icon: "warning",
             showCancelButton: true,
@@ -36,12 +76,17 @@
             if (result.isConfirmed) {
                 $("#loading").show();
                 try {
-                    const response = await fetch('/Scraper/Scrapering', {
+                    const encInfo = await getSalt();
+                    const cipherText = encryptPayload(dto, encInfo.key, encInfo.iv);
+                    const fd1 = new FormData();
+                    fd1.append("payload", cipherText);
+
+                    const response = await fetch('/IntelliSearch/Scraper/Scraperingpayload', {
                         method: 'POST',
                         headers: {
                             "RequestVerificationToken": token // matches [ValidateAntiForgeryToken]
                         },
-                        body: fd // don't set content-type; fetch will handle for FormData
+                        body: fd1 // don't set content-type; fetch will handle for FormData
                     });
 
                     // Check if the response is ok (status code 200-299)
@@ -63,8 +108,15 @@
 
                     // Example: { code: 200, message: "...", data: { ... } }
                     if (data.Code === 200) {
-                        
-                        BindScraping(data)
+                        if ($("#pdfOption").is(":checked")) {
+                            BindpdfScraping(data)
+                            $(".pdfviewcontainer").removeClass("d-none");
+                        }
+                        else {
+                            BindWebScraping(data)
+                            $(".webviewcontainer").removeClass("d-none");
+                        }
+
                         $("#loading").hide();
                     } else if (data.Code === 4) {
                         $("#loading").hide();
@@ -85,22 +137,18 @@
                             timer: 3500
                         });
                     }
-
                 } catch (error) {
                     $("#loading").hide();
                     // Handle any errors from the fetch request
                     Swal.fire({
-                        text: "An error occurred: " + error.message
+                        text: "An error occurred Api Not Working: " + error.message
                     });
                 }
             }
         });
     });
-
-
 });
-function BindScraping(Data) {
-
+function BindpdfScraping(Data) {
     // Safety check
     if (!Data || Data.Code !== 200) {
         alert(Data?.message || "No data available");
@@ -117,7 +165,7 @@ function BindScraping(Data) {
         Swal.fire({
             position: "top-end",
             icon: "success",
-            title: "scraping success",
+            title: "Scraping success",
             showConfirmButton: false,
             timer: 3500
         });
@@ -127,7 +175,6 @@ function BindScraping(Data) {
             icon: "error",
             title: "The PDF file was not found during scraping",
             showConfirmButton: true,
-            
         });
     }
     // ===== Clear Old Rows =====
@@ -135,9 +182,7 @@ function BindScraping(Data) {
 
     // ===== Bind Table Rows =====
     if (scraper.documents && scraper.documents.length > 0) {
-
         $.each(scraper.documents, function (index, doc) {
-
             var row = `
                 <tr>
                     <td>${index + 1}</td>
@@ -150,10 +195,10 @@ function BindScraping(Data) {
                     <td>${doc.size_kb}KB</td>
                     <td>${DateFormat(doc.downloaded_display)}</td>
                     <td>
-                        <a href="${doc.url}" 
+                        <a href="${doc.url}"
                            class="btn"
                            target="_blank">
-                            
+
                            <i class="fa-solid fa-file-pdf fa-2xl text-warning"></i>
                         </a>
                     </td>
@@ -162,7 +207,6 @@ function BindScraping(Data) {
 
             $("#pdfTable tbody").append(row);
         });
-
     } else {
         $("#pdfTable tbody").append(`
             <tr>
@@ -186,6 +230,84 @@ function BindScraping(Data) {
     });
     $("#loading").hide();
 }
+
+function BindWebScraping(Data) {
+    // Safety check
+    if (!Data || Data.Code !== 200) {
+        alert(Data?.message || "No data available");
+        return;
+    }
+
+    var scraper = Data.Data.Data;
+
+    // ===== Bind Summary =====
+    $("#websitewebUrl").text($("#Url").val());
+    $("#pages_crawled").text(Data.Data.PagesCrawled);
+    /*$("#downloadDir").text(scraper.download_directory);*/
+    if (Data.Data.PagesCrawled > 0) {
+        Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: "Scraping success",
+            showConfirmButton: false,
+            timer: 3500
+        });
+    } else {
+        Swal.fire({
+            position: "top-end",
+            icon: "error",
+            title: "The PDF file was not found during scraping",
+            showConfirmButton: true,
+        });
+    }
+    // ===== Clear Old Rows =====
+    $("#webTable tbody").empty();
+
+    // ===== Bind Table Rows =====
+    if (scraper && scraper.length > 0) {
+        $.each(scraper, function (index, doc) {
+            var row = `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>
+                    <a href="${doc.CanonicalUrl}" target="_blank">
+                            <img src="/Images/website.png" class="icon-website" />
+                        </a>
+                    </td>
+                    <td>${doc.Title}</td>
+
+                    <td>${doc.Summary}</td>
+
+                </tr>
+            `;
+
+            $("#webTable tbody").append(row);
+        });
+    } else {
+        $("#webTable tbody").append(`
+            <tr>
+                <td colspan="4" class="text-center text-muted">
+                    No PDFs found
+                </td>
+            </tr>
+        `);
+    }
+    $('#webTable').DataTable({
+        "order": [],
+        "paging": true,
+        "searching": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+        "buttons": [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        "select": true
+    });
+
+    $("#loading").hide();
+}
+
 function DateFormat(inputDate) {
     // Remove UTC and convert to Date
     var date = new Date(inputDate.replace(" UTC", ""));

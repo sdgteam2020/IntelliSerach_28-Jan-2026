@@ -6,7 +6,6 @@ const path = window.location.pathname;
 const parts = path.split('/').filter(Boolean);
 const guid = parts[parts.length - 1];
 
-
 document.getElementById("ref-id").textContent = guid;
 
 document.addEventListener("DOMContentLoaded", function () {

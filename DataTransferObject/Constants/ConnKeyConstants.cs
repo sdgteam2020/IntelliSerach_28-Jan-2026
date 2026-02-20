@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DataTransferObject.Constants
+﻿namespace DataTransferObject.Constants
 {
     public static class ConnKeyConstants
     {
@@ -31,7 +25,7 @@ namespace DataTransferObject.Constants
         public const string ScraperingMessage = "Scrapering Done.";
 
         public const string SuccessGet = "Data successful Get.";
-        
-        #endregion
+
+        #endregion Return To Front End
     }
 }
