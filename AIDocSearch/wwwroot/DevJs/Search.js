@@ -15,9 +15,9 @@ $(document).ready(function () {
         GetFilter(selectedFilter);
     });
 
-    //if ($('#searchInput').val() != "") {
-    //    setTimeout(searchContent(), 1000)
-    //}
+    if ($('#searchInput').val() != "") {
+        setTimeout(searchContent(), 1000)
+    }
     // Set focus to #searchInput and move cursor to the end
     let input = document.getElementById('searchInput');
     if (input) {
