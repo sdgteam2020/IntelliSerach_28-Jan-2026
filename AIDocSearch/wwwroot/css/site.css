@@ -232,3 +232,17 @@ footer {
     .search-highlight-item:hover {
         background-color: #f1f1f1;
     }
+.health-green {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.health-yellow {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.health-red {
+    color: #dc3545;
+    font-weight: 600;
+}

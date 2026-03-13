@@ -1,8 +1,10 @@
 ﻿//let from = 0, size = 5, currentQuery = '', totalHits = 0, debounceTimer = null, selectedSuggestion = -1, suggestionItems = [];
 let from = 0, size = 5, currentQuery = '', totalHits = 0, debounceTimer = null, selectedSuggestion = -1, suggestionItems = [];
 let selectedFilter = "All"
+let webServerList = [];
 $(document).ready(function () {
     GetFilter(0);
+    GetWebServerUrlMapping();
     $(document).on('click', '.filter', function () {
         // Remove 'active' class from all filters
         $('.filter').removeClass('active');
@@ -55,7 +57,8 @@ $(document).ready(function () {
 
 async function searchContent(reset = true) {
     if (reset) { from = 0; document.getElementById('results').innerHTML = ""; }
-
+    $("#loading").show();
+   
     const startTime = performance.now(); // Start timing
     const token = $('input[name="__RequestVerificationToken"]').val();
     await fetch('/IntelliSearch/Search/SearchContent', {
@@ -64,12 +67,13 @@ async function searchContent(reset = true) {
             'Content-Type': 'application/json',
             "RequestVerificationToken": token   // Pass the CSRF token in the header
         },
-        body: JSON.stringify({ DataString: $('#searchInput').val(), size: size, from: from, Filter: selectedFilter })
+        body: JSON.stringify({ DataString: $('#searchInput').val(), size: size, from: from, Filter: selectedFilter, Type: $('#ddlSearch').val() })
     })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+            $("#loading").hide();
             return response.json();
         })
         .then(data1 => {
@@ -95,6 +99,8 @@ async function searchContent(reset = true) {
                     const pathhh = hit._index;
                     const score = hit._score ?? 0;
                     const canonical_url = hit._source?.canonical_url || '';
+                    const h1 = hit._source?.h1 || '';
+                    const headings_h1 = hit._source?.headings_h1 || '';
                     const maxScore = data.hits.max_score || 1;
                     const relevance = ((hit._score / maxScore) * 100).toFixed(0);
 
@@ -105,13 +111,25 @@ async function searchContent(reset = true) {
                     let baseurl = "";
                     let fileurl = "/IntelliSearch/Master/WatermarkPdfWithFolder?fileName="
 
-                    if (realPath.toLowerCase().includes("\\uploadfile")) {
-                        // your logic here
-                        fileurl = "https://192.168.10.206/dgis_app/uploadfile/";
-                    } else if (realPath.toLowerCase().includes("\\uploadfile1111")) {
-                        // your logic here
-                        fileurl = "https://192.168.10.206/dgis_app/uploadfile111/";
+                    //if (realPath.toLowerCase().includes("\\uploadfile")) {
+                    //    // your logic here
+                    //    fileurl = "https://192.168.10.206/dgis_app/uploadfile/";
+                    //} else if (realPath.toLowerCase().includes("\\uploadfile1111")) {
+                    //    // your logic here
+                    //    fileurl = "https://192.168.10.206/dgis_app/uploadfile111/";
+                    //}
+
+                    const normalizedPath = realPath.replace(/\\/g, "/");
+
+                    const match = webServerList.find(item =>
+                        normalizedPath.includes(item.Includes)
+                    );
+
+                    if (match) {
+                        fileurl = match.Url;
                     }
+
+
                        
                     if (cleanPath == "") {
                         Mainurl = canonical_url;
@@ -146,7 +164,9 @@ async function searchContent(reset = true) {
                     </span>
                 </div>
          <!-- END SCORE DISPLAY -->
+         
         <div class="result-snippet">
+         
             <ul>
                 ${highlights}
             </ul>
@@ -157,12 +177,14 @@ async function searchContent(reset = true) {
                     $('#results').append(html);
 
                     renderPagination();
+                    $("#loading").hide();
                 });
             } else {
                 $("#CountSearch").addClass("d-none");
                 const resultDiv = document.getElementById('results'); resultDiv.innerHTML = '';
                 $(".msgerror").removeClass("d-none");
                 $(".msgerror").html(data1.Data);
+                $("#loading").hide();
             }
         }).catch(console.error);
 }
@@ -307,6 +329,9 @@ async function GetFilter(active) {
                     }
                 }
                 $(".filters").html(listItemddl);
+
+                if ($('#searchInput').val() != "")
+                    searchContent();
             }
         }
         else if (data.Code === 4) {
@@ -327,6 +352,47 @@ async function GetFilter(active) {
                 showConfirmButton: false,
                 timer: 3500
             });
+        }
+    } catch (error) {
+        Swal.fire({
+            text: errormsg002
+        });
+    }
+}
+
+
+async function GetWebServerUrlMapping() {
+    const userdata = new URLSearchParams({
+        id: 0
+    });
+    const token = $('input[name="__RequestVerificationToken"]').val();
+    try {
+        const response = await fetch('/IntelliSearch/Scraper/GetAllWebServer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                "RequestVerificationToken": token   // Pass the CSRF token in the header
+            },
+            body: userdata
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            Swal.fire({
+                position: "top-end",
+                icon: "error",
+                title: "Save failed.\n" + text,
+                showConfirmButton: false,
+                timer: 1500
+            });
+
+            return;
+        }
+        const data = await response.json();
+        if (data !=null) {
+            if (data && Array.isArray(data)) {
+                webServerList = data;   // ✅ Store globally
+            }
         }
     } catch (error) {
         Swal.fire({

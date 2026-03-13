@@ -1,16 +1,20 @@
 using AIDocSearch.CustomMiddleware;
 using BusinessLogicsLayer.Account;
+using BusinessLogicsLayer.AddWebServer;
 using BusinessLogicsLayer.Loger;
 using BusinessLogicsLayer.Logers;
 using BusinessLogicsLayer.Ranks;
 using BusinessLogicsLayer.ScraperAPI; // Ensure this is included for 'UseExceptionProcessor'
+using BusinessLogicsLayer.ScraperSetting;
 using BusinessLogicsLayer.SearchContent;
 using BusinessLogicsLayer.Service;
 using BusinessLogicsLayer.UnitOfWorks;
 using BusinessLogicsLayer.UploadPdf;
 using DataAccessLayer;
 using DataAccessLayer.Account;
+using DataAccessLayer.AddWebServer;
 using DataAccessLayer.Logers;
+using DataAccessLayer.ScraperSetting;
 using DataAccessLayer.UploadFiles;
 using DataTransferObject.IdentityModel;
 using EntityFramework.Exceptions.SqlServer;
@@ -133,8 +137,13 @@ builder.Services.AddScoped<IService, ServiceRepository>();
 builder.Services.AddScoped<IUploadFiles, UploadFiles>();
 builder.Services.AddScoped<IUploadFilesDB, UploadFilesDB>();
 
+builder.Services.AddScoped<IWebServer, WebServer>();
+builder.Services.AddScoped<IWebServerDB, WebServerDB>();
+
 builder.Services.AddScoped<ILoger, Loger>();
 builder.Services.AddScoped<ILogerDB, LogerDB>();
+builder.Services.AddScoped<IWebScraperSetting, ScraperSetting>();
+builder.Services.AddScoped<IWebScraperSettingDB, WebScraperSettingDB>();
 
 // Session cookie hardened
 builder.Services.AddSession(options =>

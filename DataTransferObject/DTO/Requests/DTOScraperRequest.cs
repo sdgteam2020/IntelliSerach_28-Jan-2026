@@ -14,5 +14,7 @@ namespace DataTransferObject.DTO.Requests
         public required string Abbreviation { get; set; }
 
         public bool IsPdf { get; set; }
+
+        public int max_pages { get; set; }
     }
 }

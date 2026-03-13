@@ -15,7 +15,15 @@
 
 </head>
 <body>
-   
+    <div id="loading" class="loader">
+        <div class="loader-container">
+            <img src="~/Images/load.gif" width="500">
+            <div>
+                <h4 class="mt--20">Loading...</h4>
+                <span>Please wait. This may take few seconds.</span>
+            </div>
+        </div>
+    </div>
    
     @Html.AntiForgeryToken()
     <header>
@@ -38,27 +46,40 @@
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Dashboard">Home</a>
                         </li>
-                        <li class="nav-item">
+                        @* <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-controller="Search" asp-action="Index">Search</a>
-                        </li>
+                        </li> *@
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-controller="Search" asp-action="Upload">Upload</a>
                         </li>
+                        
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Account" asp-action="RegistrationRequest">Registration</a>
+                                <a class="nav-link text-white" asp-area="" asp-controller="Scraper" asp-action="index">Scraper</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Search" asp-action="IndexesDetails">Indexes Details</a>
+                            </li>
+                          
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Scraper" asp-action="AddWebServer">Add Server Alias</a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Master" asp-action="AddWebScraperSetting">Scraper Page Limit</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Account" asp-action="RegistrationRequest">User Request</a>
                             </li>
                         }
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Scraper" asp-action="index">Scraper</a>
-                        </li>
+                       
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
                                 <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="form-inline m-0 p-0">
                                     <button type="submit"
-                                            class="nav-link btn btn-link text-white btn-no-decoration">
+                                            class="nav-link btn btn-link text-bg-danger btn-no-decoration">
                                         Logout
                                     </button>
 

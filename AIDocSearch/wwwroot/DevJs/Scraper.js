@@ -96,8 +96,9 @@
                             position: "top-end",
                             icon: "error",
                             title: "Save failed.\n" + text,
-                            showConfirmButton: false,
-                            timer: 1500
+                            
+                            confirmButtonText: "OK",
+                            showConfirmButton: true
                         });
                         $("#loading").hide();
                         return;
@@ -124,8 +125,9 @@
                             position: "top-end",
                             icon: "error",
                             title: data.Message + "\n " + data.Data,
-                            showConfirmButton: false,
-                            timer: 3500
+                           
+                            confirmButtonText: "OK",
+                            showConfirmButton: true
                         });
                     } else {
                         $("#loading").hide();
@@ -133,8 +135,9 @@
                             position: "top-end",
                             icon: "error",
                             title: data.Message,
-                            showConfirmButton: false,
-                            timer: 3500
+                           
+                            confirmButtonText: "OK",
+                            showConfirmButton: true
                         });
                     }
                 } catch (error) {
@@ -206,6 +209,19 @@ function BindpdfScraping(Data) {
             `;
 
             $("#pdfTable tbody").append(row);
+            
+        });
+        $('#pdfTable').DataTable({
+            "order": [],
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "buttons": [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            "select": true
         });
     } else {
         $("#pdfTable tbody").append(`
@@ -216,18 +232,7 @@ function BindpdfScraping(Data) {
             </tr>
         `);
     }
-    $('#pdfTable').DataTable({
-        "order": [],
-        "paging": true,
-        "searching": true,
-        "info": true,
-        "autoWidth": false,
-        "responsive": true,
-        "buttons": [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-        ],
-        "select": true
-    });
+   
     $("#loading").hide();
 }
 
@@ -283,6 +288,18 @@ function BindWebScraping(Data) {
 
             $("#webTable tbody").append(row);
         });
+        $('#webTable').DataTable({
+            "order": [],
+            "paging": true,
+            "searching": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "buttons": [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            "select": true
+        });
     } else {
         $("#webTable tbody").append(`
             <tr>
@@ -292,18 +309,7 @@ function BindWebScraping(Data) {
             </tr>
         `);
     }
-    $('#webTable').DataTable({
-        "order": [],
-        "paging": true,
-        "searching": true,
-        "info": true,
-        "autoWidth": false,
-        "responsive": true,
-        "buttons": [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-        ],
-        "select": true
-    });
+   
 
     $("#loading").hide();
 }

@@ -1,4 +1,6 @@
-﻿namespace DataTransferObject.DTO.Response
+﻿using System.Text.Json.Serialization;
+
+namespace DataTransferObject.DTO.Response
 {
     public class DTOScraperDataResponse
     {
@@ -7,7 +9,14 @@
 
         public string message { get; set; } = string.Empty;
     }
+    public class ErrorResponseDto
+    {
+        [JsonPropertyName("error")]
+        public string SingleError { get; set; }
 
+        [JsonIgnore]
+        public List<string> Errors => new List<string> { SingleError };
+    }
     public class ScraperData
     {
         public string website_url { get; set; }

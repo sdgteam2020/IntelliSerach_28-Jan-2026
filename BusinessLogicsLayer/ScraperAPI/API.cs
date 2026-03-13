@@ -96,13 +96,14 @@ namespace BusinessLogicsLayer.ScraperAPI
                 {
                     url = Data.url,
                     max_pdfs = Data.max_pdfs,
-                    abbr=Data.Abbreviation
+                    abbr=Data.Abbreviation,
+                    max_pages=100
                 };
 
                 var json = JsonSerializer.Serialize(payload);
 
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-
+                client.Timeout = TimeSpan.FromMinutes(5);
                 // ===== POST Request =====
                 var response = await client.PostAsync(APIcrawlURL, content);
 
@@ -110,10 +111,27 @@ namespace BusinessLogicsLayer.ScraperAPI
 
                 if (!response.IsSuccessStatusCode)
                 {
+                    if((int)response.StatusCode == 500)
+                    {
+                        return new DTOScraperDataResponse
+                        {
+                            //Status = false,
+                            message = $"API Error {(int)response.StatusCode}: {rawResponse}"
+                        };
+                    }
+                    var resulterror = JsonSerializer.Deserialize<ErrorResponseDto>(rawResponse);
+                    if(resulterror==null)
+                    {
+                        return new DTOScraperDataResponse
+                        {
+                            //Status = false,
+                            message = $"API Error {(int)response.StatusCode}: {rawResponse}"
+                        };
+                    }
                     return new DTOScraperDataResponse
                     {
                         //Status = false,
-                        message = $"API Error {(int)response.StatusCode}: {rawResponse}"
+                        message = $"API Error {(int)response.StatusCode}: {resulterror.Errors[0]}"
                     };
                 }
 
@@ -162,18 +180,35 @@ namespace BusinessLogicsLayer.ScraperAPI
                 var json = JsonSerializer.Serialize(payload);
 
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-
+                client.Timeout = TimeSpan.FromMinutes(5);
                 // ===== POST Request =====
                 var response = await client.PostAsync(APIcrawlseoURL, content);
-
+              
                 var rawResponse = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
                 {
+                    if ((int)response.StatusCode == 500)
+                    {
+                        return new DTOWebScraperDataResponse
+                        {
+                            //Status = false,
+                            message = $"API Error {(int)response.StatusCode}: {rawResponse}"
+                        };
+                    }
+                    var resulterror = JsonSerializer.Deserialize<ErrorResponseDto>(rawResponse);
+                    if (resulterror == null)
+                    {
+                        return new DTOWebScraperDataResponse
+                        {
+                            //Status = false,
+                            message = $"API Error {(int)response.StatusCode}: {rawResponse}"
+                        };
+                    }
                     return new DTOWebScraperDataResponse
                     {
                         //Status = false,
-                        message = $"API Error {(int)response.StatusCode}: {rawResponse}"
+                        message = $"API Error {(int)response.StatusCode}: {resulterror.Errors[0]}"
                     };
                 }
 

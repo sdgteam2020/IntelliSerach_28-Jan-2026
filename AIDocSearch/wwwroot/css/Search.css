@@ -159,3 +159,16 @@
         font-weight: bold;
         border-bottom: 3px solid #1a73e8;
     }
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.left-info {
+    display: flex;
+    gap: 10px;
+}
+.form-select {
+    font-size: 0.85rem !important;
+}

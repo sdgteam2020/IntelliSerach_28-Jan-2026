@@ -18,13 +18,13 @@ namespace DataTransferObject.CommonModel
 
         public int? CreatedBy { get; set; }
 
-        [ForeignKey(nameof(CreatedBy))]
-        public ApplicationUser? CreatedByUser { get; set; }
+        //[ForeignKey(nameof(CreatedBy))]
+        //public ApplicationUser? CreatedByUser { get; set; }
 
         public int? UpdatedBy { get; set; }
 
-        [ForeignKey(nameof(UpdatedBy))]
-        public ApplicationUser? UpdatedByUser { get; set; }
+        //[ForeignKey(nameof(UpdatedBy))]
+        //public ApplicationUser? UpdatedByUser { get; set; }
 
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }

@@ -1,8 +1,10 @@
 ﻿using DataTransferObject.DTO.Requests;
+using DataTransferObject.DTO.Response;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json.Nodes;
 
 namespace BusinessLogicsLayer.SearchContent
 {
@@ -15,7 +17,58 @@ namespace BusinessLogicsLayer.SearchContent
             
 
             var filters = new List<object>();
+            var shouldQueries = new List<object>();
 
+            // Always add phrase match (boosted)
+            shouldQueries.Add(
+                new MatchPhraseWrapper
+                {
+                    match_phrase = new MatchPhraseQuerywithoutfuzzy
+                    {
+                        content = new ContentQuerywithoutfuzzy
+                        {
+                            query = Request.DataString,
+                            boost = 2
+                        }
+                    }
+                }
+            );
+
+           if (Request.Type == 2 || Request.Type == 1) // Fuzzy
+            {
+                shouldQueries.Add(
+                    new MatchWrapper
+                    {
+                        match = new MatchQuery
+                        {
+                            content = new ContentQuery
+                            {
+                                query = Request.DataString,
+                                boost = 1,
+                                fuzziness = Request.Type == 2 ? "AUTO" : "0",
+                                fuzzy_transpositions = Request.Type == 2
+                            }
+                        }
+                    }
+                );
+            }
+            else if (Request.Type == 3) // Exact
+            {
+                shouldQueries.Clear(); // Only exact search
+                shouldQueries.Add(
+                    new MatchPhraseWrapper
+                    {
+                        match_phrase = new MatchPhraseQuerywithoutfuzzy
+                        {
+                            content = new ContentQuerywithoutfuzzy
+                            {
+                                query = Request.DataString,
+                                boost = 3
+                            }
+                        }
+                    }
+                );
+            }
             // ✅ CASE 1: ALL → path filter on asdc_new ONLY
             if (Request.Filter == "*!")
             {
@@ -145,33 +198,7 @@ namespace BusinessLogicsLayer.SearchContent
                         {
                             @bool = new BoolQuery
                             {
-                                should = new List<object>
-                    {
-                        new MatchPhraseWrapper
-                        {
-                            match_phrase = new MatchPhraseQuerywithoutfuzzy
-                            {
-                                content = new ContentQuerywithoutfuzzy
-                                {
-                                    query = Request.DataString,
-                                    boost = 1
-                                }
-                            }
-                        },
-                        new MatchWrapper
-                        {
-                            match = new MatchQuery
-                            {
-                                content = new ContentQuery
-                                {
-                                    query = Request.DataString,
-                                    boost = 1,
-                                    fuzziness= "AUTO",
-                                    fuzzy_transpositions=true
-                                }
-                            }
-                        }
-                    },
+                                should = shouldQueries,
 
                                 filter = filters.Any() ? filters : null   // 👈 OPTIONAL FILTER
                             }
@@ -243,6 +270,28 @@ namespace BusinessLogicsLayer.SearchContent
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
 
             return client;
+        }
+
+        public async Task<List<DTOIndexesDetailsResponse>> IndexesDetails(string Url, string UserName, string Password)
+        {
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+            using var client = CreateHttpClient(UserName, Password);
+
+            var response = await client.GetAsync(Url);
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+                return new List<DTOIndexesDetailsResponse>();
+
+            // Debug check
+            if (!responseString.Trim().StartsWith("["))
+                throw new Exception("Elasticsearch did not return JSON: " + responseString);
+
+            var indexesDetailsResponses =
+                JsonConvert.DeserializeObject<List<DTOIndexesDetailsResponse>>(responseString);
+
+            return indexesDetailsResponses ?? new List<DTOIndexesDetailsResponse>();
         }
     }
 }

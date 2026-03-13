@@ -12,23 +12,25 @@ namespace DataAccessLayer
 
         public DbSet<MRank> MRank { get; set; } = null!;
         public DbSet<TrnUploadFiles> trnUploadFiles { get; set; } = null!;
+        public DbSet<TrnWebServer> trnWebServer { get; set; } = null!;
+        public DbSet<WebScraperSetting> WebScraperSetting { get; set; } = null!;
         public DbSet<ExceptionLog> Log { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<MRank>()
-                .HasOne(x => x.CreatedByUser)
-                .WithMany()
-                .HasForeignKey(x => x.CreatedBy)
-                .OnDelete(DeleteBehavior.Restrict);
+            //builder.Entity<MRank>()
+            //    .HasOne(x => x.CreatedByUser)
+            //    .WithMany()
+            //    .HasForeignKey(x => x.CreatedBy)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<MRank>()
-                .HasOne(x => x.UpdatedByUser)
-                .WithMany()
-                .HasForeignKey(x => x.UpdatedBy)
-                .OnDelete(DeleteBehavior.Restrict);
+            //builder.Entity<MRank>()
+            //    .HasOne(x => x.UpdatedByUser)
+            //    .WithMany()
+            //    .HasForeignKey(x => x.UpdatedBy)
+            //    .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

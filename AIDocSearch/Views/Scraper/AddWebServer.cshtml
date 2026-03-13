@@ -1,0 +1,138 @@
+﻿@model DataTransferObject.DTO.Requests.DTOAddWebServerRequest
+<link asp-href-include="~/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/responsive.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/responsive.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/buttons.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/fixedHeader.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/jquery.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/css/stylesheetfordatatable.css" rel="stylesheet" />
+
+
+<script asp-src-include="~/js/datatables/jquery.datatables.min.js"></script>
+<script asp-src-include="~/js/datatables/dataTables.responsive.min.js"></script>
+<script asp-src-include="~/js/datatables/responsive.dataTables.min.js"></script>
+<script asp-src-include="~/js/datatables/dataTables.bootstrap4.min.js"></script>
+<script asp-src-include="~/js/datatables/responsive.bootstrap4.min.js"></script> <!-- DataTables Responsive extension and specifically integrates Responsive behavior with Bootstrap 4 styling. -->
+<script asp-src-include="~/js/datatables/dataTables.buttons.min.js"></script> <!-- It adds the foundational functionality needed to add custom buttons (like Export, Print, or custom actions) to a DataTable.-->
+<script asp-src-include="~/js/datatables/buttons.bootstrap4.min.js"></script> <!-- Export buttons (like Copy, CSV, Excel, PDF, Print) to match Bootstrap 4 design and layout. -->
+@* <script asp-src-include="~/js/datatables/jszip.min.js"></script> *@ <!-- for Excel export -->
+@* <script asp-src-include="~/js/datatables/pdfmake.min.js"></script> *@ <!-- for PDF export -->
+@* <script asp-src-include="~/js/datatables/vfs_fonts.js"></script> *@ <!-- required by pdfmake -->
+<script asp-src-include="~/js/datatables/buttons.html5.min.js"></script> <!-- All HTML5 export buttons -->
+<script asp-src-include="~/js/datatables/buttons.print.min.js"></script> <!-- Adds a "Print" button to DataTables toolbar for print preview and printing -->
+<script asp-src-include="~/js/datatables/datatables-call.js"></script>
+<div class="container mt-2">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Add Web Server alias</h4>
+                </div>
+
+                <div class="card-body">
+                    <form asp-controller="Scraper"
+                          asp-action="AddWebServer"
+                          method="post"
+                          enctype="multipart/form-data"
+                          autocomplete="off">
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="row align-items-end">
+                            <input asp-for="Id" type="hidden" />
+                            <div class="col-md-2">
+                                <label asp-for="Url" class="form-label"></label>
+                            </div>
+
+                            <div class="col-md-3">
+                                <input asp-for="Url" class="form-control" required />
+                                <span asp-validation-for="Url" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label asp-for="Includes" class="form-label"></label>
+                            </div>
+
+                            <div class="col-md-3">
+                                <input asp-for="Includes" class="form-control" required />
+                                <span asp-validation-for="Includes" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    Save
+                                </button>
+                            </div>
+
+                        </div>
+
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success mt-3">
+                                @TempData["SuccessMessage"]
+                            </div>
+                        }
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger mt-3">
+                                Please fix the errors.
+                            </div>
+                        }
+
+                    </form>
+                    @{
+                        int srNo = 1;
+                    }
+                    <div class="container mt-3">
+                        <div class="card shadow-sm border-0">
+                          
+
+                            <div class="card-body p-0">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th style="width:80px">Sr. No</th>
+                                            <th>Url</th>
+                                            <th>Path Pattern</th>
+                                            <th>CreateOn</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in ViewBag.AllData)
+                                        {
+                                            <tr>
+                                                <td>@srNo</td>
+                                                <td>
+                                                    @item.Url
+                                                </td>
+                                                <td>
+                                                    @item.Includes
+                                                </td>
+                                                <td>
+                                                    @item.CreatedOn.ToString("dd/MM/yyyy HH:mm")
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="button"
+                                                           class="btn btn-primary btnEdit"
+                                                           value="Edit"
+                                                           data-id="@item.Id"
+                                                           data-url="@item.Url"
+                                                           data-includes="@item.Includes" />
+                                                </td>
+                                            </tr>
+                                            srNo++;
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/devjs/addwebserver.js"></script>

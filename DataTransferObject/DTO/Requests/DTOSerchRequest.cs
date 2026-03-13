@@ -9,11 +9,12 @@ namespace DataTransferObject.DTO.Requests
         [Required(ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "RequiredError")]
         [MinLength(1, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MinLengthError")]
         [MaxLength(250, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MaxLengthError")]
-        [RegularExpression(@"^[\w\s\.,:/]+$", ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "SpecialChars")]
+        //[RegularExpression(@"^[\w\s\.,:/]+$", ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "SpecialChars")]
         public string DataString { get; set; }
 
         public int size { get; set; }
         public int from { get; set; }
         public string Filter { get; set; }
+        public int Type { get; set; }
     }
 }
