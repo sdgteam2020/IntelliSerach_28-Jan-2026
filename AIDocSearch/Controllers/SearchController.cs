@@ -185,5 +185,12 @@ namespace AIDocSearch.Controllers
                 return Json(new DTOGenericResponse<object>(ConnKeyConstants.IncorrectData, ConnKeyConstants.IncorrectDataMessage, error));
             }
         }
+
+        public async Task<IActionResult> IndexMap()
+        {
+            return View();
+
+        }
+
     }
 }

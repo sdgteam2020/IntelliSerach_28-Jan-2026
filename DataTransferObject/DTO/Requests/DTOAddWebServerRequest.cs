@@ -16,5 +16,10 @@ namespace DataTransferObject.DTO.Requests
         [RegularExpression(@"^[a-zA-Z0-9_/-]{1,50}$", ErrorMessage = "Only alphabets, numbers, _, / and - allowed. Maximum 50 characters.")]
         [Display(Name = "alias")]
         public required string Includes { get; set; }
+        [Required]
+        [Display(Name = "Index Name")]
+        [StringLength(50)]
+        [RegularExpression(@"^(?!\d+$)(?!\.+$)(?!_+$)[A-Za-z0-9._\s]+$", ErrorMessage = "Letters, numbers, spaces, . and _ are allowed, but the value cannot be only numbers, only dots, or only underscores.")]
+        public required string Index_Name { get; set; }
     }
 }

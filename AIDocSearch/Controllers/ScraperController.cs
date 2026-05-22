@@ -5,6 +5,7 @@ using DataAccessLayer.ScraperSetting;
 using DataTransferObject.Constants;
 using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
+using DataTransferObject.Localize;
 using DataTransferObject.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -145,6 +146,7 @@ namespace AIDocSearch.Controllers
 
             ViewBag.AllData = allData;
             TempData["SuccessMessage"] = null;
+            TempData["ErrorMessage"] = null;
             return View();
         }
         [HttpPost]
@@ -154,59 +156,76 @@ namespace AIDocSearch.Controllers
             var allData = await _webServer.GetAll();
 
             ViewBag.AllData = allData;
+            bool isDuplicate = allData.Any(i =>
+                 i.Id != Request.Id &&
+                 !string.IsNullOrWhiteSpace(i.Includes) &&
+                 !string.IsNullOrWhiteSpace(Request.Includes) &&
+                 i.Includes.Trim().Equals(Request.Includes.Trim(), StringComparison.OrdinalIgnoreCase)
+             );
 
-            if (ModelState.IsValid)
+            if (isDuplicate)
             {
-                var UserId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                var now = DateTime.UtcNow;
-                TrnWebServer data;
-
-                if (Request.Id > 0)
+                ModelState.AddModelError(nameof(Request.Includes), $"{Request.Includes} already exists.");
+                TempData["ErrorMessage"] = $"{Request.Includes} already exists.";
+                return View(Request);
+            }
+            if (ModelState.IsValid)
                 {
-                    // 🔹 UPDATE
-                    data = await _webServer.GetById(Convert.ToInt32(Request.Id)); // fetch existing record
+                    var UserId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    var now = DateTime.UtcNow;
+                    TrnWebServer data;
 
-                    if (data == null)
+                    if (Request.Id > 0)
                     {
-                        ModelState.AddModelError(string.Empty, "Record not found.");
-                        return View(Request);
+                        // 🔹 UPDATE
+                        data = await _webServer.GetById(Convert.ToInt32(Request.Id)); // fetch existing record
+
+                        if (data == null)
+                        {
+                            ModelState.AddModelError(string.Empty, "Record not found.");
+                            TempData["ErrorMessage"] = $"Record not found.";
+                            return View(Request);
+                        }
+
+                        // Keep original Created fields
+                        data.Url = Request.Url;
+                        data.Includes = Request.Includes;
+                        data.Index_Name = Request.Index_Name;
+                        data.UpdatedOn = now;
+                        data.UpdatedBy = UserId;
+                    }
+                    else
+                    {
+                        // 🔹 INSERT
+                        data = new TrnWebServer
+                        {
+                            Url = Request.Url,
+                            Includes = Request.Includes,
+                            Index_Name= Request.Index_Name,
+                            CreatedOn = now,
+                            UpdatedOn = now,
+                            CreatedBy = UserId,
+                            UpdatedBy = UserId,
+                            IsActive = true,
+                            IsDeleted = false
+                        };
                     }
 
-                    // Keep original Created fields
-                    data.Url = Request.Url;
-                    data.Includes = Request.Includes;
-
-                    data.UpdatedOn = now;
-                    data.UpdatedBy = UserId;
-                }
-                else
-                {
-                    // 🔹 INSERT
-                    data = new TrnWebServer
+                    TrnWebServer ret = await _webServer.AddWebServer(data);
+                    if (ret != null && ret.Id > 0)
                     {
-                        Url = Request.Url,
-                        Includes = Request.Includes,
-                        CreatedOn = now,
-                        UpdatedOn = now,
-                        CreatedBy = UserId,
-                        UpdatedBy = UserId,
-                        IsActive = true,
-                        IsDeleted = false
-                    };
+                        TempData["SuccessMessage"] = "Record Save successfully.";
+                        return View(Request);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, ret.Url ?? "Record Not Save.");
+                        TempData["ErrorMessage"] = $"Record Not Save.";
+                        return View(data);
+                    }
                 }
-
-                TrnWebServer ret = await _webServer.AddWebServer(data);
-                if (ret != null && ret.Id > 0)
-                {
-                    TempData["SuccessMessage"] = "Record Save successfully.";
-                    return View(Request);
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, ret.Url ?? "Record Not Save.");
-                    return View(data);
-                }
-            }
+               
+            
 
             return View(Request);
         }

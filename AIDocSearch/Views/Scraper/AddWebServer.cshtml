@@ -40,22 +40,30 @@
 
                         <div class="row align-items-end">
                             <input asp-for="Id" type="hidden" />
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <label asp-for="Url" class="form-label"></label>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <input asp-for="Url" class="form-control" required />
                                 <span asp-validation-for="Url" class="text-danger"></span>
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <label asp-for="Includes" class="form-label"></label>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <input asp-for="Includes" class="form-control" required />
                                 <span asp-validation-for="Includes" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <label asp-for="Index_Name" class="form-label"></label>
+                            </div>
+
+                            <div class="col-md-2">
+                                <input asp-for="Index_Name" class="form-control" required />
+                                <span asp-validation-for="Index_Name" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-2">
@@ -76,7 +84,7 @@
                         @if (!ViewData.ModelState.IsValid)
                         {
                             <div class="alert alert-danger mt-3">
-                                Please fix the errors.
+                                Please fix the errors. @TempData["ErrorMessage"]
                             </div>
                         }
 
@@ -95,6 +103,7 @@
                                             <th style="width:80px">Sr. No</th>
                                             <th>Url</th>
                                             <th>Path Pattern</th>
+                                            <th>Index Name</th>
                                             <th>CreateOn</th>
                                             <th>Action</th>
                                         </tr>
@@ -111,6 +120,9 @@
                                                     @item.Includes
                                                 </td>
                                                 <td>
+                                                    @item.Index_Name
+                                                </td>
+                                                <td>
                                                     @item.CreatedOn.ToString("dd/MM/yyyy HH:mm")
                                                 </td>
                                                 <td class="text-center">
@@ -119,7 +131,9 @@
                                                            value="Edit"
                                                            data-id="@item.Id"
                                                            data-url="@item.Url"
+                                                           data-Index_Name="@item.Index_Name"
                                                            data-includes="@item.Includes" />
+                                                          
                                                 </td>
                                             </tr>
                                             srNo++;
