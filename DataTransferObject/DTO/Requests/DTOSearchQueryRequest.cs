@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace DataTransferObject.DTO.Requests
 {
@@ -8,9 +9,26 @@ namespace DataTransferObject.DTO.Requests
         public int size { get; set; }
         public Query query { get; set; }
         public Highlight highlight { get; set; }
+        public KnnDto KnnDto { get; set; }
         public double? min_score { get; set; }
     }
+    public class KnnDto
+    {
+        [JsonPropertyName("field")]
+        public string Field { get; set; } = string.Empty;
 
+        [JsonPropertyName("query_vector")]
+        public List<float> QueryVector { get; set; } = new();
+
+        [JsonPropertyName("k")]
+        public int K { get; set; }
+
+        [JsonPropertyName("num_candidates")]
+        public int NumCandidates { get; set; }
+
+        [JsonPropertyName("boost")]
+        public double Boost { get; set; }
+    }
     public class Query
     {
         public FunctionScore function_score { get; set; }

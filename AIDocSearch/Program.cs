@@ -174,57 +174,57 @@ if (!app.Environment.IsDevelopment())
 
 app.Use(async (ctx, next) =>
 {
-    //ctx.Response.OnStarting(() =>
-    //{
-    //    ctx.Response.Headers.Remove("Expires");
+    ctx.Response.OnStarting(() =>
+    {
+        ctx.Response.Headers.Remove("Expires");
 
-    //    return Task.CompletedTask;
-    //});
-    //// ========== 0) BLOCK DANGEROUS HTTP METHODS FIRST ==========
-    //var blockedMethods = new[] { "OPTIONS", "TRACE", "TRACK", "CONNECT" };
+        return Task.CompletedTask;
+    });
+    // ========== 0) BLOCK DANGEROUS HTTP METHODS FIRST ==========
+    var blockedMethods = new[] { "OPTIONS", "TRACE", "TRACK", "CONNECT" };
 
-    //if (blockedMethods.Contains(ctx.Request.Method, StringComparer.OrdinalIgnoreCase))
-    //{
-    //    // Log for monitoring (optional)
-    //    app.Logger.LogWarning($"Security: Blocked {ctx.Request.Method} request to {ctx.Request.Path}");
+    if (blockedMethods.Contains(ctx.Request.Method, StringComparer.OrdinalIgnoreCase))
+    {
+        // Log for monitoring (optional)
+        app.Logger.LogWarning($"Security: Blocked {ctx.Request.Method} request to {ctx.Request.Path}");
 
-    //    ctx.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
-    //    ctx.Response.Headers["Allow"] = "GET, HEAD, POST"; // Only allowed methods
-    //    await ctx.Response.WriteAsync("Method Not Allowed");
-    //    return; // Stop further processing
-    //}
+        ctx.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
+        ctx.Response.Headers["Allow"] = "GET, HEAD, POST"; // Only allowed methods
+        await ctx.Response.WriteAsync("Method Not Allowed");
+        return; // Stop further processing
+    }
 
-    //// 1) Content Security Policy
-    //ctx.Response.Headers["Content-Security-Policy"] =
-    //    //"default-src 'self'; " +
-    //    "script-src 'self'; " +
-    //    "style-src 'self'; " + // allow Bootstrap inline styles
-    //    "img-src 'self' data:; " +
-    //    "font-src 'self' data:; " +
-    //    //"connect-src 'self'; " +
-    //    "frame-ancestors 'self'; " +
-    //    "base-uri 'self'; " +
-    //    "form-action 'self';";
+    // 1) Content Security Policy
+    ctx.Response.Headers["Content-Security-Policy"] =
+        //"default-src 'self'; " +
+        "script-src 'self'; " +
+        "style-src 'self'; " + // allow Bootstrap inline styles
+        "img-src 'self' data:; " +
+        "font-src 'self' data:; " +
+        //"connect-src 'self'; " +
+        "frame-ancestors 'self'; " +
+        "base-uri 'self'; " +
+        "form-action 'self';";
 
-    //// 2) X-Frame-Options (align with frame-ancestors)
-    //ctx.Response.Headers["X-Frame-Options"] = "DENY";
+    // 2) X-Frame-Options (align with frame-ancestors)
+    ctx.Response.Headers["X-Frame-Options"] = "DENY";
 
-    //// 3) Referrer-Policy
-    //ctx.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    // 3) Referrer-Policy
+    ctx.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
 
-    //// Extra good headers
-    //ctx.Response.Headers["X-Content-Type-Options"] = "nosniff";
-    //ctx.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+    // Extra good headers
+    ctx.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    ctx.Response.Headers["X-XSS-Protection"] = "1; mode=block";
 
-    //// Use HSTS only on HTTPS + production
-    //ctx.Response.Headers["Strict-Transport-Security"] =
-    //    "max-age=31536000; includeSubDomains; preload";
+    // Use HSTS only on HTTPS + production
+    ctx.Response.Headers["Strict-Transport-Security"] =
+        "max-age=31536000; includeSubDomains; preload";
 
-    //// Hide tech details where possible
-    //ctx.Response.Headers.Remove("X-Powered-By");
-    //ctx.Response.Headers.Remove("x-aspnet-version");
+    // Hide tech details where possible
+    ctx.Response.Headers.Remove("X-Powered-By");
+    ctx.Response.Headers.Remove("x-aspnet-version");
 
-    //ctx.Request.PathBase = "/IntelliSearch";
+    ctx.Request.PathBase = "/";
 
     await next();
 });

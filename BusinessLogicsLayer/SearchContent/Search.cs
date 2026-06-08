@@ -205,7 +205,14 @@ namespace BusinessLogicsLayer.SearchContent
                         }
                     }
                 },
-
+                KnnDto = new KnnDto
+                {
+                    Field = "embedding",
+                    QueryVector = new List<float> { 0.1f, 0.2f, 0.3f },
+                    K = 10,
+                    NumCandidates = 100,
+                    Boost = 3
+                },
                 // ✅ HIGHLIGHT ADDED HERE
                 highlight = new Highlight
                 {
@@ -226,6 +233,7 @@ namespace BusinessLogicsLayer.SearchContent
             }
         }
                 }
+
             };
 
             //"content", new
