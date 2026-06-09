@@ -6,19 +6,25 @@ $(document).ready(function () {
     GetFilter(0);
     GetWebServerUrlMapping();
     $(document).on('click', '.filter', function () {
-        // Remove 'active' class from all filters
-        $('.filter').removeClass('active');
 
-        // Add 'active' class to the clicked filter
+        // Prevent clicking again
+        if ($(this).hasClass('disabled')) {
+            return;
+        }
+
+        // Disable all filters (or only this one)
+        $('.filter').addClass('disabled').css('pointer-events', 'none');
+
+        $('.filter').removeClass('active');
         $(this).addClass('active');
 
         selectedFilter = $(this).text();
-       
+
         GetFilter(selectedFilter);
     });
 
     if ($('#searchInput').val() != "") {
-        setTimeout(searchContent(), 1000)
+        searchContent();
     }
     // Set focus to #searchInput and move cursor to the end
     let input = document.getElementById('searchInput');
@@ -41,18 +47,7 @@ $(document).ready(function () {
             searchContent();
     });
 
-    document.getElementById('searchInput').addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            if ($('#searchInput').val() != "")
-                searchContent();
-        }
-    });
-    $('#btnSearch').on('click', function () {
-        let query = $('#searchInput').val();
-        if ($('#searchInput').val() != "")
-            searchContent();
-    });
+    
 });
 
 async function searchContent(reset = true) {
@@ -61,13 +56,19 @@ async function searchContent(reset = true) {
    
     const startTime = performance.now(); // Start timing
     const token = $('input[name="__RequestVerificationToken"]').val();
+    const parms = { DataString: $('#searchInput').val(), size: size, from: from, Filter: selectedFilter, Type: $('#ddlSearch').val() }
+   
     await fetch('/IntelliSearch/Search/SearchContent', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             "RequestVerificationToken": token   // Pass the CSRF token in the header
         },
-        body: JSON.stringify({ DataString: $('#searchInput').val(), size: size, from: from, Filter: selectedFilter, Type: $('#ddlSearch').val() })
+        body: JSON.stringify(
+            {
+                Data: encryptPayloadData(JSON.stringify(parms))
+            })
+        
     })
         .then(response => {
             if (!response.ok) {
@@ -111,13 +112,7 @@ async function searchContent(reset = true) {
                     let baseurl = "";
                     let fileurl = "/IntelliSearch/Master/WatermarkPdfWithFolder?fileName="
 
-                    //if (realPath.toLowerCase().includes("\\uploadfile")) {
-                    //    // your logic here
-                    //    fileurl = "https://192.168.10.206/dgis_app/uploadfile/";
-                    //} else if (realPath.toLowerCase().includes("\\uploadfile1111")) {
-                    //    // your logic here
-                    //    fileurl = "https://192.168.10.206/dgis_app/uploadfile111/";
-                    //}
+                   
 
                     const normalizedPath = realPath.replace(/\\/g, "/");
 
@@ -162,6 +157,10 @@ async function searchContent(reset = true) {
                     <span class="badge bg-primary">
                         Score: ${relevance}
                     </span>
+                     <span class="badge bg-secondary">
+                        Path: ${normalizedPath}
+                    </span>
+                    
                 </div>
          <!-- END SCORE DISPLAY -->
          
@@ -183,7 +182,7 @@ async function searchContent(reset = true) {
                 $("#CountSearch").addClass("d-none");
                 const resultDiv = document.getElementById('results'); resultDiv.innerHTML = '';
                 $(".msgerror").removeClass("d-none");
-                $(".msgerror").html(data1.Data);
+                $(".msgerror").html(data1.Data ?? data1.Message);
                 $("#loading").hide();
             }
         }).catch(console.error);
@@ -300,7 +299,7 @@ async function GetFilter(active) {
             Swal.fire({
                 position: "top-end",
                 icon: "error",
-                title: "Save failed.\n" + text,
+                title: "Save failed1.\n" + text,
                 showConfirmButton: false,
                 timer: 1500
             });
@@ -315,17 +314,17 @@ async function GetFilter(active) {
                 listItemddl += `<li class="filter active">All</li>`;
             else
                 listItemddl += `<li class="filter">All</li>`;
-            if (data.Data.Count) {
-                let urls = data.Data.Items;
+            if (data.Data) {
+                let urls = data.Data;
 
-                for (let i = 0; i < data.Data.Count; i++) {
-                    let displayLabel = urls[i].Abbr;
+                for (let i = 0; i < data.Data.length; i++) {
+                    let displayLabel = urls[i].index;
                     if (displayLabel != "" ) {
                         if (displayLabel == active)
                             // Using the .Url and .Abbr properties from your FilterItem model
-                            listItemddl += `<li class="filter active" title="${urls[i].Url}">${urls[i].Abbr}</li>`;
+                            listItemddl += `<li class="filter active" title="${urls[i].index}">${urls[i].index}</li>`;
                         else
-                            listItemddl += `<li class="filter" title="${urls[i].Url}">${urls[i].Abbr}</li>`;
+                            listItemddl += `<li class="filter" title="${urls[i].index}">${urls[i].index}</li>`;
                     }
                 }
                 $(".filters").html(listItemddl);
@@ -367,7 +366,7 @@ async function GetWebServerUrlMapping() {
     });
     const token = $('input[name="__RequestVerificationToken"]').val();
     try {
-        const response = await fetch('/IntelliSearch/Scraper/GetAllWebServer', {
+        const response = await fetch('/IntelliSearch/Master/GetAllWebServer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -381,7 +380,7 @@ async function GetWebServerUrlMapping() {
             Swal.fire({
                 position: "top-end",
                 icon: "error",
-                title: "Save failed.\n" + text,
+                title: "Save failed2.\n" + text,
                 showConfirmButton: false,
                 timer: 1500
             });

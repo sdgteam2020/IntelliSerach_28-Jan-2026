@@ -1,38 +1,55 @@
-﻿
+﻿@using AIDocSearch.Helpers
+@using DataTransferObject.CommonModel
+@using DataTransferObject.IdentityModel
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> signInManager;
+@inject UserManager<ApplicationUser> userManager;
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IConfiguration configuration;
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Indian Army IntelliSearch</title>
     <!--Bootstrap 4 CDN-->
-    <link href="~/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="~/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+    <link href="~/bootstrap/css/bootstrap.min.css" asp-append-version="true"  rel="stylesheet" />
+    <link href="~/sweetalert2/sweetalert2.min.css" asp-append-version="true"  rel="stylesheet" />
    
     <!--Fontawesome CDN-->
-    <link href="~/fontawesome/css/all.min.css" rel="stylesheet" />
-    <link href="~/css/site.css" rel="stylesheet" />
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
+    <link href="~/fontawesome/css/all.min.css" asp-append-version="true"  rel="stylesheet" />
+    <link href="~/css/site.css" asp-append-version="true"  rel="stylesheet" />
+    <script src="~/js/crypto-js.min.js" asp-append-version="true" defer></script>
+    <script src="~/lib/jquery/dist/jquery.min.js" ></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 </head>
 <body>
     <div id="loading" class="loader">
         <div class="loader-container">
-            <img src="~/Images/load.gif" width="500">
+            <img src="~/Images/load.gif">
             <div>
                 <h4 class="mt--20">Loading...</h4>
                 <span>Please wait. This may take few seconds.</span>
             </div>
         </div>
     </div>
-   
+    @{
+        DTOSession? dtoSession = new DTOSession();
+        if (!string.IsNullOrEmpty(@HttpContextAccessor.HttpContext.Session.GetString("Users")))
+        {
+            dtoSession = SessionHeplers.GetObject<DTOSession>(HttpContextAccessor.HttpContext.Session, "Users");
+
+        }
+        }
     @Html.AntiForgeryToken()
     <header>
 
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3 custom-navbar">
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Dashboard">
-                    <img src="~/images/logo.png"
+                    <img src="~/images/logo.webp"
                          alt="Logo"
+                         width="100"
+                         height="100"
                          class="app-logo-white" />
 
                     @* <span class="font-weight-bold" style="font-size:1.3rem;">Search Document AI</span> *@
@@ -55,20 +72,16 @@
                         
                         @if (User.IsInRole("Admin"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Scraper" asp-action="index">Scraper</a>
-                            </li>
+                           
                             <li class="nav-item">
                                 <a class="nav-link text-white" asp-area="" asp-controller="Search" asp-action="IndexesDetails">Indexes Details</a>
                             </li>
                           
                             <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Scraper" asp-action="AddWebServer">Add Server Alias</a>
+                                <a class="nav-link text-white" asp-area="" asp-controller="Master" asp-action="AddWebServer">Add Server Alias</a>
                             </li>
                             
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Master" asp-action="AddWebScraperSetting">Scraper Page Limit</a>
-                            </li>
+                         
                             <li class="nav-item">
                                 <a class="nav-link text-white" asp-area="" asp-controller="Account" asp-action="RegistrationRequest">User Request</a>
                             </li>
@@ -93,6 +106,7 @@
                             @if (User.Identity.IsAuthenticated)
                             {
                                 <span class="navbar-text text-white"> <h4 class="alert-heading">Welcome , @User.Identity.Name!</h4> </span>
+                                <input type="hidden" id="payloadaes" value="@dtoSession.AESKey" />
                             }
                         </li>
                     </ul>
@@ -120,10 +134,11 @@
 
     <!-- Ensure jQuery is loaded before Bootstrap JS -->
     
-    <script src="~/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/sweetalert2/sweetalert2.min.js"></script>
-    <script src="~/js/crypto-js.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true" defer></script>
+    <script src="~/sweetalert2/sweetalert2.min.js" asp-append-version="true" defer></script>
+    <script src="~/js/crypto-js.min.js" asp-append-version="true" defer></script>
+    <script src="~/js/site.js" ></script>
+    <script src="~/devjs/loadaes.js"></script>
    
     @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -1,5 +1,9 @@
-﻿using BusinessLogicsLayer.ScraperSetting;
+﻿using AIDocSearch.Helpers;
+using BusinessLogicsLayer.AddWebServer;
+using BusinessLogicsLayer.Helpers;
+using BusinessLogicsLayer.ScraperSetting;
 using BusinessLogicsLayer.UnitOfWorks;
+using DataTransferObject.CommonModel;
 using DataTransferObject.Constants;
 using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
@@ -23,12 +27,14 @@ namespace AIDocSearch.Controllers
         private readonly IUnitOfWork unitOfWork;
         private readonly IWebHostEnvironment _env;
         private readonly IWebScraperSetting _webScraperSetting;
+        private readonly IWebServer _webServer;
 
-        public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IWebScraperSetting webScraperSetting)
+        public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IWebScraperSetting webScraperSetting, IWebServer webServer)
         {
             this.unitOfWork = unitOfWork;
             _env = env;
             _webScraperSetting = webScraperSetting;
+            _webServer = webServer;
         }
 
         #region Master Table
@@ -248,9 +254,114 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GetAllWebServer()
+        public async Task<IActionResult> GetWebScraperSetting()
         {
             return Json(await _webScraperSetting.GetWebScraperSetting());
+        }
+        #endregion
+
+
+        #region Add Server
+
+        public async Task<IActionResult> AddWebServer()
+        {
+            var allData = await _webServer.GetAll();
+
+            ViewBag.AllData = allData;
+            TempData["SuccessMessage"] = null;
+            TempData["ErrorMessage"] = null;
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddWebServer(string EncryptedData)
+        {
+            DTOAddWebServerRequest Request = await AESEncrytDecry.DecryptAESWithDTO<DTOAddWebServerRequest>(EncryptedData, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
+
+            var allData = await _webServer.GetAll();
+            ViewBag.AllData = allData;
+            bool isDuplicate = allData.Any(i =>
+                 i.Id != Request.Id &&
+                 !string.IsNullOrWhiteSpace(i.Includes) &&
+                 !string.IsNullOrWhiteSpace(Request.Includes) &&
+                 i.Includes.Trim().Equals(Request.Includes.Trim(), StringComparison.OrdinalIgnoreCase)
+             );
+
+            if (isDuplicate)
+            {
+                ModelState.AddModelError(nameof(Request.Includes), $"{Request.Includes} already exists.");
+                TempData["ErrorMessage"] = $"{Request.Includes} already exists.";
+                return View(Request);
+            }
+            ModelState.Clear();
+            if (TryValidateModel(Request))
+            {
+                var UserId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var now = DateTime.UtcNow;
+                TrnWebServer data;
+
+                if (Request.Id > 0)
+                {
+                    // 🔹 UPDATE
+                    data = await _webServer.GetById(Convert.ToInt32(Request.Id)); // fetch existing record
+
+                    if (data == null)
+                    {
+                        ModelState.AddModelError(string.Empty, "Record not found.");
+                        TempData["ErrorMessage"] = $"Record not found.";
+                        return View(Request);
+                    }
+
+                    // Keep original Created fields
+                    data.Url = Request.Url.Trim();
+                    data.Includes = Request.Includes.Trim();
+                    data.Index_Name = Request.Index_Name.Trim();
+                    data.UpdatedOn = now;
+                    data.UpdatedBy = UserId;
+                }
+                else
+                {
+                    // 🔹 INSERT
+                    data = new TrnWebServer
+                    {
+                        Url = Request.Url,
+                        Includes = Request.Includes,
+                        Index_Name = Request.Index_Name,
+                        CreatedOn = now,
+                        UpdatedOn = now,
+                        CreatedBy = UserId,
+                        UpdatedBy = UserId,
+                        IsActive = true,
+                        IsDeleted = false
+                    };
+                }
+
+                TrnWebServer ret = await _webServer.AddWebServer(data);
+                if (ret != null && ret.Id > 0)
+                {
+                    
+                    ViewBag.AllData = await _webServer.GetAll();
+                    TempData["SuccessMessage"] = "Record Save successfully.";
+                    return View(Request);
+                }
+                else
+                {
+                    ViewBag.AllData = await _webServer.GetAll();
+                    ModelState.AddModelError(string.Empty, ret.Url ?? "Record Not Save.");
+                    TempData["ErrorMessage"] = $"Record Not Save.";
+                    return View(data);
+                }
+            }
+
+
+            ViewBag.AllData = await _webServer.GetAll();
+            return View(Request);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetAllWebServer()
+        {
+            return Json(await _webServer.GetAll());
         }
         #endregion
     }

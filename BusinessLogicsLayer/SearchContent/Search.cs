@@ -131,7 +131,7 @@ namespace BusinessLogicsLayer.SearchContent
                             {
                                 terms = new
                                 {
-                                    _index = new List<string> { $"seo_{Request.Filter}" }
+                                    _index = new List<string> { $"{Request.Filter}" }
                                 }
                             }
                         }
@@ -205,14 +205,14 @@ namespace BusinessLogicsLayer.SearchContent
                         }
                     }
                 },
-                KnnDto = new KnnDto
-                {
-                    Field = "embedding",
-                    QueryVector = new List<float> { 0.1f, 0.2f, 0.3f },
-                    K = 10,
-                    NumCandidates = 100,
-                    Boost = 3
-                },
+                //KnnDto = new KnnDto
+                //{
+                //    Field = "embedding",
+                //    QueryVector = new List<float> { 0.1f, 0.2f, 0.3f },
+                //    K = 10,
+                //    NumCandidates = 100,
+                //    Boost = 3
+                //},
                 // ✅ HIGHLIGHT ADDED HERE
                 highlight = new Highlight
                 {
@@ -298,8 +298,11 @@ namespace BusinessLogicsLayer.SearchContent
 
             var indexesDetailsResponses =
                 JsonConvert.DeserializeObject<List<DTOIndexesDetailsResponse>>(responseString);
+            var userIndices = indexesDetailsResponses
+                            .Where(i => !i.index.StartsWith("."))
+                            .ToList();
 
-            return indexesDetailsResponses ?? new List<DTOIndexesDetailsResponse>();
+            return userIndices ?? new List<DTOIndexesDetailsResponse>();
         }
     }
 }

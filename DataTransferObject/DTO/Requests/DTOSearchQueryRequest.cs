@@ -5,11 +5,11 @@ namespace DataTransferObject.DTO.Requests
 {
     public class DTOSearchQueryRequest
     {
-        public int from { get; set; }          // pagination start
+        public int from { get; set; }  // pagination start
         public int size { get; set; }
         public Query query { get; set; }
         public Highlight highlight { get; set; }
-        public KnnDto KnnDto { get; set; }
+       // public KnnDto KnnDto { get; set; }
         public double? min_score { get; set; }
     }
     public class KnnDto

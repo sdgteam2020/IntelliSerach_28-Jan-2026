@@ -1,13 +1,17 @@
-﻿using BusinessLogicsLayer.ScraperAPI;
+﻿using AIDocSearch.Helpers;
+using BusinessLogicsLayer.Helpers;
+using BusinessLogicsLayer.ScraperAPI;
 using BusinessLogicsLayer.ScraperSetting;
 using BusinessLogicsLayer.SearchContent;
 using BusinessLogicsLayer.UploadPdf;
+using DataTransferObject.CommonModel;
 using DataTransferObject.Constants;
 using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
 using DataTransferObject.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using System.Data;
 using System.Diagnostics;
 using System.Security.Claims;
@@ -43,31 +47,41 @@ namespace AIDocSearch.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SearchContent([FromBody] DTOSerchRequest Data)
+        public async Task<IActionResult> SearchContent([FromBody] EncryptedRequest Payload)
         {
-            if (ModelState.IsValid)
-            {
-                if (Data == null || string.IsNullOrEmpty(Data.DataString))
-                {
-                    return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.BadRequestMessage, "Invalid search request."));
-                    // return BadRequest("Invalid search request.");
-                }
-                string Url = _configuration["UrlData:Url"] ?? string.Empty;
-                string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
-                string Password = _configuration["UrlData:Password"] ?? string.Empty;
-                // Call the search service to get the response
-                var RetData = await _searchService.GetResponse(Data, Url, UserName, Password);
-                return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.SuccessMessage, RetData));
-            }
+            DTOSerchRequest Data = await AESEncrytDecry.DecryptAESWithDTO<DTOSerchRequest>(Payload.Data, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
+            if (Data == null)
+                return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.BadRequestMessage, null));
+
             else
             {
-                var error = ModelState.Where(x => x.Value?.Errors?.Count > 0)
-                                              .SelectMany(x => x.Value!.Errors)
-                                              .Select(e => e.ErrorMessage)
-                                              .ToList();
+               
+                if (ModelState.IsValid)
+                {
+                    if (Data == null || string.IsNullOrEmpty(Data.DataString))
+                    {
+                        return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.BadRequestMessage, "Invalid search request."));
+                        // return BadRequest("Invalid search request.");
+                    }
+                    string Url = _configuration["UrlData:Url"] ?? string.Empty;
+                    string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
+                    string Password = _configuration["UrlData:Password"] ?? string.Empty;
+                    // Call the search service to get the response
+                    var RetData = await _searchService.GetResponse(Data, Url, UserName, Password);
+                    return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.SuccessMessage, RetData));
+                }
+                else
+                {
+                    var error = ModelState.Where(x => x.Value?.Errors?.Count > 0)
+                                                  .SelectMany(x => x.Value!.Errors)
+                                                  .Select(e => e.ErrorMessage)
+                                                  .ToList();
 
-                return Json(new DTOGenericResponse<object>(ConnKeyConstants.IncorrectData, ConnKeyConstants.IncorrectDataMessage, error));
+                    return Json(new DTOGenericResponse<object>(ConnKeyConstants.IncorrectData, ConnKeyConstants.IncorrectDataMessage, error));
+                }
+
             }
+           
         }
 
         public async Task<IActionResult> IndexesDetails()
@@ -82,15 +96,17 @@ namespace AIDocSearch.Controllers
 
         public async Task<IActionResult> Upload()
         {
-            var allData = await _uploadFiles.GetUploadFileByUserId(
-      Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier))
-        );
-
-            ViewBag.AllData = allData.Data;
-
+            await LoadUserFiles();
             return View();
         }
+        private async Task LoadUserFiles()
+        {
+            var userId = Convert.ToInt32(
+                User.FindFirstValue(ClaimTypes.NameIdentifier));
 
+            var result = await _uploadFiles.GetUploadFileByUserId(userId);
+            ViewBag.AllData = result.Data;
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(DTOUploadRequest Data)
@@ -111,16 +127,18 @@ namespace AIDocSearch.Controllers
                     {
                         RunFSCrawler();
                     }
+                    await LoadUserFiles();
                     TempData["SuccessMessage"] = "File uploaded successfully.";
                     return RedirectToAction(nameof(Upload)); // PRG pattern
                 }
                 else
                 {
+                    await LoadUserFiles();
                     ModelState.AddModelError(string.Empty, ret.Message ?? "File upload failed.");
                     return View(Data);
                 }
             }
-
+            await LoadUserFiles();
             return View(Data);
         }
         public bool IsFSCrawlerRunning()
@@ -155,7 +173,14 @@ namespace AIDocSearch.Controllers
         {
             if (ModelState.IsValid)
             {
-               
+                string Url = _configuration["UrlData:indicesUrl"] ?? string.Empty;
+                string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
+                string Password = _configuration["UrlData:Password"] ?? string.Empty;
+                var IndexesDetails = await _searchService.IndexesDetails(Url, UserName, Password);
+                // Call the search service to get the response
+                return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.ScraperingMessage, IndexesDetails));
+                
+
                 DTOAPILoginRequest dTOAPILoginRequest = new DTOAPILoginRequest();
                 dTOAPILoginRequest.username = "admin";
                 dTOAPILoginRequest.password = "Admin@123";

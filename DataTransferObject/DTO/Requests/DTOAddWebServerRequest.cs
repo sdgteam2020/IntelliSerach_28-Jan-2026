@@ -13,7 +13,7 @@ namespace DataTransferObject.DTO.Requests
         [Display(Name = "Enter Url")]
         public required string Url { get; set; }
         [Required]
-        [RegularExpression(@"^[a-zA-Z0-9_/-]{1,50}$", ErrorMessage = "Only alphabets, numbers, _, / and - allowed. Maximum 50 characters.")]
+        [RegularExpression(@"^[a-zA-Z0-9_/-:/]{1,50}$", ErrorMessage = "Only alphabets, numbers, _, /,: and - allowed. Maximum 50 characters.")]
         [Display(Name = "alias")]
         public required string Includes { get; set; }
         [Required]

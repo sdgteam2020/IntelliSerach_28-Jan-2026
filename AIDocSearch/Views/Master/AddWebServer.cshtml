@@ -30,14 +30,15 @@
                 </div>
 
                 <div class="card-body">
-                    <form asp-controller="Scraper"
+                    <form asp-controller="Master"
                           asp-action="AddWebServer"
                           method="post"
+                          id="SaveForm"
                           enctype="multipart/form-data"
                           autocomplete="off">
 
                         @Html.AntiForgeryToken()
-
+                        <input type="hidden" id="EncryptedData" name="EncryptedData" value="null" />
                         <div class="row align-items-end">
                             <input asp-for="Id" type="hidden" />
                             <div class="col-md-1">
@@ -93,14 +94,14 @@
                         int srNo = 1;
                     }
                     <div class="container mt-3">
-                        <div class="card shadow-sm border-0">
-                          
-
+                        <div class="shadow-sm border-0">
+                           
                             <div class="card-body p-0">
-                                <table class="table table-bordered table-striped">
-                                    <thead class="table-dark">
+                                <table class="table table-hover mb-0 align-middle" id="tblData">
+                                    <thead class="table-light">
                                         <tr>
-                                            <th style="width:80px">Sr. No</th>
+                                        <tr>
+                                            <th>Sr. No</th>
                                             <th>Url</th>
                                             <th>Path Pattern</th>
                                             <th>Index Name</th>

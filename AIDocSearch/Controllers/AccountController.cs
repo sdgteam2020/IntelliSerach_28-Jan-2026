@@ -1,5 +1,6 @@
 ﻿using AIDocSearch.Helpers;
 using BusinessLogicsLayer.Account;
+using BusinessLogicsLayer.Helpers;
 using BusinessLogicsLayer.Ranks;
 using DataTransferObject.CommonModel;
 using DataTransferObject.Constants;
@@ -129,7 +130,7 @@ namespace AIDocSearch.Controllers
                         return Redirect(returnUrl);
                     }
                     var ret = await _rank.GetByshort(selectedUser.RankId);
-                   
+
 
                     var dTOSession = new DTOSession
                     {
@@ -137,7 +138,9 @@ namespace AIDocSearch.Controllers
                         RoleName = string.Join(",", await userManager.GetRolesAsync(selectedUser)),
                         UserName = selectedUser.UserName,
                         Name = selectedUser.Name,
-                        RankName = ret.RankAbbreviation
+                        RankName = ret.RankAbbreviation,
+                        AESKey = AESEncrytDecry.GenerateKey()
+
                     };
 
                     SessionHeplers.SetObject(HttpContext.Session, "Users", dTOSession);
