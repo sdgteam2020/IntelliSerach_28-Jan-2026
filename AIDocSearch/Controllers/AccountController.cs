@@ -1,5 +1,5 @@
 ﻿using AIDocSearch.Helpers;
-using BusinessLogicsLayer.Account;
+using BusinessLogicsLayer.Accounts;
 using BusinessLogicsLayer.Helpers;
 using BusinessLogicsLayer.Ranks;
 using DataTransferObject.CommonModel;

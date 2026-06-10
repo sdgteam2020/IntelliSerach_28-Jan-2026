@@ -1,5 +1,5 @@
 ﻿using AIDocSearch.Helpers;
-using BusinessLogicsLayer.Loger;
+using BusinessLogicsLayer.Logers;
 using DataTransferObject.CommonModel;
 using DataTransferObject.DTO.Requests;
 

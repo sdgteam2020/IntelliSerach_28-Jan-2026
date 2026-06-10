@@ -1,4 +1,4 @@
-﻿using BusinessLogicsLayer.Loger;
+﻿using BusinessLogicsLayer.Logers;
 using DataAccessLayer;
 using DataAccessLayer.GenericRepository;
 using DataAccessLayer.Logers;

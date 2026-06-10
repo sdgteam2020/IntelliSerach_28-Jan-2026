@@ -5,7 +5,7 @@ using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
 using DataTransferObject.IdentityModel;
 
-namespace BusinessLogicsLayer.Account
+namespace BusinessLogicsLayer.Accounts
 {
     public class Account : GenericRepository<ApplicationUser>, IAccount
     {

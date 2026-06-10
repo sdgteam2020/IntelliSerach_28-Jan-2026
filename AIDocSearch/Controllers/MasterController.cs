@@ -1,7 +1,7 @@
 ﻿using AIDocSearch.Helpers;
 using BusinessLogicsLayer.AddWebServer;
 using BusinessLogicsLayer.Helpers;
-using BusinessLogicsLayer.ScraperSetting;
+using BusinessLogicsLayer.ScraperSettings;
 using BusinessLogicsLayer.UnitOfWorks;
 using DataTransferObject.CommonModel;
 using DataTransferObject.Constants;

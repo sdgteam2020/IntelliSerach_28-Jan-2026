@@ -1,21 +1,17 @@
 ﻿using AIDocSearch.Helpers;
 using BusinessLogicsLayer.Helpers;
 using BusinessLogicsLayer.ScraperAPI;
-using BusinessLogicsLayer.ScraperSetting;
 using BusinessLogicsLayer.SearchContent;
 using BusinessLogicsLayer.UploadPdf;
 using DataTransferObject.CommonModel;
 using DataTransferObject.Constants;
 using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
-using DataTransferObject.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using System.Data;
 using System.Diagnostics;
 using System.Security.Claims;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AIDocSearch.Controllers
 {

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BusinessLogicsLayer.ScraperSetting
+namespace BusinessLogicsLayer.ScraperSettings
 {
     public interface IWebScraperSetting
     {

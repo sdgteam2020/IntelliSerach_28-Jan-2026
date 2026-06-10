@@ -3,7 +3,7 @@ using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
 using DataTransferObject.IdentityModel;
 
-namespace BusinessLogicsLayer.Account
+namespace BusinessLogicsLayer.Accounts
 {
     public interface IAccount : IGenericRepository<ApplicationUser>
     {

@@ -3,7 +3,7 @@ using DataTransferObject.DTO.Requests;
 using DataTransferObject.DTO.Response;
 using DataTransferObject.Model;
 
-namespace BusinessLogicsLayer.Loger
+namespace BusinessLogicsLayer.Logers
 {
     public interface ILoger : IGenericRepository<ExceptionLog>
     {
