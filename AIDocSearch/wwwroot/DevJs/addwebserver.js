@@ -1,4 +1,21 @@
 ﻿$(document).ready(function () {
+    $('#tblData').DataTable({
+        "order": [],
+        "paging": true,
+        "searching": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+        "select": true
+    });
+    $("#SaveForm").on("submit", async function (e) {
+        e.preventDefault();
+
+        const isValid = false; await CheckValidation();
+        if (isValid) {
+            this.submit();
+        }
+    });
 
     $(".btnEdit").click(function () {
 
@@ -20,3 +37,23 @@
     });
 
 });
+async function CheckValidation() {
+    const form = $("#SaveForm");
+    if (!form.valid()) {
+        return false;
+    }
+
+    let formData = {};
+
+    form.serializeArray().forEach(function (item) {
+        formData[item.name] = item.value;
+    });
+
+    let jsonData = JSON.stringify(formData);
+
+    let encrypted = encryptPayloadData(jsonData);
+    $("#EncryptedData").val(encrypted);
+
+    $("#SaveForm")[0].submit(); // native submit
+    return true;
+}

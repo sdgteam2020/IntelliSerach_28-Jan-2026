@@ -24,9 +24,9 @@ table.table-sm, table.table-sm tbody {
     }
 
 .table thead th {
-    border-bottom: 1px solid #c6a3e4;
-    background-color: #044C92;
-    color: #ffffff;
+    border-bottom: 1px solid #ededed;
+    background-color: #ededed;
+    color: #000000;
     border-top: 0;
 }
 

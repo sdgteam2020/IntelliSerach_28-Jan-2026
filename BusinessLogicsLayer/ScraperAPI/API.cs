@@ -7,14 +7,6 @@ namespace BusinessLogicsLayer.ScraperAPI
 {
     public class API : IAPI
     {
-        //private readonly string APILoginURL = "https://mpcrs.army.mil/webscraper1/api/login/";
-        //private readonly string APIcrawlURL = "https://mpcrs.army.mil/webscraper1/api/crawl/";
-        //private readonly string APIcrawlseoURL = "https://mpcrs.army.mil/webscraper1/web/api/crawl/";
-
-        //private readonly string APILoginURL = "https://192.168.10.219/pdf/api/login/";
-        //private readonly string APIcrawlURL = "https://192.168.10.219/pdf/api/crawl/";
-        //private readonly string APIcrawlseoURL = "https://192.168.10.219/seo/api/crawl/";
-
         public async Task<DTOLoginAPIResponse> Getauthentication(DTOAPILoginRequest data, string APILoginURL)
         {
             try

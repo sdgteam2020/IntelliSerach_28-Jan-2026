@@ -1,15 +1,20 @@
-﻿using System.Security.Cryptography;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 
-namespace AIDocSearch.Helpers
+namespace BusinessLogicsLayer.Helpers
 {
-    public static class AESEncrytDecry
+    public class AESEncrytDecry
     {
+        private static Random RNG = new Random();
         // 🔐 Secure key generation
         public static string GenerateKey()
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
         }
+
 
         public static string DecryptAES(string cipherText, string secret)
         {
@@ -34,5 +39,22 @@ namespace AIDocSearch.Helpers
 
             return Encoding.UTF8.GetString(decrypted);
         }
+        public static async Task<T> DecryptAESWithDTO<T>(string cipherText, string key)
+        {
+            try
+            {
+                string json = AESEncrytDecry.DecryptAES(cipherText, key);
+
+                if (string.IsNullOrEmpty(json))
+                    return default;
+
+                return await Task.FromResult(JsonConvert.DeserializeObject<T>(json));
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
     }
 }

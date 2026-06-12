@@ -1,26 +1,11 @@
 using AIDocSearch.CustomMiddleware;
-using BusinessLogicsLayer.Account;
-using BusinessLogicsLayer.AddWebServer;
-using BusinessLogicsLayer.Loger;
-using BusinessLogicsLayer.Logers;
-using BusinessLogicsLayer.Ranks;
-using BusinessLogicsLayer.ScraperAPI; // Ensure this is included for 'UseExceptionProcessor'
-using BusinessLogicsLayer.ScraperSetting;
-using BusinessLogicsLayer.SearchContent;
-using BusinessLogicsLayer.Service;
-using BusinessLogicsLayer.UnitOfWorks;
-using BusinessLogicsLayer.UploadPdf;
 using DataAccessLayer;
-using DataAccessLayer.Account;
-using DataAccessLayer.AddWebServer;
-using DataAccessLayer.Logers;
-using DataAccessLayer.ScraperSetting;
-using DataAccessLayer.UploadFiles;
 using DataTransferObject.IdentityModel;
 using EntityFramework.Exceptions.SqlServer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Ensure this is included
 using Newtonsoft.Json.Serialization;
+using BusinessLogicsLayer;
 
 var builder = WebApplication.CreateBuilder(args);
 var configration = builder.Configuration;
@@ -125,25 +110,10 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddRepository();
+// Register local application services
+builder.Services.AddSingleton<AIDocSearch.Services.IEncryptionService, AIDocSearch.Services.EncryptionService>();
 
-builder.Services.AddScoped<ISearch, Search>();
-builder.Services.AddScoped<IAccount, Account>();
-builder.Services.AddScoped<IAccountDL, AccountDL>();
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IRank, Rank>();
-builder.Services.AddScoped<IAPI, API>();
-builder.Services.AddScoped<IService, ServiceRepository>();
-builder.Services.AddScoped<IUploadFiles, UploadFiles>();
-builder.Services.AddScoped<IUploadFilesDB, UploadFilesDB>();
-
-builder.Services.AddScoped<IWebServer, WebServer>();
-builder.Services.AddScoped<IWebServerDB, WebServerDB>();
-
-builder.Services.AddScoped<ILoger, Loger>();
-builder.Services.AddScoped<ILogerDB, LogerDB>();
-builder.Services.AddScoped<IWebScraperSetting, ScraperSetting>();
-builder.Services.AddScoped<IWebScraperSettingDB, WebScraperSettingDB>();
 
 // Session cookie hardened
 builder.Services.AddSession(options =>
@@ -235,7 +205,17 @@ app.UseCookiePolicy(new CookiePolicyOptions
 });
 app.UseHttpsRedirection();
 app.UsePathBase("/IntelliSearch");
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        const int durationInSeconds = 60 * 60 * 24 * 365; // 1 year
+
+        ctx.Context.Response.Headers.Append(
+            "Cache-Control",
+            $"public,max-age={durationInSeconds}");
+    }
+}); 
 app.UseRouting();
 app.UseCors("CorsPolicy");
 app.UseAuthorization();

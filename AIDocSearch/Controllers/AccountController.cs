@@ -1,5 +1,6 @@
 ﻿using AIDocSearch.Helpers;
-using BusinessLogicsLayer.Account;
+using BusinessLogicsLayer.Accounts;
+using BusinessLogicsLayer.Helpers;
 using BusinessLogicsLayer.Ranks;
 using DataTransferObject.CommonModel;
 using DataTransferObject.Constants;
@@ -11,6 +12,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Threading;
+using AIDocSearch.Services;
 
 namespace AIDocSearch.Controllers
 {
@@ -23,8 +26,9 @@ namespace AIDocSearch.Controllers
         private readonly IAccount _account;
         public const string SessionKeySalt = "_Salt";
         public readonly IRank _rank;
+        private readonly IEncryptionService _encryptionService;
 
-        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAccount _account, IRank rank)
+        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAccount _account, IRank rank, IEncryptionService encryptionService)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
@@ -32,19 +36,25 @@ namespace AIDocSearch.Controllers
             this.signInManager = signInManager;
             this._account = _account;
             _rank = rank;
+            _encryptionService = encryptionService;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Login()
         {
-            string GetSalt = AESEncrytDecry.GenerateKey();
-            //HttpContext.Session.SetString(SessionKeySalt, GetSalt);
-            ViewBag.hdns = "jYDtHxUEIOk9v0Xpv5XftQnzgtJSlNKjeZNHw9tBz7o=";
+            // Ensure a session salt exists for any client-side encryption
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString(SessionKeySalt)))
+            {
+                var salt = AESEncrytDecry.GenerateKey();
+                HttpContext.Session.SetString(SessionKeySalt, salt);
+            }
+
+            ViewBag.hdns = HttpContext.Session.GetString(SessionKeySalt);
             await signInManager.SignOutAsync();
-            DTOLoginRequest model = new DTOLoginRequest();
-            model.UserName = "Admin";
-            return View(model); // Ensure a return statement is present
+
+            var model = new DTOLoginRequest { UserName = "Admin" };
+            return View(model);
         }
 
         /// <summary>
@@ -60,19 +70,20 @@ namespace AIDocSearch.Controllers
         /// </returns>
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(DTOLoginRequest model, string? returnUrl)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(DTOLoginRequest model, string? returnUrl, CancellationToken cancellationToken)
         {
-            // Check if the model state is valid
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
             {
-                string? GetSalt = "jYDtHxUEIOk9v0Xpv5XftQnzgtJSlNKjeZNHw9tBz7o=";//HttpContext.Session.GetString(SessionKeySalt); // Get Salt from Session
-                if (GetSalt != null)
+                string? GetSalt = HttpContext.Session.GetString(SessionKeySalt); // Get Salt from Session
+                if (!string.IsNullOrEmpty(GetSalt))
                 {
                     ViewBag.hdns = GetSalt;
-                    string Password = AESEncrytDecry.DecryptAES(model.Password, GetSalt);  //decrypt password
-                    model.Password = Password;
-                    string username = AESEncrytDecry.DecryptAES(model.UserName, GetSalt);  //decrypt password
-                    model.UserName = username;
+                    model.Password = _encryptionService.Decrypt(model.Password, GetSalt);
+                    model.UserName = _encryptionService.Decrypt(model.UserName, GetSalt);
                 }
 
                 // Get the user's IP address and the current request URL (for logging or auditing)
@@ -106,7 +117,7 @@ namespace AIDocSearch.Controllers
                 }
 
                 // Attempt to sign in the user with the provided password
-                var result = await signInManager.PasswordSignInAsync(model.UserName, model.Password, false, true);
+                var result = await signInManager.PasswordSignInAsync(model.UserName, model.Password, isPersistent: false, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     HttpContext.Session.Clear();
@@ -129,7 +140,7 @@ namespace AIDocSearch.Controllers
                         return Redirect(returnUrl);
                     }
                     var ret = await _rank.GetByshort(selectedUser.RankId);
-                   
+
 
                     var dTOSession = new DTOSession
                     {
@@ -137,7 +148,9 @@ namespace AIDocSearch.Controllers
                         RoleName = string.Join(",", await userManager.GetRolesAsync(selectedUser)),
                         UserName = selectedUser.UserName,
                         Name = selectedUser.Name,
-                        RankName = ret.RankAbbreviation
+                        RankName = ret.RankAbbreviation,
+                        AESKey = AESEncrytDecry.GenerateKey()
+
                     };
 
                     SessionHeplers.SetObject(HttpContext.Session, "Users", dTOSession);
@@ -158,6 +171,17 @@ namespace AIDocSearch.Controllers
                     ModelState.AddModelError(string.Empty, "Not Valid User / Password. Access Failed Count " + selectedUser.AccessFailedCount + " Max Access Attempts 3");
                 }
             }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("Login attempt canceled by client for user {User}", model.UserName);
+                ModelState.AddModelError(string.Empty, "Request canceled.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during login for user {User}", model.UserName);
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again later.");
+            }
+
             // Return the login view with the model and any error messages
             return View(model);
         }

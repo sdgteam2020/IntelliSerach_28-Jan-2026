@@ -15,7 +15,7 @@ namespace DataAccessLayer.Account
 
         public async Task<DTODataTablesResponse<DTOUserDataResponse>> GetAllUsers(DTODataTablesRequest request)
         {
-            var Data = (from u in _context.Users.OrderByDescending(x => x.Id)
+            var Data = (from u in _context.Users.OrderByDescending(x => x.Id).Where(i=>i.Id!=1)
                         select new DTOUserDataResponse()
                         {
                             Id = u.Id,
@@ -26,13 +26,13 @@ namespace DataAccessLayer.Account
                             Name = u.Name,
                             Active = u.Active
                         }).AsQueryable();
-
+                
             var TotRec = await Data.CountAsync();
             //Apply filtering
             if (!string.IsNullOrEmpty(request.searchValue))
             {
                 string searchValue = request.searchValue.ToLower();
-                Data = Data.Where(x => x.DomainId.ToLower().Contains(searchValue));
+                Data = Data.Where(x => x.DomainId.ToLower().Contains(searchValue) );
             }
             // Apply sorting
 

@@ -11,16 +11,12 @@
 <html>
 <head>
     <title>Login Page</title>
-    <!--Made with love by Mutiullah Samim -->
-    <!--Bootsrap 4 CDN-->
-    <link href="~/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+   
+    <link href="~/bootstrap/css/bootstrap.min.css" asp-append-version="true" rel="stylesheet" />
 
-    <!--Fontawesome CDN-->
-
-    <link href="~/fontawesome/css/all.min.css" rel="stylesheet" />
-    <!--Custom styles-->
-    <link href="~/css/login.css" rel="stylesheet" />
-    <script src="~/js/crypto-js.min.js"></script>
+    <link href="~/fontawesome/css/all.min.css" asp-append-version="true" rel="stylesheet" />
+    <link href="~/css/login.css" asp-append-version="true" rel="stylesheet" />
+    <script src="~/js/crypto-js.min.js" asp-append-version="true" defer></script>
 </head>
 <body>
     <canvas id="canvas"></canvas>
@@ -29,10 +25,11 @@
         <div class="d-flex justify-content-center h-100">
             <div class="card">
                 <div class="card-header text-center">
-                    <img src="~/images/logo.png"
+                    <img src="~/images/logo.webp"
                          alt="Logo"
+                         width="100"
+                         height="100"
                          class="app-logo mx-auto d-block" />
-
                     <h3>Log in</h3>
                     @* <div class="d-flex justify-content-end social_icon">
                         <span><i class="fa-solid fa-file-pdf"></i></span>
@@ -41,32 +38,55 @@
                 </div>
                 <div class="card-body">
                     <form asp-action="Login" asp-controller="Account" method="post" novalidate>
-                        <input type="hidden" id="aesKey" value="@ViewBag.hdns" />
+                        <input type="hidden" id="payloadaes" value="@ViewBag.hdns" />
                         @Html.AntiForgeryToken()
 
-                        <div class="input-group mb-3 input-group-prepend">
-                            <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                            <input asp-for="UserName" class="form-control" value="@Model.UserName" required/>
-                           
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="visually-hidden"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <input asp-for="UserName"
+                                       class="form-control" value="@Model.UserName"
+                                       required />
+                            </div>
                         </div>
 
-                        <div class="input-group mb-3 input-group-prepend">
-                            <span class="input-group-text"><i class="fas fa-key"></i></span>
-                            <input asp-for="Password" class="form-control" value="Admin@123" required />
-                           
+                        <div class="mb-3">
+                            <label asp-for="Password" class="visually-hidden"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-key"></i>
+                                </span>
+                                <input asp-for="Password"
+                                       class="form-control"
+                                       required />
+                            </div>
                         </div>
-                        <div class="input-group mb-3 input-group-prepend">
-                            <span class="input-group-text"><i class="fa-solid fa-user-tie"></i></span>
-                            <select asp-for="RoleName" class="form-select" required>
-                                <option value="">Select Role</option>
-                                <option value="User" selected>User</option>
-                                <option value="Admin">Admin</option>
-                            </select>
-                           
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-warning">Login</button>
-                        </div>
+                     <div class="mb-3">
+    <label asp-for="RoleName" class="visually-hidden">
+        Role
+    </label>
+
+    <div class="input-group">
+        <span class="input-group-text">
+            <i class="fa-solid fa-user-tie"></i>
+        </span>
+
+        <select asp-for="RoleName" class="form-select" required>
+            <option value="">Select Role</option>
+            <option value="User">User</option>
+            <option value="Admin">Admin</option>
+        </select>
+    </div>
+</div>
+
+<div class="d-grid">
+    <button type="submit" class="btn btn-warning">
+        Login
+    </button>
+</div>
                         <div class="alert  mt-2" role="alert">
                             @if (!ViewData.ModelState.IsValid)
                             {
@@ -97,4 +117,5 @@
     </div>
 </body>
 </html>
+<script src="~/devjs/loadaes.js"></script>
 <script src="~/devjs/login.js"></script>
