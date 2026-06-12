@@ -110,6 +110,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddRepository();
+// Register local application services
+builder.Services.AddSingleton<AIDocSearch.Services.IEncryptionService, AIDocSearch.Services.EncryptionService>();
 
 
 
