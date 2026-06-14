@@ -1,17 +1,23 @@
+using Application.Interfaces;
+using Infrastructure.Shared.Helpers;
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using BusinessLogicsLayer.Helpers;
 
 namespace AIDocSearch.Services
 {
     public class EncryptionService : IEncryptionService
     {
+        private readonly IAESEncrytDecry _encryptionKey;
+        public EncryptionService(IAESEncrytDecry encryptionKey)
+        {
+            _encryptionKey = encryptionKey;
+        }
         // NOTE: This wrapper delegates to existing AESEncrytDecry helper so behavior remains unchanged.
         public string Decrypt(string cipherText, string key)
         {
             if (string.IsNullOrEmpty(cipherText)) return cipherText;
-            return AESEncrytDecry.DecryptAES(cipherText, key);
+            return _encryptionKey.DecryptAES(cipherText, key);
         }
 
         public string Encrypt(string plainText, string key)

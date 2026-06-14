@@ -1,7 +1,7 @@
 ﻿using AIDocSearch.Helpers;
-using BusinessLogicsLayer.Logers;
-using DataTransferObject.CommonModel;
-using DataTransferObject.DTO.Requests;
+using Application.Interfaces.Repository;
+using Domain.CommonModel;
+using Domain.DTOs.Requests;
 
 namespace AIDocSearch.CustomMiddleware
 {

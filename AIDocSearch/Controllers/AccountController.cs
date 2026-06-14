@@ -1,19 +1,16 @@
-﻿using AIDocSearch.Helpers;
-using BusinessLogicsLayer.Accounts;
-using BusinessLogicsLayer.Helpers;
-using BusinessLogicsLayer.Ranks;
-using DataTransferObject.CommonModel;
-using DataTransferObject.Constants;
-using DataTransferObject.DTO.Requests;
-using DataTransferObject.DTO.Response;
-using DataTransferObject.IdentityModel;
+﻿using Infrastructure.Shared.Helpers;
+using Domain.CommonModel;
+using Domain.Constants;
+using Domain.DTOs.Requests;
+using Domain.DTOs.Response;
+using Domain.IdentityEntities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Threading;
-using AIDocSearch.Services;
+using Application.Interfaces.Repository;
+using Application.Interfaces;
+using AIDocSearch.Interfaces;
 
 namespace AIDocSearch.Controllers
 {
@@ -23,12 +20,16 @@ namespace AIDocSearch.Controllers
         private readonly RoleManager<ApplicationRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly IAccount _account;
+        private readonly IUserAccount _account;
         public const string SessionKeySalt = "_Salt";
         public readonly IRank _rank;
         private readonly IEncryptionService _encryptionService;
+        private readonly IAuthService _authService;
+        private readonly IRegisterService _registerService;
+        private readonly ISessionService _sessionService;
+        private readonly IAESEncrytDecry _AESEncrytDecry;
 
-        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAccount _account, IRank rank, IEncryptionService encryptionService)
+        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserAccount _account, IRank rank, IEncryptionService encryptionService, IAuthService authService, IRegisterService registerService, ISessionService sessionService, IAESEncrytDecry aESEncrytDecry)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
@@ -37,21 +38,20 @@ namespace AIDocSearch.Controllers
             this._account = _account;
             _rank = rank;
             _encryptionService = encryptionService;
+            _authService = authService;
+            _registerService = registerService;
+            _sessionService = sessionService;
+            _AESEncrytDecry = aESEncrytDecry;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Login()
         {
-            // Ensure a session salt exists for any client-side encryption
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString(SessionKeySalt)))
-            {
-                var salt = AESEncrytDecry.GenerateKey();
-                HttpContext.Session.SetString(SessionKeySalt, salt);
-            }
-
-            ViewBag.hdns = HttpContext.Session.GetString(SessionKeySalt);
-            await signInManager.SignOutAsync();
+            // Ensure a session salt exists and sign out any existing user
+            var salt = _sessionService.EnsureSalt(HttpContext);
+            ViewBag.hdns = salt;
+            await _authService.SignOutAsync();
 
             var model = new DTOLoginRequest { UserName = "Admin" };
             return View(model);
@@ -91,36 +91,36 @@ namespace AIDocSearch.Controllers
                 var url = $"{Request.Scheme}://{Request.Host}{Request.Path}{Request.QueryString}";
 
                 // Attempt to find the user by username
+                // Use AuthService only for sign-in operation below; we still need user for role checks and account state
                 var selectedUser = await userManager.FindByNameAsync(model.UserName);
-                if (selectedUser != null && !selectedUser.Active)
-                {
-                    return RedirectToAction("ContactUs", "Account");
-                }
                 if (selectedUser == null)
                 {
-                    // User not found, add error to ModelState
-                    // User not found, redirect to the Registration page
+                    // User not found -> redirect to registration flow
                     TempData["UserName"] = model.UserName;
                     TempData["RoleName"] = model.RoleName;
                     return RedirectToAction("Register", "Account");
+                }
+
+                if (!selectedUser.Active)
+                {
+                    return RedirectToAction("ContactUs", "Account");
                 }
                 if (string.IsNullOrWhiteSpace(selectedUser.UserName))
                     throw new InvalidOperationException("UserName cannot be null.");
                 // Get the user's roles
                 var roles = await userManager.GetRolesAsync(selectedUser);
 
-                if (roles == null || !roles.Any(r => r.ToLower() == model.RoleName.ToLower()))
+                if (roles == null || !roles.Any(r => r.Equals(model.RoleName, StringComparison.OrdinalIgnoreCase)))
                 {
-                    ModelState.AddModelError(string.Empty,
-                        "You do not have permission to log in. Your role does not match.");
+                    ModelState.AddModelError(string.Empty, ConnKeyConstants.RoleMismatchMessage);
                     return View(model);
                 }
 
                 // Attempt to sign in the user with the provided password
-                var result = await signInManager.PasswordSignInAsync(model.UserName, model.Password, isPersistent: false, lockoutOnFailure: true);
-                if (result.Succeeded)
+                var authResult = await _authService.SignInAsync(model.UserName, model.Password, model.RoleName, cancellationToken);
+                if (authResult.Succeeded)
                 {
-                    HttpContext.Session.Clear();
+                    _sessionService.ClearSession(HttpContext);
 
                     // Delete the session cookie so ASP.NET Core issues a NEW session ID
                     var sessionCookieName = ".AspNetCore.Session"; // or ".MOU.Session" if you renamed it
@@ -131,8 +131,7 @@ namespace AIDocSearch.Controllers
 
                     await userManager.UpdateSecurityStampAsync(selectedUser);
 
-                    // 2) Re-issue THIS session’s cookie so it contains the fresh stamp
-                    //await signInManager.SignOutAsync();
+                    // Re-issue sign-in with fresh stamp
                     await signInManager.SignInAsync(selectedUser, isPersistent: false);
                     // If a valid returnUrl is provided, redirect to it
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -140,6 +139,11 @@ namespace AIDocSearch.Controllers
                         return Redirect(returnUrl);
                     }
                     var ret = await _rank.GetByshort(selectedUser.RankId);
+                    if (ret == null)
+                    {
+                        // Fallback to a safe default
+                        ret = new Domain.Entities.MRank { RankAbbreviation = "N/A" };
+                    }
 
 
                     var dTOSession = new DTOSession
@@ -149,37 +153,38 @@ namespace AIDocSearch.Controllers
                         UserName = selectedUser.UserName,
                         Name = selectedUser.Name,
                         RankName = ret.RankAbbreviation,
-                        AESKey = AESEncrytDecry.GenerateKey()
+                        AESKey = _AESEncrytDecry.GenerateKey()
 
                     };
-
-                    SessionHeplers.SetObject(HttpContext.Session, "Users", dTOSession);
-                    ViewBag.Message = "Successfully Logged In.";
+                    _sessionService.SetUserSession(HttpContext, dTOSession);
+                    ViewBag.Message = ConnKeyConstants.LoggedInMessage;
                     // Redirect users with the "User" role to the Dashboard
                     return RedirectToActionPermanent("Dashboard", "Home");
                 }
-                else if (result.IsLockedOut)
+                else if (authResult.IsLockedOut)
                 {
-                    ModelState.AddModelError(string.Empty, "Account Locked Out Please Try after 10 minutes.");
+                    ModelState.AddModelError(string.Empty, ConnKeyConstants.AccountLockedMessage);
                 }
-                else if (result.IsNotAllowed)
+                else if (authResult.IsNotAllowed)
                 {
-                    ModelState.AddModelError(string.Empty, "Already Login \" + user.UserName + \" Please Try Some Time.");
+                    ModelState.AddModelError(string.Empty, string.Format(ConnKeyConstants.SignInNotAllowedFormat, selectedUser.UserName));
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Not Valid User / Password. Access Failed Count " + selectedUser.AccessFailedCount + " Max Access Attempts 3");
+                    // Do not expose internal counters to the user; log detail instead
+                    _logger.LogWarning("Failed login for user {User} from {IP}. AccessFailedCount={Count}", selectedUser.UserName, ipAddress, selectedUser.AccessFailedCount);
+                    ModelState.AddModelError(string.Empty, ConnKeyConstants.InvalidCredentialsMessage);
                 }
             }
             catch (OperationCanceledException)
             {
                 _logger.LogWarning("Login attempt canceled by client for user {User}", model.UserName);
-                ModelState.AddModelError(string.Empty, "Request canceled.");
+                ModelState.AddModelError(string.Empty, ConnKeyConstants.RequestCanceledMessage);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during login for user {User}", model.UserName);
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again later.");
+                ModelState.AddModelError(string.Empty, ConnKeyConstants.InternalServerErrorMessage);
             }
 
             // Return the login view with the model and any error messages
@@ -200,7 +205,7 @@ namespace AIDocSearch.Controllers
         [AllowAnonymous]
         public IActionResult Register()
         {
-            string GetSalt = AESEncrytDecry.GenerateKey();
+            string GetSalt = _AESEncrytDecry.GenerateKey();
             HttpContext.Session.SetString(SessionKeySalt, GetSalt);
             ViewBag.hdns = GetSalt;
             ViewBag.UserName = TempData["UserName"] as string;
@@ -227,91 +232,43 @@ namespace AIDocSearch.Controllers
         /// </returns>
         [HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(DTORegisterRequest model)
         {
             ViewBag.UserName = model.UserName;
             ViewBag.RoleName = model.Role;
-            string? GetSalt = HttpContext.Session.GetString(SessionKeySalt); // Get Salt from Session
+            // Use session service to ensure/get salt
+            string? GetSalt = _sessionService.EnsureSalt(HttpContext); // ensures and returns salt
             if (GetSalt != null)
             {
                 ViewBag.hdns = GetSalt;
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Salt is null");
+                ModelState.AddModelError(string.Empty, ConnKeyConstants.SaltNullMessage);
                 return View(model);
-
             }
+
             if (ModelState.IsValid)
             {
-                // Check if user already exists
-                var existingUser = await userManager.FindByNameAsync(model.UserName);
-                if (existingUser != null)
-                {
-                    ModelState.AddModelError(string.Empty, "User already exists.");
-                    return View(model);
-                }
-
-                string Password = AESEncrytDecry.DecryptAES(model.ConfirmPassword, GetSalt);  //decrypt password
+                // Decrypt the incoming password using the injected encryption service
+                string Password = _encryptionService.Decrypt(model.ConfirmPassword, GetSalt);
                 model.ConfirmPassword = Password;
-                var user = new ApplicationUser
+
+                // Delegate registration logic to the injected register service
+                var registerResult = await _registerService.RegisterAsync(model, Password);
+                if (registerResult.Succeeded)
                 {
-                    UserName = model.UserName,
-                    Email = model.UserName + "@army.mil",
-                    Active = false,
-                    Updatedby = 1,
-                    UpdatedOn = DateTime.UtcNow,
-                    Name = model.Name,
-                    RankId = model.RankId,
-
-                    // model.Email
-                    // Add other properties as needed
-                };
-
-                var result = await userManager.CreateAsync(user, model.ConfirmPassword);
-                // Replace this block in the Register POST action after successful registration
-                if (result.Succeeded)
-                {
-                    // Ensure the role exists
-                    if (!await roleManager.RoleExistsAsync(model.Role))
-                    {
-                        await roleManager.CreateAsync(new ApplicationRole { Name = model.Role });
-                    }
-
-                    // Assign role to user
-                    await userManager.AddToRoleAsync(user, model.Role);
-
-                    // ✅ INSERT CLAIMS INTO AspNetUserClaims Table
-                    var claims = new List<Claim>()
-                    {
-                        new Claim("Role", model.Role),
-                    };
-                    await userManager.AddClaimsAsync(user, claims);
-                    // ✅ Insert into AspNetUserLogins
-                    var loginInfo = new UserLoginInfo(
-                        loginProvider: "IntelliSearch",   // LoginProvider column
-                        providerKey: user.Id.ToString(), // ProviderKey column (ensure string type)
-                        providerDisplayName: "Indian Army IntelliSearch" // Provide a display name as required by the constructor
-                        );
-
-                    await userManager.AddLoginAsync(user, loginInfo);
-                    // ✅ Add Token into AspNetUserTokens
-                    await userManager.SetAuthenticationTokenAsync(
-                        user,
-                        loginProvider: "IntelliSearch",
-                        tokenName: "RegistrationToken",
-                        tokenValue: Guid.NewGuid().ToString()
-                    );
-
-                    // Redirect to the same page (Register) after successful registration
                     TempData["SuccessMessage"] = "Registration successful!";
                     return RedirectToAction("ContactUs", "Account");
                 }
-                foreach (var error in result.Errors)
+
+                foreach (var error in registerResult.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    ModelState.AddModelError(string.Empty, error);
                 }
             }
+
             return View(model);
         }
         [Authorize(Roles = "Admin")]
