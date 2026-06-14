@@ -1,13 +1,13 @@
 ﻿using AIDocSearch.Helpers;
-using BusinessLogicsLayer.AddWebServer;
-using BusinessLogicsLayer.Helpers;
-using BusinessLogicsLayer.ScraperSettings;
-using BusinessLogicsLayer.UnitOfWorks;
-using DataTransferObject.CommonModel;
-using DataTransferObject.Constants;
-using DataTransferObject.DTO.Requests;
-using DataTransferObject.DTO.Response;
-using DataTransferObject.Model;
+using AIDocSearch.Services;
+using Application.Interfaces;
+using Application.Interfaces.Repository;
+using Domain.CommonModel;
+using Domain.Constants;
+using Domain.DTOs.Requests;
+using Domain.DTOs.Response;
+using Domain.Entities;
+using Infrastructure.Shared.Helpers;
 using iText.IO.Font.Constants;
 using iText.Kernel.Colors;
 using iText.Kernel.Font;
@@ -28,18 +28,26 @@ namespace AIDocSearch.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IWebScraperSetting _webScraperSetting;
         private readonly IWebServer _webServer;
+        private readonly IAESEncrytDecry _AESEncrytDecry;
+        private readonly IDateTimeService _dateTimeService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IWebScraperSetting webScraperSetting, IWebServer webServer)
+
+        public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IWebScraperSetting webScraperSetting, IWebServer webServer, IAESEncrytDecry aESEncrytDecry, IDateTimeService dateTimeService, Application.Interfaces.ICurrentUserService currentUserService)
         {
             this.unitOfWork = unitOfWork;
             _env = env;
             _webScraperSetting = webScraperSetting;
             _webServer = webServer;
+            _AESEncrytDecry = aESEncrytDecry;
+            _dateTimeService= dateTimeService;
+            _currentUserService = currentUserService;
         }
 
         #region Master Table
 
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetAllMMaster(DTOMasterRequest Data)
         {
             try
@@ -101,7 +109,8 @@ namespace AIDocSearch.Controllers
 
 
             // DateTime stamp
-            string dateTimeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            // NowUtc_String is a property on IDateTimeService, not a method
+            string dateTimeNow = _dateTimeService.NowUtcString;
 
             // Output stream
             using var outputStream = new MemoryStream();
@@ -176,7 +185,7 @@ namespace AIDocSearch.Controllers
 
         public async Task<IActionResult> AddWebScraperSetting()
         {
-            var allData = await _webScraperSetting.GetWebScraperSetting();
+            var allData = await _webScraperSetting.GetAll();
 
             ViewBag.AllData = allData;
             TempData["SuccessMessage"] = null;
@@ -186,13 +195,13 @@ namespace AIDocSearch.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddWebScraperSetting(DTOWebScraperSettingRequest Request)
         {
-            var allData = await _webScraperSetting.GetWebScraperSetting();
+            var allData = await _webScraperSetting.GetAll();
 
             ViewBag.AllData = allData;
 
             if (ModelState.IsValid)
             {
-                var UserId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var UserId = _currentUserService.UserId ?? 0;
                 var now = DateTime.UtcNow;
                 WebScraperSetting data;
 
@@ -231,7 +240,12 @@ namespace AIDocSearch.Controllers
 
                 if (Request.Id > 0)
                 {
-                    WebScraperSetting ret = await _webScraperSetting.UpdateWebScraperSetting(data);
+                    WebScraperSetting ret = null;
+                    if(data.Id==0)
+                        ret=await _webScraperSetting.AddWithReturn(data);
+                    else if (data.Id > 0)
+                        ret = await _webScraperSetting.UpdateWithReturn(data);
+
                     if (ret != null && ret.Id > 0)
                     {
                         TempData["SuccessMessage"] = "Record Update successfully.";
@@ -256,7 +270,7 @@ namespace AIDocSearch.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetWebScraperSetting()
         {
-            return Json(await _webScraperSetting.GetWebScraperSetting());
+            return Json(await _webScraperSetting.GetAll());
         }
         #endregion
 
@@ -276,7 +290,7 @@ namespace AIDocSearch.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddWebServer(string EncryptedData)
         {
-            DTOAddWebServerRequest Request = await AESEncrytDecry.DecryptAESWithDTO<DTOAddWebServerRequest>(EncryptedData, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
+            DTOAddWebServerRequest Request = await _AESEncrytDecry.DecryptAESWithDTO<DTOAddWebServerRequest>(EncryptedData, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
 
             var allData = await _webServer.GetAll();
             ViewBag.AllData = allData;
@@ -296,8 +310,8 @@ namespace AIDocSearch.Controllers
             ModelState.Clear();
             if (TryValidateModel(Request))
             {
-                var UserId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                var now = DateTime.UtcNow;
+               
+               
                 TrnWebServer data;
 
                 if (Request.Id > 0)
@@ -316,8 +330,8 @@ namespace AIDocSearch.Controllers
                     data.Url = Request.Url.Trim();
                     data.Includes = Request.Includes.Trim();
                     data.Index_Name = Request.Index_Name.Trim();
-                    data.UpdatedOn = now;
-                    data.UpdatedBy = UserId;
+                    data.UpdatedOn = _dateTimeService.NowUtc;
+                    data.UpdatedBy = _currentUserService.UserId;
                 }
                 else
                 {
@@ -327,16 +341,25 @@ namespace AIDocSearch.Controllers
                         Url = Request.Url,
                         Includes = Request.Includes,
                         Index_Name = Request.Index_Name,
-                        CreatedOn = now,
-                        UpdatedOn = now,
-                        CreatedBy = UserId,
-                        UpdatedBy = UserId,
+                        CreatedOn = _dateTimeService.NowUtc,
+                        UpdatedOn = _dateTimeService.NowUtc,
+                        CreatedBy = _currentUserService.UserId,
+                        UpdatedBy = _currentUserService.UserId,
                         IsActive = true,
                         IsDeleted = false
                     };
                 }
 
-                TrnWebServer ret = await _webServer.AddWebServer(data);
+                TrnWebServer ret = null;
+                if (data.Id == 0)
+                {
+                    ret= await _webServer.AddWithReturn(data);
+                }
+                else if (data.Id > 0)
+                {
+                    ret= await _webServer.UpdateWithReturn(data);
+                   
+                }
                 if (ret != null && ret.Id > 0)
                 {
                     

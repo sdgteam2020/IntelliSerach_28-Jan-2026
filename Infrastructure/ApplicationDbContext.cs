@@ -1,0 +1,36 @@
+﻿using Domain.IdentityEntities;
+using Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace Infrastructure
+{
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        { }
+
+        public DbSet<MRank> MRank { get; set; } = null!;
+        public DbSet<TrnUploadFiles> trnUploadFiles { get; set; } = null!;
+        public DbSet<TrnWebServer> trnWebServer { get; set; } = null!;
+        public DbSet<WebScraperSetting> WebScraperSetting { get; set; } = null!;
+        public DbSet<ExceptionLog> Log { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            //builder.Entity<MRank>()
+            //    .HasOne(x => x.CreatedByUser)
+            //    .WithMany()
+            //    .HasForeignKey(x => x.CreatedBy)
+            //    .OnDelete(DeleteBehavior.Restrict);
+
+            //builder.Entity<MRank>()
+            //    .HasOne(x => x.UpdatedByUser)
+            //    .WithMany()
+            //    .HasForeignKey(x => x.UpdatedBy)
+            //    .OnDelete(DeleteBehavior.Restrict);
+        }
+    }
+}

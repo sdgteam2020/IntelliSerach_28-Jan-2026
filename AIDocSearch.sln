@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197
+# Visual Studio Version 18
+VisualStudioVersion = 18.6.11828.311
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDocSearch", "AIDocSearch\AIDocSearch.csproj", "{EA485822-3237-440E-BBB1-C67B8828C61C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLogicsLayer", "BusinessLogicsLayer\BusinessLogicsLayer.csproj", "{534A4258-6368-4B9B-B250-BBFD45C0BDA4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Shared", "Infrastructure.Shared\Infrastructure.Shared.csproj", "{534A4258-6368-4B9B-B250-BBFD45C0BDA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLayer", "DataAccessLayer\DataAccessLayer.csproj", "{CBC72371-C2DC-4C20-93C6-FD04326EDB12}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{CBC72371-C2DC-4C20-93C6-FD04326EDB12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataTransferObject", "DataTransferObject\DataTransferObject.csproj", "{2E68023D-CB62-49A0-A4E1-66BFF6723C0D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{2E68023D-CB62-49A0-A4E1-66BFF6723C0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{985CCC0C-8A00-4672-B2DA-C8A31334604C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{2E68023D-CB62-49A0-A4E1-66BFF6723C0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E68023D-CB62-49A0-A4E1-66BFF6723C0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E68023D-CB62-49A0-A4E1-66BFF6723C0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{985CCC0C-8A00-4672-B2DA-C8A31334604C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{985CCC0C-8A00-4672-B2DA-C8A31334604C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{985CCC0C-8A00-4672-B2DA-C8A31334604C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{985CCC0C-8A00-4672-B2DA-C8A31334604C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

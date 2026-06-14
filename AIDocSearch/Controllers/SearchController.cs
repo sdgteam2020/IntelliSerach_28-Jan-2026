@@ -1,17 +1,16 @@
 ﻿using AIDocSearch.Helpers;
-using BusinessLogicsLayer.Helpers;
-using BusinessLogicsLayer.ScraperAPI;
-using BusinessLogicsLayer.SearchContent;
-using BusinessLogicsLayer.UploadPdf;
-using DataTransferObject.CommonModel;
-using DataTransferObject.Constants;
-using DataTransferObject.DTO.Requests;
-using DataTransferObject.DTO.Response;
+using Infrastructure.Shared.Helpers;
+using Domain.CommonModel;
+using Domain.Constants;
+using Domain.DTOs.Requests;
+using Domain.DTOs.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Diagnostics;
 using System.Security.Claims;
+using Application.Interfaces.Repository;
+using Application.Interfaces;
 
 namespace AIDocSearch.Controllers
 {
@@ -23,17 +22,20 @@ namespace AIDocSearch.Controllers
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _env;
         private readonly IUploadFiles _uploadFiles;
+        private readonly IUpload _upload;
         private readonly IAPI _aPI;
-        
-        public SearchController(IHttpClientFactory httpClientFactory, IConfiguration _configuration, ISearch _searchService, IWebHostEnvironment env, IUploadFiles uploadFiles, IAPI aPI)
+        private readonly IAESEncrytDecry _AESEncrytDecry;
+
+        public SearchController(IHttpClientFactory httpClientFactory, IConfiguration _configuration, ISearch _searchService, IWebHostEnvironment env, IUploadFiles uploadFiles, IAPI aPI, IUpload upload, IAESEncrytDecry aESEncrytDecry)
         {
             _httpClientFactory = httpClientFactory;
             this._searchService = _searchService;
             this._configuration = _configuration;
             _env = env;
             _uploadFiles = uploadFiles;
+            _upload = upload;
             _aPI = aPI;
-            
+            _AESEncrytDecry = aESEncrytDecry;
         }
 
         public async Task<IActionResult> Index(string searchInput)
@@ -43,9 +45,10 @@ namespace AIDocSearch.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SearchContent([FromBody] EncryptedRequest Payload)
         {
-            DTOSerchRequest Data = await AESEncrytDecry.DecryptAESWithDTO<DTOSerchRequest>(Payload.Data, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
+            DTOSerchRequest Data = await _AESEncrytDecry.DecryptAESWithDTO<DTOSerchRequest>(Payload.Data, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
             if (Data == null)
                 return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.BadRequestMessage, null));
 
@@ -116,13 +119,13 @@ namespace AIDocSearch.Controllers
                     ModelState.AddModelError(string.Empty, "Please select a file to upload.");
                     return View(Data);
                 }
-                var ret = await _uploadFiles.UploadFileAsync(Data.FileName, FilePath, Convert.ToInt32(userId));
+                var ret = await _upload.UploadFileAsync(Data.FileName, FilePath, Convert.ToInt32(userId));
                 if (ret.Code == 200)
                 {
-                    if (!IsFSCrawlerRunning())
-                    {
-                        RunFSCrawler();
-                    }
+                    //if (!IsFSCrawlerRunning())
+                    //{
+                    //    RunFSCrawler();
+                    //}
                     await LoadUserFiles();
                     TempData["SuccessMessage"] = "File uploaded successfully.";
                     return RedirectToAction(nameof(Upload)); // PRG pattern

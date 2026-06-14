@@ -1,11 +1,13 @@
 using AIDocSearch.CustomMiddleware;
-using DataAccessLayer;
-using DataTransferObject.IdentityModel;
+using AIDocSearch.Services;
+using Domain.IdentityEntities;
 using EntityFramework.Exceptions.SqlServer;
+using Infrastructure;
+using Infrastructure.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Ensure this is included
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json.Serialization;
-using BusinessLogicsLayer;
 
 var builder = WebApplication.CreateBuilder(args);
 var configration = builder.Configuration;
@@ -30,7 +32,6 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(opts =>
     opts.Password.RequiredLength = 8;
     opts.Password.RequiredUniqueChars = 1;
     opts.User.RequireUniqueEmail = false;
-
     // Lockout
     opts.Lockout.AllowedForNewUsers = true;
     opts.Lockout.MaxFailedAccessAttempts = 3;
@@ -108,12 +109,17 @@ builder.Services.AddCors(options =>
         policy.SetPreflightMaxAge(TimeSpan.FromHours(1));
     });
 });
+builder.Services.AddSelfInfrastructure();
+builder.Services.AddInfrastructure();
+builder.Services.AddSharedInfrastructure();
 
-builder.Services.AddRepository();
 // Register local application services
-builder.Services.AddSingleton<AIDocSearch.Services.IEncryptionService, AIDocSearch.Services.EncryptionService>();
+
+builder.Services.AddHttpContextAccessor();
+// register current user service (implementation in AIDocSearch.Services)
 
 
+    
 
 // Session cookie hardened
 builder.Services.AddSession(options =>
