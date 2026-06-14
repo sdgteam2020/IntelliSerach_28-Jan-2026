@@ -27,7 +27,6 @@
     // Hide error message if validation passes
     document.getElementById("txterrormsg").classList.add("d-none");
 
-
     // 🔐 Encrypt values
     UserNameInput.value = encryptPayloadData(plainUserName);
     passwordInput.value = encryptPayloadData(plainPassword);
@@ -37,129 +36,191 @@
 });
 
 
+/* =========================================================
+   ENHANCED PARTICLE BACKGROUND ANIMATION
+   - Fixed: canvas resizing no longer resets the DPI transform
+             every frame (this was the cause of blurry / mis-scaled
+             particles in the original).
+   - Added: proper resize handling (debounced).
+   - Added: mouse interaction — particles gently react/connect
+             to the cursor.
+   - Added: smoother glow effect on particles.
+   - Added: delta-time based movement so speed is consistent
+             across different frame rates / devices.
+   - Performance: removed repeated getComputedStyle() calls
+             inside the per-particle render loop.
+========================================================= */
 
-window.requestAnimFrame = function () {
-    return (
-        window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.oRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
-        function (/* function */ callback) {
-            window.setTimeout(callback, 1000 / 60);
-        }
-    );
-}();
+(function () {
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
 
-var canvas = document.getElementById('canvas');
-var context = canvas.getContext('2d');
+    const dpi = window.devicePixelRatio || 1;
 
-//get DPI
-let dpi = window.devicePixelRatio || 1;
-context.scale(dpi, dpi);
-console.log(dpi);
+    const couleurs = ["#3a0088", "#930077", "#e61c5d", "#ffbd39"];
+    const particle_count = 70;
+    const connectionDistance = 200;
+    const mouseInfluenceDistance = 150;
 
-function fix_dpi() {
-    //get CSS height
-    //the + prefix casts it to an integer
-    //the slice method gets rid of "px"
-    let style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
-    let style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+    let cssWidth = 0;
+    let cssHeight = 0;
+    let particles = [];
+    let mouse = { x: null, y: null, active: false };
+    let lastTime = performance.now();
 
-    //scale the canvas
-    canvas.setAttribute('height', style_height * dpi);
-    canvas.setAttribute('width', style_width * dpi);
-}
+    // ---- Sizing -------------------------------------------------------
+    function resizeCanvas() {
+        cssWidth = canvas.clientWidth;
+        cssHeight = canvas.clientHeight;
 
-var particle_count = 70,
-    particles = [],
-    couleurs = ["#3a0088", "#930077", "#e61c5d", "#ffbd39"];
-function Particle() {
-    this.radius = Math.round((Math.random() * 3) + 5);
-    this.x = Math.floor((Math.random() * ((+getComputedStyle(canvas).getPropertyValue("width").slice(0, -2) * dpi) - this.radius + 1) + this.radius));
-    this.y = Math.floor((Math.random() * ((+getComputedStyle(canvas).getPropertyValue("height").slice(0, -2) * dpi) - this.radius + 1) + this.radius));
-    this.color = couleurs[Math.floor(Math.random() * couleurs.length)];
-    this.speedx = Math.round((Math.random() * 201) + 0) / 100;
-    this.speedy = Math.round((Math.random() * 201) + 0) / 100;
+        canvas.width = cssWidth * dpi;
+        canvas.height = cssHeight * dpi;
 
-    switch (Math.round(Math.random() * couleurs.length)) {
-        case 1:
-            this.speedx *= 1;
-            this.speedy *= 1;
-            break;
-        case 2:
-            this.speedx *= -1;
-            this.speedy *= 1;
-            break;
-        case 3:
-            this.speedx *= 1;
-            this.speedy *= -1;
-            break;
-        case 4:
-            this.speedx *= -1;
-            this.speedy *= -1;
-            break;
+        // Reset transform before re-scaling so we don't compound DPI scaling
+        // on repeated resizes.
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.scale(dpi, dpi);
     }
 
-    this.move = function () {
+    // ---- Particle -------------------------------------------------------
+    function createParticle() {
+        const radius = Math.round((Math.random() * 3) + 5);
+        return {
+            radius,
+            x: Math.random() * (cssWidth - radius * 2) + radius,
+            y: Math.random() * (cssHeight - radius * 2) + radius,
+            color: couleurs[Math.floor(Math.random() * couleurs.length)],
+            // Speed expressed in px / second for frame-rate independence
+            speedx: (Math.random() * 60 - 30),
+            speedy: (Math.random() * 60 - 30),
+        };
+    }
+
+    function initParticles() {
+        particles = [];
+        for (let i = 0; i < particle_count; i++) {
+            particles.push(createParticle());
+        }
+    }
+
+    // ---- Drawing -------------------------------------------------------
+    function drawParticle(p) {
         context.beginPath();
         context.globalCompositeOperation = 'source-over';
-        context.fillStyle = this.color;
         context.globalAlpha = 1;
-        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+
+        // Soft glow
+        context.shadowBlur = 8;
+        context.shadowColor = p.color;
+        context.fillStyle = p.color;
+
+        context.arc(p.x, p.y, p.radius, 0, Math.PI * 2, false);
         context.fill();
         context.closePath();
+        context.shadowBlur = 0; // reset so it doesn't bleed into line drawing
+    }
 
-        this.x = this.x + this.speedx;
-        this.y = this.y + this.speedy;
+    function drawConnections(p) {
+        for (let j = 0; j < particles.length; j++) {
+            const other = particles[j];
+            if (other === p) continue;
 
-        if (this.x <= 0 + this.radius) {
-            this.speedx *= -1;
-        }
-        if (this.x >= canvas.width - this.radius) {
-            this.speedx *= -1;
-        }
-        if (this.y <= 0 + this.radius) {
-            this.speedy *= -1;
-        }
-        if (this.y >= canvas.height - this.radius) {
-            this.speedy *= -1;
-        }
+            const xd = other.x - p.x;
+            const yd = other.y - p.y;
+            const d = Math.sqrt(xd * xd + yd * yd);
 
-        for (var j = 0; j < particle_count; j++) {
-            var particleActuelle = particles[j],
-                yd = particleActuelle.y - this.y,
-                xd = particleActuelle.x - this.x,
-                d = Math.sqrt(xd * xd + yd * yd);
-
-            if (d < 200) {
+            if (d < connectionDistance) {
                 context.beginPath();
-                context.globalAlpha = (200 - d) / (200 - 0);
+                context.globalAlpha = (connectionDistance - d) / connectionDistance;
                 context.globalCompositeOperation = 'destination-over';
                 context.lineWidth = 1;
-                context.moveTo(this.x, this.y);
-                context.lineTo(particleActuelle.x, particleActuelle.y);
-                context.strokeStyle = this.color;
+                context.moveTo(p.x, p.y);
+                context.lineTo(other.x, other.y);
+                context.strokeStyle = p.color;
                 context.lineCap = "round";
                 context.stroke();
                 context.closePath();
             }
         }
-    };
-};
-for (var i = 0; i < particle_count; i++) {
-    fix_dpi();
-    var particle = new Particle();
-    particles.push(particle);
-}
 
-function animate() {
-    fix_dpi();
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    for (var i = 0; i < particle_count; i++) {
-        particles[i].move();
+        // Connection to mouse cursor
+        if (mouse.active) {
+            const xd = mouse.x - p.x;
+            const yd = mouse.y - p.y;
+            const d = Math.sqrt(xd * xd + yd * yd);
+
+            if (d < mouseInfluenceDistance) {
+                context.beginPath();
+                context.globalAlpha = (mouseInfluenceDistance - d) / mouseInfluenceDistance;
+                context.globalCompositeOperation = 'destination-over';
+                context.lineWidth = 1.5;
+                context.moveTo(p.x, p.y);
+                context.lineTo(mouse.x, mouse.y);
+                context.strokeStyle = "#ffffff";
+                context.lineCap = "round";
+                context.stroke();
+                context.closePath();
+
+                // Gentle attraction toward the cursor
+                p.x += xd * 0.01;
+                p.y += yd * 0.01;
+            }
+        }
     }
-    requestAnimFrame(animate);
-}
 
-animate();
+    function updateParticle(p, dt) {
+        p.x += p.speedx * dt;
+        p.y += p.speedy * dt;
+
+        if (p.x <= p.radius || p.x >= cssWidth - p.radius) {
+            p.speedx *= -1;
+            p.x = Math.max(p.radius, Math.min(cssWidth - p.radius, p.x));
+        }
+        if (p.y <= p.radius || p.y >= cssHeight - p.radius) {
+            p.speedy *= -1;
+            p.y = Math.max(p.radius, Math.min(cssHeight - p.radius, p.y));
+        }
+    }
+
+    // ---- Animation loop --------------------------------------------------
+    function animate(now) {
+        const dt = Math.min((now - lastTime) / 1000, 0.05); // clamp big gaps
+        lastTime = now;
+
+        context.clearRect(0, 0, cssWidth, cssHeight);
+
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            updateParticle(p, dt);
+            drawConnections(p);
+            drawParticle(p);
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    // ---- Events -------------------------------------------------------
+    let resizeTimeout;
+    window.addEventListener('resize', function () {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function () {
+            resizeCanvas();
+        }, 150);
+    });
+
+    canvas.addEventListener('mousemove', function (e) {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+        mouse.active = true;
+    });
+
+    canvas.addEventListener('mouseleave', function () {
+        mouse.active = false;
+    });
+
+    // ---- Init -------------------------------------------------------
+    resizeCanvas();
+    initParticles();
+    requestAnimationFrame(animate);
+})();
