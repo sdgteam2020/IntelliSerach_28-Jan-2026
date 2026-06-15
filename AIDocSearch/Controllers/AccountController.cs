@@ -210,8 +210,8 @@ namespace AIDocSearch.Controllers
             ViewBag.hdns = GetSalt;
             ViewBag.UserName = TempData["UserName"] as string;
             ViewBag.RoleName = TempData["RoleName"] as string;
-            if (string.IsNullOrEmpty(TempData["UserName"] as string))
-                return RedirectToAction("Login");
+            //if (string.IsNullOrEmpty(TempData["UserName"] as string))
+            //    return RedirectToAction("Login");
             return View(new DTORegisterRequest());
         }
 
@@ -236,7 +236,7 @@ namespace AIDocSearch.Controllers
         public async Task<IActionResult> Register(DTORegisterRequest model)
         {
             ViewBag.UserName = model.UserName;
-            ViewBag.RoleName = model.Role;
+           
             // Use session service to ensure/get salt
             string? GetSalt = _sessionService.EnsureSalt(HttpContext); // ensures and returns salt
             if (GetSalt != null)

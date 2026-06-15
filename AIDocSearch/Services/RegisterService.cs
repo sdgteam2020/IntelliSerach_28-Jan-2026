@@ -52,13 +52,13 @@ namespace AIDocSearch.Services
                 return result;
             }
 
-            if (!await _roleManager.RoleExistsAsync(model.Role))
+            if (!await _roleManager.RoleExistsAsync("User"))
             {
-                await _roleManager.CreateAsync(new ApplicationRole { Name = model.Role });
+                await _roleManager.CreateAsync(new ApplicationRole { Name = "User" });
             }
 
-            await _userManager.AddToRoleAsync(user, model.Role);
-            var claims = new[] { new Claim("Role", model.Role) };
+            await _userManager.AddToRoleAsync(user, "User");
+            var claims = new[] { new Claim("Role", "User"  ) };
             await _userManager.AddClaimsAsync(user, claims);
 
             // Add login info and registration token similar to previous behavior

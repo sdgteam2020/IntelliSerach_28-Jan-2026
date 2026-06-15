@@ -18,6 +18,8 @@ namespace Infrastructure
             services.AddScoped<IWebServer, WebServerRepository>();
             services.AddTransient<ILoger, LogerRepository>();
             services.AddScoped<IWebScraperSetting, WebScraperSettingRepository>();
+            services.AddScoped<IindexUserMapping, IndexUserMapping>();
+
 
         }
     }

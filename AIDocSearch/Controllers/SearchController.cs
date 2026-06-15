@@ -82,16 +82,9 @@ namespace AIDocSearch.Controllers
             }
            
         }
-
-        public async Task<IActionResult> IndexesDetails()
-        {
-            string Url = _configuration["UrlData:indicesUrl"] ?? string.Empty;
-            string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
-            string Password = _configuration["UrlData:Password"] ?? string.Empty;
-            // Call the search service to get the response
-           
-            return View(await _searchService.IndexesDetails(Url, UserName, Password));
-        }
+        #region Indexes Details Add And Assgin Index To Users
+        // IndexesDetails moved to IndexController for client-side binding
+        #endregion
 
         public async Task<IActionResult> Upload()
         {

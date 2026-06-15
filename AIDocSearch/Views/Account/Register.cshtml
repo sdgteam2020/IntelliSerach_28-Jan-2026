@@ -22,6 +22,7 @@
     <link href="~/css/login.css" rel="stylesheet" />
     <script src="~/js/crypto-js.min.js"></script>
     <link href="~/css/register.css" rel="stylesheet" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
 </head>
 <body>
     <canvas id="canvas"></canvas>
@@ -85,16 +86,7 @@
                                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                             </div>
                         </div>
-                        <div class="form-group row mb-3 ">
-                            <label asp-for="Role" class="col-sm-3 col-form-label text-white"></label>
-                            <div class="col-sm-9">
-                                <select asp-for="Role" class="form-select" required>
-                                    <option value="@ViewBag.RoleName">@ViewBag.RoleName</option>
-
-                                </select>
-                                <span asp-validation-for="Role" class="text-danger"></span>
-                            </div>
-                        </div>
+                       
                         <div class="form-group row mb-3 text-center">
                             <div class="col-sm-12">
                                 <button type="submit" class="btn login_btn ">Create</button>

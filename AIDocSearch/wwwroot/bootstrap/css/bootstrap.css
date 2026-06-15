@@ -6206,6 +6206,7 @@ textarea.form-control-lg {
     border-bottom: var(--bs-modal-header-border-width) solid var(--bs-modal-header-border-color);
     border-top-left-radius: var(--bs-modal-inner-border-radius);
     border-top-right-radius: var(--bs-modal-inner-border-radius);
+    
 }
 
     .modal-header .btn-close {

@@ -5,10 +5,12 @@
     });
 
     try {
+        var token = $('input[name="__RequestVerificationToken"]').val();
         const response = await fetch('/IntelliSearch/Master/GetAllMMaster', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': token
             },
             body: userdata
         });
@@ -43,7 +45,7 @@
         }
     } catch (error) {
         Swal.fire({
-            text: errormsg002
+            text: error
         });
     }
 }

@@ -15,6 +15,7 @@ namespace Infrastructure
         public DbSet<TrnWebServer> trnWebServer { get; set; } = null!;
         public DbSet<WebScraperSetting> WebScraperSetting { get; set; } = null!;
         public DbSet<ExceptionLog> Log { get; set; }
+        public DbSet<TrnIndexUserMapping> TrnIndexUserMapping { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -1,0 +1,84 @@
+@{
+    ViewData["Title"] = "Elasticsearch Index Details";
+}
+
+<div class="container mt-1">
+
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>Indexes Details</h4>
+                </div>
+                <div class="card-body">
+
+                    <div id="tableContainer">
+                        <!-- table will be injected by JS -->
+                    </div>
+
+                    <!-- DataTables CSS/JS includes required for the table initialization -->
+                    <link asp-href-include="~/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
+                    <link asp-href-include="~/datatables/responsive.bootstrap4.min.css" rel="stylesheet" />
+                    <link asp-href-include="~/datatables/responsive.dataTables.min.css" rel="stylesheet" />
+                    <link asp-href-include="~/datatables/buttons.bootstrap4.min.css" rel="stylesheet" />
+                    <link asp-href-include="~/datatables/fixedHeader.dataTables.min.css" rel="stylesheet" />
+                    <link asp-href-include="~/datatables/jquery.dataTables.min.css" rel="stylesheet" />
+
+                    <script asp-src-include="~/js/datatables/jquery.datatables.min.js"></script>
+                    <script asp-src-include="~/js/datatables/dataTables.responsive.min.js"></script>
+                    <script asp-src-include="~/js/datatables/responsive.dataTables.min.js"></script>
+                    <script asp-src-include="~/js/datatables/dataTables.bootstrap4.min.js"></script>
+                    <script asp-src-include="~/js/datatables/responsive.bootstrap4.min.js"></script>
+                    <script asp-src-include="~/js/datatables/dataTables.buttons.min.js"></script>
+                    <script asp-src-include="~/js/datatables/buttons.bootstrap4.min.js"></script>
+                    <script asp-src-include="~/js/datatables/buttons.html5.min.js"></script>
+                    <script asp-src-include="~/js/datatables/buttons.print.min.js"></script>
+
+                    @Html.AntiForgeryToken()
+
+                    <!-- Assign Modal (static in page) -->
+                    <div id="assignModal" class="modal fade" tabindex="-1" role="dialog">
+                      <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Assign Index</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                                    <div class="row justify-content-end mb-2">
+                                        <div class="col-auto">
+                                            <div class="d-flex align-items-center">
+                                                <label for="userSearch" class="me-2 mb-0">Search</label>
+                                                <input id="userSearch"
+                                                       class="form-control"
+                                                       
+                                                       placeholder="Search by username or name" />
+                                            </div>
+                                        </div>
+                                    </div>
+                            <div>
+                              <table id="assignUserTable" class="table table-sm mt-4">
+                                <thead>
+                                  <tr><th><input type="checkbox" id="assignSelectAll"/></th><th>UserName</th><th>Name</th><th>Rank</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                              </table>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button id="assignSave" class="btn btn-primary">Assign</button>
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/devjs/indexesdetails.js"></script>
+<script src="~/devjs/indexesdetails.assign.js"></script>
+<script src="~/devjs/indexesdetails.load.js"></script>

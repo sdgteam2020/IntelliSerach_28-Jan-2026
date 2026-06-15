@@ -29,9 +29,6 @@ namespace Domain.DTOs.Requests
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
-        [RegularExpression(@"^[\w ]+$", ErrorMessage = "Invalid Role format")]
-        [Required(ErrorMessage = "Role Is required")]
-        public string Role { get; set; } = string.Empty;
 
         [Required]
         [ForeignKey("MRank")]
