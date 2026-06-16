@@ -56,11 +56,22 @@ namespace AIDocSearch.Controllers
             string Password = _configuration["UrlData:Password"] ?? string.Empty;
 
             var data = await _searchService.IndexesDetails(Url, UserName, Password);
-
-            return Json(new { success = true, data });
+            if(_currentUserService.UserId!=1)
+            {
+                var userIndexes = await _userAccount.GetAllIndexUserWise(_currentUserService.UserId);
+                var filteredData = data
+                  .Where(i => userIndexes.Contains(i.uuid))
+                  .ToList();
+                return Json(new { success = true, data = filteredData,type= "Users" });
+            }
+            else
+            {
+                return Json(new { success = true, data, type = "Admin" });
+            }
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SearchUsers([FromForm] DTODataTablesRequest request,
     [FromForm] string uuid)
         {
@@ -81,6 +92,7 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetIndexWiseAssginUsers([FromForm] string IndexId)
         {
             if (_userAccount == null) return Json(new { success = false, data = Array.Empty<object>() });
@@ -90,6 +102,7 @@ namespace AIDocSearch.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AssignIndex([FromBody] DTOIndexAssignRequest request)
         {
             if (!ModelState.IsValid || request == null)

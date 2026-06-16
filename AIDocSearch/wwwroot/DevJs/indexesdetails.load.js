@@ -2,7 +2,7 @@
 // This file fetches the data and renders table with assign buttons
 
 $(function () {
-    function renderTable(data) {
+    function renderTable(data, type) {
         // helper to read values that may be serialized with dots in keys (e.g. "docs.count")
         function getVal(obj, /* names in priority */) {
             for (var i = 1; i < arguments.length; i++) {
@@ -35,14 +35,12 @@ $(function () {
         html.push('<th>Docs Deleted</th>');
         html.push('<th>Store Size</th>');
      
-      
-
-      
         html.push('<th>Actions</th>');
         html.push('</tr></thead>');
         html.push('<tbody>');
 
         if (Array.isArray(data) && data.length) {
+          
             data.forEach(function (item) {
                 html.push('<tr>');
                 html.push('<td><span class="health-' + (item.health || '').toLowerCase() + '">' + (item.health || '').toUpperCase() + '</span></td>');
@@ -51,15 +49,15 @@ $(function () {
                 html.push('<td>' + (getVal(item, 'DocsDeleted', 'docs.deleted') || '') + '</td>');
                 html.push('<td>' + (getVal(item, 'StoreSize', 'store.size') || '') + '</td>');
              
-              
+                html.push('<td><button class="btn btn-sm btn-warning btn-fileview-index ml-2" data-index="' + (item.uuid || '') + '">View Files</button>');
+
+                if (type =="Admin")
                
-               
-                html.push('<td><button class="btn btn-sm btn-primary btn-assign-index" data-index="' + (item.uuid || '') + '">Assign</button></td>');
+                    html.push('<button class="btn btn-sm btn-primary btn-assign-index  m-lg-2" data-index="' + (item.uuid || '') + '">Assign</button>');
+                html.push('</td>');
                 html.push('</tr>');
             });
-        } else {
-            html.push('<tr><td colspan="6" class="text-center text-danger">No Index Data Found</td></tr>');
-        }
+        } 
 
         html.push('</tbody></table>');
 
@@ -91,7 +89,7 @@ $(function () {
             headers: { 'RequestVerificationToken': token },
             success: function (resp) {
                 if (resp && resp.success) {
-                    renderTable(resp.data);
+                    renderTable(resp.data,resp.type);
                 } else {
                     $('#tableContainer').html('<div class="text-danger">Failed to load data.</div>');
                 }
