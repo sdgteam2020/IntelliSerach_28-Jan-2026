@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.GenericRepository;
+using Domain.DTOs.Requests;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -9,5 +10,6 @@ namespace Application.Interfaces.Repository
     public interface IindexUserMapping : IGenericRepository<TrnIndexUserMapping>
     {
         Task<TrnIndexUserMapping> AddWithCheckIndexId(TrnIndexUserMapping Data);
+        Task<bool> UserAssginAndDeAssignIndex(DTOIndexAssignRequest Data);
     }
 }

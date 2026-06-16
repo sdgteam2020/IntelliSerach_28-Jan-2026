@@ -36,7 +36,7 @@ $(function () {
         html.push('<th>Store Size</th>');
      
       
-        html.push('<th>Status</th>');
+
       
         html.push('<th>Actions</th>');
         html.push('</tr></thead>');
@@ -52,7 +52,7 @@ $(function () {
                 html.push('<td>' + (getVal(item, 'StoreSize', 'store.size') || '') + '</td>');
              
               
-                html.push('<td>' + (item.status || '') + '</td>');
+               
                
                 html.push('<td><button class="btn btn-sm btn-primary btn-assign-index" data-index="' + (item.uuid || '') + '">Assign</button></td>');
                 html.push('</tr>');

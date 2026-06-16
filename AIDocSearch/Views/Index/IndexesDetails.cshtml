@@ -52,20 +52,21 @@
                                                 <input id="userSearch"
                                                        class="form-control"
                                                        
-                                                       placeholder="Search by username or name" />
+                                                       placeholder="Search by username" />
                                             </div>
                                         </div>
                                     </div>
                             <div>
-                              <table id="assignUserTable" class="table table-sm mt-4">
+                                        <table id="assignUserTable" class="table table-sm mt-4 w-100">
                                 <thead>
-                                  <tr><th><input type="checkbox" id="assignSelectAll"/></th><th>UserName</th><th>Name</th><th>Rank</th></tr>
+                                  <tr><th><input type="checkbox" id="assignSelectAll"/></th><th>UserName</th><th>Name</th></tr>
                                 </thead>
                                 <tbody></tbody>
                               </table>
                             </div>
                           </div>
                           <div class="modal-footer">
+                            <div class="DispalyUserList d-none"></div>
                             <button id="assignSave" class="btn btn-primary">Assign</button>
                             <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                           </div>

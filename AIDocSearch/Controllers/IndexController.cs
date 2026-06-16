@@ -61,44 +61,46 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SearchUsers(string q,string uuid)
+        public async Task<IActionResult> SearchUsers([FromForm] DTODataTablesRequest request,
+    [FromForm] string uuid)
         {
             // Basic datatables-like request mapping
-            var request = new DTODataTablesRequest
-            {
-                searchValue = q ?? string.Empty,
-                Start = 0,
-                Length = 20,
-                Draw = 1
-            };
+            //var request = new DTODataTablesRequest
+            //{
+            //    searchValue = q ?? string.Empty,
+            //    Start = 0,
+            //    Length = 20,
+            //    Draw = 1
+            //};
 
             if (_userAccount == null) return Json(new { success = false, data = Array.Empty<object>() });
 
             var result = await _userAccount.GetActive_ForIndex_Mapping_Users(request, uuid);
 
-            // Map to client-friendly shape
-            var mapped = result.data.Select(u => new
-            {
-                Id = u.Id,
-                UserName = u.DomainId, // domain id holds user name
-                Name = u.Name,
-                RankName = u.RoleNames != null ? string.Join(",", u.RoleNames) : string.Empty,
-                Active = u.Active,
-                IndexId = u.IndexId
-               
-            }).ToList();
-
-            return Json(new { success = true, data = mapped });
+            return Json(result);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetIndexWiseAssginUsers([FromForm] string IndexId)
+        {
+            if (_userAccount == null) return Json(new { success = false, data = Array.Empty<object>() });
+            var result = await _userAccount.GetIndexWiseAssginUsers(IndexId);
+            return Json(new { success = true, data = result });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignIndex([FromBody] DTOIndexAssignRequest request)
         {
-            if (!ModelState.IsValid || request == null || request.UserIds == null || !request.UserIds.Any())
+            if (!ModelState.IsValid || request == null)
                 return BadRequest(new { success = false, message = "Invalid request" });
 
-           
+            await _indexUserMapping.UserAssginAndDeAssignIndex(request);
+            if (request.AllSelected)
+            {
+                    var allUsers = await _userAccount.GetActiveUsers();
+                    request.UserIds = allUsers.Select(u => u.Id).ToList();
+            }
             // create mappings
             foreach (var uid in request.UserIds)
             {
@@ -113,7 +115,7 @@ namespace AIDocSearch.Controllers
                     IsActive = true,
                     IsDeleted = false
                 };
-                await _indexUserMapping.AddWithReturn(map);
+                await _indexUserMapping.AddWithCheckIndexId(map);
             }
            
 
@@ -122,34 +124,6 @@ namespace AIDocSearch.Controllers
                 ConnKeyConstants.SuccessMessage,
                 null));
         }
-        public async Task<IActionResult> UserIndexMappings(DTOUserIndexMapping data)
-        {
-            if (data.UserId == null || data.UserId.Length == 0)
-            {
-                return BadRequest("At least one UserId is required.");
-            }
 
-            foreach (var userId in data.UserId)
-            {
-                var trnIndexUserMapping = new TrnIndexUserMapping
-                {
-                    IndexId = data.IndexId,
-                    UserId = userId,
-                    CreatedOn = _dateTimeService.NowUtc,
-                    UpdatedOn = _dateTimeService.NowUtc,
-                    CreatedBy = _currentUserService.UserId,
-                    UpdatedBy = _currentUserService.UserId,
-                    IsActive = true,
-                    IsDeleted = false
-                };
-
-                await _indexUserMapping.AddWithReturn(trnIndexUserMapping);
-            }
-
-            return Json(new DTOGenericResponse<object>(
-                ConnKeyConstants.Success,
-                ConnKeyConstants.SuccessMessage,
-                null));
-        }
     }
 }

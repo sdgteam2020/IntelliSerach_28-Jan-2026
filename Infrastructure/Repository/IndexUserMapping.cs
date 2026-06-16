@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Repository;
+using Domain.DTOs.Requests;
 using Domain.Entities;
 using Infrastructure.Repository.GenericRepository;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,23 @@ namespace Infrastructure.Repository
 
             // Record already exists, so return the existing one
             return existing;
+        }
+
+        public async Task<bool> UserAssginAndDeAssignIndex(DTOIndexAssignRequest Data)
+        {
+
+            var existingMappings = _context.TrnIndexUserMapping
+     .Where(x => x.IndexId == Data.IndexId &&
+                 !Data.UserIds.Contains(x.UserId))
+     .ToList();
+
+            if (existingMappings.Any())
+            {
+                _context.TrnIndexUserMapping.RemoveRange(existingMappings);
+                _context.SaveChanges();
+            }
+
+            return true;
         }
     }
 }

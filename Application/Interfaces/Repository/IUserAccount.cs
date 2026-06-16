@@ -11,7 +11,10 @@ namespace Application.Interfaces.Repository
     public interface IUserAccount : IGenericRepository<ApplicationUser>
     {
         Task<DTODataTablesResponse<DTOUserDataResponse>> GetAllUsers(DTODataTablesRequest request);
+        Task<List<DTOUserDataResponse>> GetActiveUsers();
         Task<DTODataTablesResponse<DTOUserDataResponse>> GetActive_ForIndex_Mapping_Users(DTODataTablesRequest request,string IndexId);
+        Task<string> GetIndexWiseAssginUsers(string IndexId);
+
 
     }
 }

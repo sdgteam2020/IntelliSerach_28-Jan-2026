@@ -9,6 +9,9 @@ namespace Domain.DTOs.Requests
         public required string IndexId { get; set; }
 
         [Required]
-        public required List<int> UserIds { get; set; }
+        public List<int>? UserIds { get; set; }
+
+        
+        public bool AllSelected { get; set; }
     }
 }
