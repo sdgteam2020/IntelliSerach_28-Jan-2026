@@ -110,7 +110,8 @@ async function searchContent(reset = true) {
 
                     let Mainurl = "";
                     let baseurl = "";
-                    let fileurl = "/IntelliSearch/Master/WatermarkPdfWithFolder?fileName="
+                    let fileurl = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
+                    let fileurlbase = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
 
                    
 
@@ -121,7 +122,7 @@ async function searchContent(reset = true) {
                     );
 
                     if (match) {
-                        fileurl = match.Url;
+                        fileUrl = match.Url + "/" + cleanPath;
                     }
 
 
@@ -140,14 +141,14 @@ async function searchContent(reset = true) {
 
                     let html = `
     <div class="google-result">
-        <a href="${fileurl}${cleanPath}"
+        <a href="${fileurlbase} +"/"+${fileUrl}"
            target="_blank"
            class="result-title">
            ${Mainurl}
         </a>
 
         <div class="result-url">
-            <a href="${fileurl}${cleanPath}" target="_blank">
+            <a href="${fileurlbase}+"/"+${cleanPath}" target="_blank">
               ${baseurl}
             </a>
         </div>

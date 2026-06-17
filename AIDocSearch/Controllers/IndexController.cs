@@ -137,6 +137,17 @@ namespace AIDocSearch.Controllers
                 ConnKeyConstants.SuccessMessage,
                 null));
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetDocDetailsByIndexName(string indexName)
+        {
+            string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
+            string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
+            string Password = _configuration["UrlData:Password"] ?? string.Empty;
 
+            var data = await _searchService.GetDocDetailsByIndexName(Url ,indexName, UserName, Password);
+            return Json(new { success = true, data });
+
+        }
     }
 }

@@ -33,7 +33,7 @@
                     <script asp-src-include="~/js/datatables/buttons.bootstrap4.min.js"></script>
                     <script asp-src-include="~/js/datatables/buttons.html5.min.js"></script>
                     <script asp-src-include="~/js/datatables/buttons.print.min.js"></script>
-
+                    <link href="~/css/indexdetails.css" rel="stylesheet" />
                     @Html.AntiForgeryToken()
 
                     <!-- Assign Modal (static in page) -->
@@ -41,7 +41,7 @@
                       <div class="modal-dialog modal-lg" role="document">
                         <div class="modal-content">
                           <div class="modal-header">
-                            <h5 class="modal-title">Assign Index</h5>
+                            <h5 class="modal-title Indexnameinmodal" >Assign Index</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
                           <div class="modal-body">
@@ -57,6 +57,7 @@
                                         </div>
                                     </div>
                             <div>
+
                                         <table id="assignUserTable" class="table table-sm mt-4 w-100">
                                 <thead>
                                   <tr><th><input type="checkbox" id="assignSelectAll"/></th><th>UserName</th><th>Name</th></tr>
@@ -73,7 +74,24 @@
                         </div>
                       </div>
                     </div>
+                    <div class="modal fade" id="fileModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
 
+                                <div class="modal-header">
+                                    <h5 class="modal-title Indexnameinmodal">Files</h5>
+                                    <button type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="modal"></button>
+                                </div>
+
+                                <div class="modal-body">
+                                    <div id="fileList"></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

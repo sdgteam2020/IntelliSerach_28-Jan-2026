@@ -15,7 +15,7 @@ namespace Infrastructure.Repository
         protected new readonly ApplicationDbContext _context;
 
         public AccountRepository(ApplicationDbContext context) : base(context)
-        {
+        { 
             _context = context;
         }
 

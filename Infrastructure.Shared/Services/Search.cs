@@ -305,5 +305,53 @@ namespace Infrastructure.Shared.Services
 
             return userIndices ?? new List<DTOIndexesDetailsResponse>();
         }
+
+        public async Task<List<FileSource>> GetDocDetailsByIndexName(
+       string baseUrl,
+       string indexName,
+       string userName,
+       string password)
+        {
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
+
+            using var client = CreateHttpClient(userName, password);
+            var query = new
+            {
+                _source = new[]
+                {
+        "file.FileName",
+        "file.Extension",
+        "path.real"
+    },
+                query = new
+                {
+                    match_all = new { }
+                },
+                size = 100
+            };
+
+            var content = new StringContent(
+                JsonConvert.SerializeObject(query),
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await client.PostAsync(
+                $"{baseUrl}/{indexName}/_search",
+                content);
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(json);
+
+            var result =
+                JsonConvert.DeserializeObject<ElasticsearchSearchResponse>(json);
+
+            return result?.Hits?.Hitss?
+                .Select(x => x.Source)
+                .ToList()
+                ?? new List<FileSource>();
+        }
     }
 }

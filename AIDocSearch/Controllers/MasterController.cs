@@ -66,6 +66,8 @@ namespace AIDocSearch.Controllers
         #endregion Master Table
 
         [HttpGet]
+
+        #region watermarks
         public IActionResult WatermarkPdfWithFolder(string fileName, string? folderPath)
         {
             if (string.IsNullOrWhiteSpace(fileName))
@@ -181,6 +183,117 @@ namespace AIDocSearch.Controllers
             return File(outputStream.ToArray(), "application/pdf");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> WatermarkPdfFromUrl(string pdfUrl)
+        {
+            if (string.IsNullOrWhiteSpace(pdfUrl))
+                return BadRequest("pdfUrl is required");
+            using var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback =
+        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            };
+
+            using var httpClient = new HttpClient(handler);
+
+            byte[] pdfBytes;
+
+            try
+            {
+                pdfBytes = await httpClient.GetByteArrayAsync(pdfUrl);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Unable to download PDF. {ex.Message}");
+            }
+
+            string outFileName = Path.GetFileName(new Uri(pdfUrl).AbsolutePath);
+
+            string clientIP = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            var forwardedHeader = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(forwardedHeader))
+            {
+                clientIP = forwardedHeader
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(ip => ip.Trim())
+                    .FirstOrDefault()
+                    ?? clientIP;
+            }
+
+            string dateTimeNow = _dateTimeService.NowUtcString;
+
+            using var inputStream = new MemoryStream(pdfBytes);
+            using var outputStream = new MemoryStream();
+
+            using (var reader = new PdfReader(inputStream))
+            using (var writer = new PdfWriter(outputStream))
+            using (var pdf = new PdfDocument(reader, writer))
+            {
+                PdfFont font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+
+                for (int p = 1; p <= pdf.GetNumberOfPages(); p++)
+                {
+                    var page = pdf.GetPage(p);
+                    var rect = page.GetPageSize();
+
+                    var stamp = new PdfStampAnnotation(rect);
+                    stamp.SetFlags(PdfAnnotation.PRINT);
+
+                    var appearance = new PdfFormXObject(rect);
+                    var canvas = new PdfCanvas(appearance, pdf);
+
+                    var gs = new PdfExtGState().SetFillOpacity(0.20f);
+
+                    canvas.SaveState();
+                    canvas.SetExtGState(gs);
+                    canvas.SetFillColor(new DeviceRgb(255, 0, 0));
+
+                    canvas.BeginText();
+                    canvas.SetFontAndSize(font, 50);
+
+                    float angle = (float)(Math.PI / 4);
+
+                    string[] lines =
+                    {
+                clientIP,
+                dateTimeNow
+            };
+
+                    float startX = rect.GetWidth() * 0.20f;
+                    float startY = rect.GetHeight() * 0.25f;
+
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        float dx = (float)Math.Sin(angle) * 80 * i;
+                        float dy = -(float)Math.Cos(angle) * 80 * i;
+
+                        canvas.SetTextMatrix(
+                            (float)Math.Cos(angle),
+                            (float)Math.Sin(angle),
+                            (float)-Math.Sin(angle),
+                            (float)Math.Cos(angle),
+                            startX + dx,
+                            startY + dy);
+
+                        canvas.ShowText(lines[i]);
+                    }
+
+                    canvas.EndText();
+                    canvas.RestoreState();
+
+                    stamp.SetNormalAppearance(appearance.GetPdfObject());
+                    page.AddAnnotation(stamp);
+                }
+            }
+
+            Response.Headers["Content-Disposition"] =
+                $"inline; filename=\"{outFileName}\"";
+
+            return File(outputStream.ToArray(), "application/pdf");
+        }
+        #endregion
         #region Add WebScraperSetting
 
         public async Task<IActionResult> AddWebScraperSetting()

@@ -10,6 +10,7 @@ namespace Application.Interfaces
     {
         Task<string> GetResponse(DTOSerchRequest Request, string Url, string UserName, string Password);
         Task<List<DTOIndexesDetailsResponse>> IndexesDetails(string Url, string UserName, string Password);
+        Task<List<FileSource>> GetDocDetailsByIndexName(string Url, string indexName, string UserName, string Password);
         
     }
 }

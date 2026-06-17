@@ -1,12 +1,12 @@
 // devjs/indexesdetails.load.js
 // This file fetches the data and renders table with assign buttons
-
+var webServerList = [];
 $(function () {
     function renderTable(data, type) {
         // helper to read values that may be serialized with dots in keys (e.g. "docs.count")
         function getVal(obj, /* names in priority */) {
-            for (var i = 1; i < arguments.length; i++) {
-                var name = arguments[i];
+            for (let i = 1; i < arguments.length; i++) {
+                let name = arguments[i];
                 if (!name) continue;
                 // direct property
                 if (obj.hasOwnProperty(name) && obj[name] !== undefined && obj[name] !== null) return obj[name];
@@ -14,10 +14,10 @@ $(function () {
                 if (obj[name] !== undefined && obj[name] !== null) return obj[name];
                 // nested path a.b.c
                 if (name.indexOf('.') !== -1) {
-                    var parts = name.split('.');
-                    var cur = obj;
-                    var ok = true;
-                    for (var p = 0; p < parts.length; p++) {
+                    let parts = name.split('.');
+                    let cur = obj;
+                    let ok = true;
+                    for (let p = 0; p < parts.length; p++) {
                         if (cur == null) { ok = false; break; }
                         cur = cur[parts[p]];
                     }
@@ -26,70 +26,158 @@ $(function () {
             }
             return '';
         }
-        var html = [];
-        html.push('<table class="table table-hover mb-0 align-middle" id="tblData">');
-        html.push('<thead class="table-light"><tr>');
-        html.push('<th>Health</th>');
-        html.push('<th>Index</th>');
-        html.push('<th>Docs Count</th>');
-        html.push('<th>Docs Deleted</th>');
-        html.push('<th>Store Size</th>');
-     
-        html.push('<th>Actions</th>');
-        html.push('</tr></thead>');
-        html.push('<tbody>');
+        let html = [];
 
+        html.push('<div class="row ">');
+        html.push(`
+<div class="row mb-3">
+    <div class="col-md-4 ms-auto">
+        <div class="input-group">
+            <span class="input-group-text">
+               <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text"
+                   id="indexSearch"
+                   class="form-control"
+                   placeholder="Search Index..." />
+        </div>
+    </div>
+</div>
+
+<div class="row" id="indexCardsContainer">
+`);
         if (Array.isArray(data) && data.length) {
-          
+
             data.forEach(function (item) {
-                html.push('<tr>');
-                html.push('<td><span class="health-' + (item.health || '').toLowerCase() + '">' + (item.health || '').toUpperCase() + '</span></td>');
-                html.push('<td>' + ((item.index || '').replace('seo_', '')) + '</td>');
-                html.push('<td>' + (getVal(item, 'DocsCount', 'docs.count') || '') + '</td>');
-                html.push('<td>' + (getVal(item, 'DocsDeleted', 'docs.deleted') || '') + '</td>');
-                html.push('<td>' + (getVal(item, 'StoreSize', 'store.size') || '') + '</td>');
-             
-                html.push('<td><button class="btn btn-sm btn-warning btn-fileview-index ml-2" data-index="' + (item.uuid || '') + '">View Files</button>');
 
-                if (type =="Admin")
-               
-                    html.push('<button class="btn btn-sm btn-primary btn-assign-index  m-lg-2" data-index="' + (item.uuid || '') + '">Assign</button>');
-                html.push('</td>');
-                html.push('</tr>');
+                var health = (item.health || '').toLowerCase();
+                var badgeClass = 'bg-success';
+
+                if (health === 'yellow')
+                    badgeClass = 'bg-warning text-dark';
+                else if (health === 'red')
+                    badgeClass = 'bg-danger';
+
+                html.push(`
+<div class="col-12 col-md-6 col-xl-3 index-item"
+     data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
+
+    <div class="card index-card border-0">
+
+        <div class="card-header-custom">
+            <div>
+                <h5 class="mb-1">
+                    ${(item.index || '').replace('fs-', '')}
+                </h5>
+
+            </div>
+
+            <span class="status-badge ${health}">
+                ${(item.health || '').toUpperCase()}
+            </span>
+        </div>
+
+        <div class="card-body">
+
+            <div class="metrics-grid">
+
+                <div class="metric-item_Storage">
+                    <div class="metric-value text-primary">
+                        ${getVal(item, 'DocsCount', 'docs.count') || 0}
+                    </div>
+                    <div class="metric-label">
+                        Documents
+                    </div>
+                </div>
+
+                <div class="metric-item_Storage">
+                    <div class="metric-value text-danger">
+                        ${getVal(item, 'DocsDeleted', 'docs.deleted') || 0}
+                    </div>
+                    <div class="metric-label">
+                        Deleted
+                    </div>
+                </div>
+
+                <div class="metric-item_Storage">
+                    <div class="metric-value text-success">
+                        ${getVal(item, 'StoreSize', 'store.size') || '0'}
+                    </div>
+                    <div class="metric-label">
+                        Storage
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="action-area">
+
+                <button
+                    class="btn btn-outline-info btn-sm btn-fileview-index"
+                    data-index="${item.index || ''}"
+                     data-index-name="${(item.index || '').replace('fs-', '')}"
+                    >
+                    👁 View Files
+                </button>
+
+                ${type === "Admin" ? `
+               <button
+                class="btn btn-outline-primary btn-sm btn-assign-index"
+                data-index="${item.uuid || ''}"
+                data-index-name="${(item.index || '').replace('fs-', '')}">
+                <i class="fas fa-user-plus"></i>  Assign
+            </button>
+                ` : ''}
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+`);
             });
-        } 
 
-        html.push('</tbody></table>');
+        } else {
+
+            html.push(`
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center text-muted py-5">
+                    No indexes found.
+                </div>
+            </div>
+        </div>
+    `);
+        }
+
+        html.push('</div>');
 
         $('#tableContainer').html(html.join(''));
+        $(document)
+            .off('keyup', '#indexSearch')
+            .on('keyup', '#indexSearch', function () {
 
-        // initialize datatables if required
-        if ($.fn.DataTable) {
-            if ($.fn.dataTable.isDataTable('#tblData')) {
-                $('#tblData').DataTable().destroy();
-            }
-            $('#tblData').DataTable({
-                "order": [],
-                "paging": true,
-                "searching": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
-                "select": true,
-                pageLength: 25
+                let searchText = $(this).val().toLowerCase().trim();
+
+                $('.index-item').each(function () {
+
+                    let indexName = ($(this).attr('data-index-name') || '').toLowerCase();
+                    
+                    $(this).toggle(indexName.includes(searchText));
+                });
             });
-        }
     }
 
     function load() {
-        var token = $('input[name="__RequestVerificationToken"]').val();
+        let token = $('input[name="__RequestVerificationToken"]').val();
         $.ajax({
             url: '/Index/GetIndexesDetails',
             method: 'POST',
             headers: { 'RequestVerificationToken': token },
             success: function (resp) {
                 if (resp && resp.success) {
-                    renderTable(resp.data,resp.type);
+                    renderTable(resp.data, resp.type);
                 } else {
                     $('#tableContainer').html('<div class="text-danger">Failed to load data.</div>');
                 }
@@ -99,6 +187,46 @@ $(function () {
             }
         });
     }
+    async function GetWebServerUrlMapping() {
+        const userdata = new URLSearchParams({
+            id: 0
+        });
+        const token = $('input[name="__RequestVerificationToken"]').val();
+        try {
+            const response = await fetch('/IntelliSearch/Master/GetAllWebServer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    "RequestVerificationToken": token   // Pass the CSRF token in the header
+                },
+                body: userdata
+            });
 
+            if (!response.ok) {
+                const text = await response.text();
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Save failed2.\n" + text,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                return;
+            }
+            const data = await response.json();
+            if (data != null) {
+                if (data && Array.isArray(data)) {
+                    webServerList = data;   // ✅ Store globally
+                }
+            }
+        } catch (error) {
+            Swal.fire({
+                text: errormsg002
+            });
+        }
+    }
     load();
+    GetWebServerUrlMapping();
+
 });

@@ -1,0 +1,145 @@
+﻿.index-card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08), 0 4px 10px rgba(0,0,0,.04);
+    transition: all .3s ease;
+    height: auto;
+    margin-bottom:10px;
+}
+
+    .index-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,.15), 0 10px 20px rgba(0,0,0,.08);
+    }
+
+.card-header-custom {
+    background: linear-gradient(135deg, #044C92, #106dc9);
+    color: white;
+    padding: 2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.card-header-custom div{
+    margin-left:10px;
+}
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: .75rem;
+        font-weight: 600;
+        color: #fff;
+    }
+
+        .status-badge.green {
+            color: #22c55e;
+        }
+
+        .status-badge.yellow {
+            color: #f59e0b;
+        }
+
+        .status-badge.red {
+            color: #ef4444;
+        }
+
+    .metrics-grid {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        gap: 10px;
+    }
+
+    .metric-item {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        border-radius: 12px;
+        background: #c3e1ff;
+    }
+
+    .metric-item_Documents {
+        flex: 1;
+        text-align: center;
+        padding: 8px;
+        border-radius: 12px;
+        background: #a0d5938f;
+    }
+
+    .metric-item_Deleted {
+        flex: 1;
+        text-align: center;
+        padding: 8px;
+        border-radius: 12px;
+        background: #fbc9c9;
+    }
+
+    .metric-item_Storage {
+        flex: 1;
+        text-align: center;
+        padding: 8px;
+        border-radius: 12px;
+        background: #c3e1ff;
+    }
+
+    .metric-value {
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .metric-label {
+        font-size: .8rem;
+        color: #6b7280;
+    }
+
+    .action-area {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+        .action-area .btn {
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-weight: 500;
+        }
+
+    @media (max-width: 768px) {
+
+        .metrics-grid {
+            flex-direction: column;
+        }
+
+        .action-area {
+            flex-direction: column;
+        }
+
+            .action-area .btn {
+                width: 100%;
+            }
+    }
+
+    .file-card {
+        border-radius: 15px;
+        transition: all .25s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
+
+        .file-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(0,0,0,.15);
+        }
+
+    .file-icon {
+        min-width: 45px;
+    }
+
+    .file-card h6 {
+        font-weight: 600;
+    }
+
+    .file-card small {
+        word-break: break-word;
+    }

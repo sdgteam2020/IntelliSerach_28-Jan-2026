@@ -11,5 +11,6 @@ namespace Application.Interfaces.Repository
     {
         Task<TrnIndexUserMapping> AddWithCheckIndexId(TrnIndexUserMapping Data);
         Task<bool> UserAssginAndDeAssignIndex(DTOIndexAssignRequest Data);
+        // Task<string[]> GetAllIndexUserWise(int? UserId);
     }
 }

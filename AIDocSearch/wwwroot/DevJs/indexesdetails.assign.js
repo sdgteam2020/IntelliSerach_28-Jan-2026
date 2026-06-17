@@ -3,7 +3,10 @@
 var UserList = [];
 var selectedUsers = new Set();
 var uncheckeduser = new Set();
+
 $(function () {
+   
+
     function openAssignModal(uuid) {
         selectedUsers.clear(); // ✅
         uncheckeduser.clear(); // ✅
@@ -192,11 +195,239 @@ $(function () {
 
     // wire assign button click handler on table
     $(document).on('click', '.btn-assign-index', function () {
-        var uuid = $(this).data('index');
+        let uuid = $(this).data('index');
+        let indexName = $(this).data('index-name');
+
+        $(".Indexnameinmodal").html(indexName);
         openAssignModal(uuid);
         loadAssignedUsers(uuid);
         resetUserList()
 
+    });
+
+    $(document)
+        .off('keyup', '#fileSearch')
+        .on('keyup', '#fileSearch', function () {
+
+            const search = $(this)
+                .val()
+                .toLowerCase()
+                .trim();
+
+            let visibleCount = 0;
+
+            $('.file-item').each(function () {
+
+                const fileName =
+                    ($(this).data('filename') || '')
+                        .toString();
+
+                const match =
+                    fileName.includes(search);
+
+                $(this).toggle(match);
+
+                if (match)
+                    visibleCount++;
+            });
+
+            $('#fileCount').text(visibleCount);
+        });
+
+    $(document).on('click', '.btn-fileview-index', function () {
+
+        let indexName = $(this).data('index');
+        
+        $(".Indexnameinmodal").html($(this).data('index-name'));
+
+        $.ajax({
+            url: '/Index/GetDocDetailsByIndexName',
+            type: 'POST',
+            data: {
+                indexName: indexName
+            },
+            headers: {
+                'RequestVerificationToken':
+                    $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (response) {
+
+                if (!response.success) {
+                    alert('No data found');
+                    return;
+                }
+
+                var html = '';
+
+                if (response.data && response.data.length > 0) {
+
+                    const totalFiles = response.data.length;
+
+                    html += `
+<div class="row mb-3 align-items-center">
+
+    <div class="col-md-6">
+        <h6 class="mb-0">
+            <i class="fa-solid fa-folder-open text-primary"></i>
+            Total Files:
+            <span class="badge bg-primary" id="fileCount">
+                ${totalFiles}
+            </span>
+        </h6>
+    </div>
+
+    <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text"
+                   id="fileSearch"
+                   class="form-control"
+                   placeholder="Search file name..." />
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3" id="fileCardsContainer">
+`;
+
+                    response.data.forEach(function (item) {
+
+                        const path = item.Path?.Real || '';
+                        const fileName = path.split('\\').pop().split('/').pop();
+
+                        const extension = fileName.includes('.')
+                            ? fileName.split('.').pop().toLowerCase()
+                            : '';
+
+                        let icon = 'fa-solid fa-file';
+                        let iconClass = 'text-secondary';
+
+                        switch (extension) {
+                            case 'pdf':
+                                icon = 'fa-solid fa-file-pdf';
+                                iconClass = 'text-danger';
+                                break;
+
+                            case 'doc':
+                            case 'docx':
+                                icon = 'fa-solid fa-file-word';
+                                iconClass = 'text-primary';
+                                break;
+
+                            case 'xls':
+                            case 'xlsx':
+                                icon = 'fa-solid fa-file-excel';
+                                iconClass = 'text-success';
+                                break;
+
+                            case 'ppt':
+                            case 'pptx':
+                                icon = 'fa-solid fa-file-powerpoint';
+                                iconClass = 'text-warning';
+                                break;
+
+                            case 'txt':
+                                icon = 'fa-solid fa-file-lines';
+                                iconClass = 'text-dark';
+                                break;
+
+                            case 'jpg':
+                            case 'jpeg':
+                            case 'png':
+                            case 'gif':
+                            case 'bmp':
+                            case 'webp':
+                                icon = 'fa-solid fa-file-image';
+                                iconClass = 'text-info';
+                                break;
+
+                            case 'zip':
+                            case 'rar':
+                            case '7z':
+                                icon = 'fa-solid fa-file-zipper';
+                                iconClass = 'text-warning';
+                                break;
+                        }
+                        let downloadUrl = "";/* `https://192.168.10.207/pdf/${encodeURIComponent(fileName)}`; */
+                        const normalizedPath = path.replace(/\\/g, "/");
+
+                        const match = webServerList.find(item =>
+                            normalizedPath.includes(item.Includes)
+                        );
+                        if (match) {
+                            downloadUrl = match.Url + "/" + fileName;
+                        }
+                        const isPdf = extension === 'pdf';
+
+                        let fileUrl;
+
+                        if (isPdf) {
+                            fileUrl = `/Master/WatermarkPdfFromUrl?pdfUrl=${encodeURIComponent(downloadUrl)}`;
+                        }
+                        else {
+                            fileUrl = downloadUrl;
+                        }
+
+                       
+                        html += `
+            <div class="col-md-6 col-lg-4 file-item"
+     data-filename="${fileName.toLowerCase()}">
+                <div class="card file-card h-100 border-0">
+
+                    <div class="card-body d-flex align-items-start">
+
+                        <div class="file-icon me-3">
+                            <i class="${icon} ${iconClass} fa-2x"></i>
+                        </div>
+
+                        <div class="flex-grow-1">
+
+                      <h6 class="mb-1 file-name">
+    <a href="${fileUrl}"
+       target="_blank"
+       class="text-decoration-none"
+       title="${fileName}">
+        <i class="${isPdf ? 'fa-solid fa-eye' : 'fa-solid fa-download'} me-1"></i>
+        ${fileName}
+    </a>
+</h6>
+
+                            <small class="text-muted">
+                                ${extension.toUpperCase()}
+                            </small>
+
+                          
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        `;
+                    });
+
+                    html += '</div>';
+                }
+                else {
+                    html = '<div class="alert alert-info">No files found.</div>';
+                }
+
+                $('#fileList').html(html);
+
+                var modal = new bootstrap.Modal(
+                    document.getElementById('fileModal')
+                );
+
+                modal.show();
+            },
+            error: function () {
+                alert('Error loading files.');
+            }
+        });
     });
 
     function resetUserList() {
