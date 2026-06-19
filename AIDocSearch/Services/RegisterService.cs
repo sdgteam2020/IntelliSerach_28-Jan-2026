@@ -58,7 +58,7 @@ namespace AIDocSearch.Services
             }
 
             await _userManager.AddToRoleAsync(user, "User");
-            var claims = new[] { new Claim("Role", "User"  ) };
+            var claims = new[] { new Claim("Manage Application", "2") };
             await _userManager.AddClaimsAsync(user, claims);
 
             // Add login info and registration token similar to previous behavior

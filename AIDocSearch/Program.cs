@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Ensure this is included
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json.Serialization;
+using Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 var configration = builder.Configuration;
@@ -37,6 +38,13 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(opts =>
     opts.Lockout.MaxFailedAccessAttempts = 3;
     opts.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
 }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+// Force immediate security-stamp validation on every request (small installs/dev only).
+// NOTE: Setting to TimeSpan.Zero will validate the security stamp on each request and
+// can increase DB load. Use a small interval in production if needed (e.g., 1 minute).
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval = TimeSpan.Zero;
+});
 builder.Services.ConfigureApplicationCookie(o =>
 {
     o.LoginPath = "/Account/Login";
@@ -140,6 +148,41 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 
 var app = builder.Build();
 
+// Run database seeder at startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+        var db = services.GetRequiredService<ApplicationDbContext>();
+
+        // Ensure database schema is up-to-date (creates Identity tables like
+        // AspNetUserClaims, AspNetUserLogins, AspNetUserTokens if migrations include them)
+        try
+        {
+            db.Database.Migrate();
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Database migration failed during startup.");
+            throw;
+        }
+
+        // Seed data (synchronously wait during startup)
+        var loggerFactory = services.GetService<ILoggerFactory>();
+        var seederLogger = loggerFactory?.CreateLogger("DbSeeder");
+        DbSeeder.SeedAsync(userManager, roleManager, db, seederLogger).GetAwaiter().GetResult();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -172,12 +215,12 @@ app.Use(async (ctx, next) =>
 
     // 1) Content Security Policy
     ctx.Response.Headers["Content-Security-Policy"] =
-        //"default-src 'self'; " +
+        "default-src 'self'; " +
         "script-src 'self'; " +
         "style-src 'self'; " + // allow Bootstrap inline styles
         "img-src 'self' data:; " +
         "font-src 'self' data:; " +
-        //"connect-src 'self'; " +
+        "connect-src 'self'; " +
         "frame-ancestors 'self'; " +
         "base-uri 'self'; " +
         "form-action 'self';";
@@ -232,6 +275,6 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Dashboard}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

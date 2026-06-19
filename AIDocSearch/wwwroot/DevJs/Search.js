@@ -122,7 +122,16 @@ async function searchContent(reset = true) {
                     );
 
                     if (match) {
-                        fileUrl = match.Url + "/" + cleanPath;
+                         const marker = match.Includes.replace("/", "").replace(/\\/g, "/");
+                         const index = normalizedPath.indexOf(marker);
+
+                            const result = index >= 0
+                                ? normalizedPath.substring(index + marker.length + 1)
+                                : normalizedPath;
+                        fileUrl = match.Url + "/" + result;
+
+                        const encrypted = encryptPayloadData(fileUrl);
+                        fileUrl = encodeURIComponent(encrypted);
                     }
 
 
@@ -130,7 +139,7 @@ async function searchContent(reset = true) {
                     if (cleanPath == "") {
                         Mainurl = canonical_url;
                         cleanPath = canonical_url;
-                        fileurl = "";
+                        //fileurl = "";
                         baseurl = getBaseUrl(Mainurl)
                     }
                     else {
@@ -141,14 +150,14 @@ async function searchContent(reset = true) {
 
                     let html = `
     <div class="google-result">
-        <a href="${fileurlbase} +"/"+${fileUrl}"
+        <a href="${fileurlbase}${fileUrl}"
            target="_blank"
            class="result-title">
            ${Mainurl}
         </a>
 
         <div class="result-url">
-            <a href="${fileurlbase}+"/"+${cleanPath}" target="_blank">
+            <a href="${fileurlbase}${cleanPath}" target="_blank">
               ${baseurl}
             </a>
         </div>

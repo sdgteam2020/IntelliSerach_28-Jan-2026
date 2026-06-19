@@ -1,16 +1,17 @@
 ﻿using AIDocSearch.Helpers;
-using Infrastructure.Shared.Helpers;
+using Application.Interfaces;
+using Application.Interfaces.Repository;
 using Domain.CommonModel;
 using Domain.Constants;
 using Domain.DTOs.Requests;
 using Domain.DTOs.Response;
+using Infrastructure.Shared.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Diagnostics;
 using System.Security.Claims;
-using Application.Interfaces.Repository;
-using Application.Interfaces;
 
 namespace AIDocSearch.Controllers
 {
@@ -89,6 +90,7 @@ namespace AIDocSearch.Controllers
         public async Task<IActionResult> Upload()
         {
             await LoadUserFiles();
+            
             return View();
         }
         private async Task LoadUserFiles()
@@ -107,12 +109,14 @@ namespace AIDocSearch.Controllers
             {
                 string FilePath = Path.Combine(_env.WebRootPath, "UploadForIndexing");
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
                 if (Data.FileName == null)
                 {
                     ModelState.AddModelError(string.Empty, "Please select a file to upload.");
                     return View(Data);
                 }
-                var ret = await _upload.UploadFileAsync(Data.FileName, FilePath, Convert.ToInt32(userId));
+                string UserName = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").UserName;
+                var ret = await _upload.UploadFileAsync(Data.FileName, FilePath, Convert.ToInt32(userId), UserName);
                 if (ret.Code == 200)
                 {
                     //if (!IsFSCrawlerRunning())

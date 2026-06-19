@@ -8,7 +8,7 @@ namespace Application.Interfaces
 {
     public interface IUpload
     {
-        Task<DTOGenericResponse<object>> UploadFileAsync(IFormFile file, string uploadPath, int UserId);
+        Task<DTOGenericResponse<object>> UploadFileAsync(IFormFile file, string uploadPath, int UserId,string UserName);
 
 
     }

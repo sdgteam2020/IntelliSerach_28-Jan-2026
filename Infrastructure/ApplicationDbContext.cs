@@ -1,5 +1,6 @@
-﻿using Domain.IdentityEntities;
-using Domain.Entities;
+﻿using Domain.Entities;
+using Domain.IdentityEntities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,18 +21,18 @@ namespace Infrastructure
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            builder.Entity<ApplicationUser>(entity =>
+            {
+                entity.Ignore(x => x.Email);
+                entity.Ignore(x => x.EmailConfirmed);
+                entity.Ignore(x => x.NormalizedEmail);
+                entity.Ignore(x => x.PhoneNumber);
+                entity.Ignore(x => x.PhoneNumberConfirmed);
+                entity.Ignore(x => x.TwoFactorEnabled);
+ 
+            });
+         
 
-            //builder.Entity<MRank>()
-            //    .HasOne(x => x.CreatedByUser)
-            //    .WithMany()
-            //    .HasForeignKey(x => x.CreatedBy)
-            //    .OnDelete(DeleteBehavior.Restrict);
-
-            //builder.Entity<MRank>()
-            //    .HasOne(x => x.UpdatedByUser)
-            //    .WithMany()
-            //    .HasForeignKey(x => x.UpdatedBy)
-            //    .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -186,14 +186,24 @@ namespace AIDocSearch.Controllers
         [HttpGet]
         public async Task<IActionResult> WatermarkPdfFromUrl(string pdfUrl)
         {
+            pdfUrl = Uri.UnescapeDataString(pdfUrl);
+            pdfUrl = _AESEncrytDecry.DecryptAES(pdfUrl, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
+
             if (string.IsNullOrWhiteSpace(pdfUrl))
                 return BadRequest("pdfUrl is required");
+
             using var handler = new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback =
         HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
             };
+            string extension = Path.GetExtension(new Uri(pdfUrl).AbsolutePath)?.ToLower();
 
+            // If not PDF, open original URL
+            if (extension != ".pdf")
+            {
+                return Redirect(pdfUrl);
+            }
             using var httpClient = new HttpClient(handler);
 
             byte[] pdfBytes;
@@ -492,6 +502,11 @@ namespace AIDocSearch.Controllers
 
             ViewBag.AllData = await _webServer.GetAll();
             return View(Request);
+        }
+
+        public async Task<IActionResult> DeleteWebServer(DTOCommon Data)
+        {
+            return Json(await _webServer.SoftDeleteWebServer(Data.Id));
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

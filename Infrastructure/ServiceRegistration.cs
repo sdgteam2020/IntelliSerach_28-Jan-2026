@@ -19,6 +19,7 @@ namespace Infrastructure
             services.AddTransient<ILoger, LogerRepository>();
             services.AddScoped<IWebScraperSetting, WebScraperSettingRepository>();
             services.AddScoped<IindexUserMapping, IndexUserMapping>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
 
         }

@@ -8,5 +8,6 @@ namespace Application.Interfaces.Repository
 {
     public interface IWebServer : IGenericRepository<TrnWebServer>
     {
+        Task<bool> SoftDeleteWebServer(int Id);
     }
 }

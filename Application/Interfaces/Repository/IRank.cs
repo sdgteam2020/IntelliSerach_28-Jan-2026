@@ -8,5 +8,6 @@ namespace Application.Interfaces.Repository
 {
     public interface IRank : IGenericRepository<MRank>
     {
+        Task<List<MRank>> GetAllOrderByRank();
     }
 }

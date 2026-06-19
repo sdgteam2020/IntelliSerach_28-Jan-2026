@@ -11,6 +11,14 @@ namespace Domain.Entities
 
         [Required]
         [Column(TypeName = "varchar(500)")]
-        public string FileName { get; set; }
+        public required string FileName { get; set; }
+        [Required]
+        [Column(TypeName = "varchar(50)")]
+        public required string FolderName { get; set; }
+
+        [Required]
+        [Column(TypeName = "varchar(500)")]
+        public required string OrignalFileName { get; set; }
+
     }
 }

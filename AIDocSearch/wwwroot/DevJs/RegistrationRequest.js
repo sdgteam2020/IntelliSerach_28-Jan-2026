@@ -122,9 +122,11 @@ function BindData() {
     });
 }
 $(document).on('change', '.updateuser', async function () {
+    let userId = $(this).data('id');
+    let isActive = $(this).prop('checked');
     const result = await Swal.fire({
         title: "Are you sure?",
-        text: "You want to update Status",
+        text: "Do you want to " + (isActive ? "activate" : "deactivate") + " this user?",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
@@ -132,8 +134,7 @@ $(document).on('change', '.updateuser', async function () {
         confirmButtonText: "Yes"
     });
     if (result.isConfirmed) {
-        var userId = $(this).data('id');
-        var isActive = $(this).prop('checked');
+     
 
         const token = $('input[name="__RequestVerificationToken"]').val();
 
@@ -171,7 +172,7 @@ $(document).on('change', '.updateuser', async function () {
                 Swal.fire({
                     position: "top-end",
                     icon: "success",
-                    title: data.Message || "Update successfully.",
+                    title: "" + (isActive ? "Activate" : "Deactivate") + " successfully.",
                     showConfirmButton: false,
                     timer: 1500
                 });

@@ -19,7 +19,7 @@ namespace Infrastructure.Shared.Services
             List<DTOMasterResponse> lst = new List<DTOMasterResponse>();
             if (Data.id == 1)
             {
-                var Ret = await Rank.GetAll();
+                var Ret = await Rank.GetAllOrderByRank();
                 foreach (var Forma in Ret)
                 {
                     DTOMasterResponse db = new DTOMasterResponse();

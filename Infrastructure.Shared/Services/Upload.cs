@@ -18,65 +18,83 @@ namespace Infrastructure.Shared.Services
             _uploadFilesDB = uploadFilesDB;
         }
 
-        
 
-        public async Task<DTOGenericResponse<object>> UploadFileAsync(IFormFile file, string uploadPath, int UserId)
+
+        public async Task<DTOGenericResponse<object>> UploadFileAsync(
+     IFormFile file,
+     string uploadPath,
+     int userId,
+     string userName)
         {
-            if (uploadPath != null)
+            if (file == null)
             {
-                string ExitImagePath = Path.Combine(uploadPath, "PDF");
-                if (System.IO.File.Exists(ExitImagePath))
-                {
-                    System.IO.File.Delete(ExitImagePath);
-                }
+                return new DTOGenericResponse<object>(
+                    ConnKeyConstants.BadRequest,
+                    "No file selected.",
+                    false);
             }
-            string FileName = "";
-            if (file != null)
+
+            // Create user folder
+            string userFolder = Path.Combine(uploadPath, userName);
+
+            if (!Directory.Exists(userFolder))
             {
-                // 5 MB = 5 * 1024 * 1024 bytes
-                const long MaxFileSize = 5 * 1024 * 1024;
-
-                if (file.Length > MaxFileSize)
-                {
-                    return new DTOGenericResponse<object>(
-                        ConnKeyConstants.BadRequest,
-                        "File size must be less than 5 MB.",
-                        false
-                    );
-                }
-
-                string originalName = Path.GetFileNameWithoutExtension(file.FileName);
-                string extension = Path.GetExtension(file.FileName);
-
-                // Add datetime (yyyyMMdd_HHmmss)
-                string filename = $"{originalName}_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";
-                FileName = _service.ProcessUploadedFile(file, uploadPath, filename);
-
-                string path = Path.Combine(uploadPath, FileName);
-                bool pdfcontentresult = _service.IsPdf(file);
-
-                if (!pdfcontentresult)
-                {
-                    return new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.NotPdfFile, false);
-                }
-                var now = DateTime.UtcNow;
-
-                TrnUploadFiles trnUploadFiles = new TrnUploadFiles
-                {
-                    FileName = FileName,
-                    CreatedOn = now,
-                    UpdatedOn = now,
-                    CreatedBy = UserId,
-                    UpdatedBy = UserId,
-                    IsActive = true,
-                    IsDeleted = false
-                };
-
-                await _uploadFilesDB.AddWithReturn(trnUploadFiles);
-
-                return new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.UploadSucess, true);
+                Directory.CreateDirectory(userFolder);
             }
-            return new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.UploadSucess, true);
+
+            // 5 MB = 5 * 1024 * 1024 bytes
+            const long MaxFileSize = 5 * 1024 * 1024;
+
+            if (file.Length > MaxFileSize)
+            {
+                return new DTOGenericResponse<object>(
+                    ConnKeyConstants.BadRequest,
+                    "File size must be less than 5 MB.",
+                    false);
+            }
+
+            string originalName = Path.GetFileNameWithoutExtension(file.FileName);
+            string extension = Path.GetExtension(file.FileName);
+
+            string fileName = $"{originalName}_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";
+
+            bool pdfContentResult = _service.IsPdf(file);
+
+            if (!pdfContentResult)
+            {
+                return new DTOGenericResponse<object>(
+                    ConnKeyConstants.BadRequest,
+                    ConnKeyConstants.NotPdfFile,
+                    false);
+            }
+
+            // Upload into user folder
+            string savedFileName = _service.ProcessUploadedFile(
+                file,
+                userFolder,
+                fileName);
+
+            var now = DateTime.UtcNow;
+
+            TrnUploadFiles trnUploadFiles = new TrnUploadFiles
+            {
+                FileName = savedFileName,
+                FolderName= userName,
+                OrignalFileName = file.FileName,
+                CreatedOn = now,
+                UpdatedOn = now,
+                CreatedBy = userId,
+                UpdatedBy = userId,
+                IsActive = true,
+                IsDeleted = false
+            };
+
+            await _uploadFilesDB.AddWithReturn(trnUploadFiles);
+
+            return new DTOGenericResponse<object>(
+                ConnKeyConstants.Success,
+                ConnKeyConstants.UploadSucess,
+                true);
         }
     }
 }

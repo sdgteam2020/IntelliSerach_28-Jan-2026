@@ -296,7 +296,7 @@ $(function () {
                     response.data.forEach(function (item) {
 
                         const path = item.Path?.Real || '';
-                        const fileName = path.split('\\').pop().split('/').pop();
+                        let fileName = path.split('\\').pop().split('/').pop();
 
                         const extension = fileName.includes('.')
                             ? fileName.split('.').pop().toLowerCase()
@@ -356,19 +356,32 @@ $(function () {
 
                         const match = webServerList.find(item =>
                             normalizedPath.includes(item.Includes)
+                            
                         );
                         if (match) {
-                            downloadUrl = match.Url + "/" + fileName;
+                            const marker = match.Includes.replace("/", "").replace(/\\/g, "/");
+                            const index = path.indexOf(marker);
+
+                            const result = index >= 0
+                                ? path.substring(index + marker.length + 1)
+                                : path;
+
+                            //fileName = path.split('\\').pop().split('/').pop();
+                            downloadUrl = match.Url + "/" + result;
+
                         }
                         const isPdf = extension === 'pdf';
 
                         let fileUrl;
 
                         if (isPdf) {
-                            fileUrl = `/Master/WatermarkPdfFromUrl?pdfUrl=${encodeURIComponent(downloadUrl)}`;
+                            const encrypted = encryptPayloadData(downloadUrl);
+                            fileUrl = `/Master/WatermarkPdfFromUrl?pdfUrl=${encodeURIComponent(encrypted)}`;
                         }
                         else {
-                            fileUrl = downloadUrl;
+                            // fileUrl = downloadUrl;
+                            const encrypted = encryptPayloadData(downloadUrl);
+                            fileUrl = `/Master/WatermarkPdfFromUrl?pdfUrl=${encodeURIComponent(encrypted)}`;
                         }
 
                        

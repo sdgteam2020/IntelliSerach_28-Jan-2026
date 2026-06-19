@@ -20,6 +20,7 @@ namespace AIDocSearch.Controllers
         private readonly RoleManager<ApplicationRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
+
         private readonly IUserAccount _account;
         public const string SessionKeySalt = "_Salt";
         public readonly IRank _rank;
@@ -28,8 +29,9 @@ namespace AIDocSearch.Controllers
         private readonly IRegisterService _registerService;
         private readonly ISessionService _sessionService;
         private readonly IAESEncrytDecry _AESEncrytDecry;
+        private readonly IUserRepository _iUserRepository;
 
-        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserAccount _account, IRank rank, IEncryptionService encryptionService, IAuthService authService, IRegisterService registerService, ISessionService sessionService, IAESEncrytDecry aESEncrytDecry)
+        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserAccount _account, IRank rank, IEncryptionService encryptionService, IAuthService authService, IRegisterService registerService, ISessionService sessionService, IAESEncrytDecry aESEncrytDecry, IUserRepository iUserRepository)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
@@ -42,6 +44,7 @@ namespace AIDocSearch.Controllers
             _registerService = registerService;
             _sessionService = sessionService;
             _AESEncrytDecry = aESEncrytDecry;
+            _iUserRepository = iUserRepository;
         }
 
         [HttpGet]
@@ -73,9 +76,7 @@ namespace AIDocSearch.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(DTOLoginRequest model, string? returnUrl, CancellationToken cancellationToken)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
+            
             try
             {
                 string? GetSalt = HttpContext.Session.GetString(SessionKeySalt); // Get Salt from Session
@@ -85,6 +86,8 @@ namespace AIDocSearch.Controllers
                     model.Password = _encryptionService.Decrypt(model.Password, GetSalt);
                     model.UserName = _encryptionService.Decrypt(model.UserName, GetSalt);
                 }
+                if (!ModelState.IsValid)
+                    return View(model);
 
                 // Get the user's IP address and the current request URL (for logging or auditing)
                 string ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";

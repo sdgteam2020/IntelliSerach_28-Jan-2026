@@ -1,9 +1,10 @@
-﻿using Domain.Entities;
+﻿using Application.Interfaces.Repository;
+using Domain.Entities;
+using Infrastructure.Repository.GenericRepository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Infrastructure.Repository.GenericRepository;
-using Application.Interfaces.Repository;
 
 namespace Infrastructure.Repository
 {
@@ -14,6 +15,24 @@ namespace Infrastructure.Repository
         public WebServerRepository(ApplicationDbContext context) : base(context)
         {
             _context = context;
+        }
+
+        public async Task<bool> SoftDeleteWebServer(int Id)
+        {
+            var webServer = await _context.trnWebServer
+                                .FirstOrDefaultAsync(x => x.Id == Id);
+
+            if (webServer == null)
+                return false;
+
+            webServer.IsActive = false;
+            webServer.IsDeleted = true;
+
+
+            await _context.SaveChangesAsync();
+
+            return true;
+
         }
     }
 }

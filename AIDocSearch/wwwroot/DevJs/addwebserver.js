@@ -35,8 +35,66 @@
             scrollTop: $("form").offset().top
         }, 500);
     });
+    $(".btnDel").click(function () {
+
+        let id = $(this).data("id");
+        
+        DeleteWebServer(id);
+    });
 
 });
+async function DeleteWebServer(id) {
+
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'You want to delete this record?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Delete',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#d33'
+    });
+
+    if (!result.isConfirmed)
+        return;
+
+    try {
+
+        const response = await fetch('/Master/DeleteWebServer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ Id: id })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete record.');
+        }
+
+        const data = await response.json();
+
+        await Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Record deleted successfully.'
+        });
+
+        // Reload page or refresh table
+        location.reload();
+
+    }
+    catch (error) {
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message
+        });
+
+        console.error(error);
+    }
+}
 async function CheckValidation() {
     const form = $("#SaveForm");
     if (!form.valid()) {
