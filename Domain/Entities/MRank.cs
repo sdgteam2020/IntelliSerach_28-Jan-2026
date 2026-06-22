@@ -11,11 +11,7 @@ namespace Domain.Entities
         [RegularExpression(@"^[\d]+$", ErrorMessage = "Rank Id is number.")]
         public short RankId { get; set; }
 
-        [Required(ErrorMessage = "required!")]
-        [RegularExpression("^[a-zA-Z0-9 ]*$", ErrorMessage = "Only Alphabets and Numbers allowed.")]
-        [Column(TypeName = "varchar(50)")]
-        [MaxLength(50, ErrorMessage = "Maximum length of Rank Name is fifty character.")]
-        public string RankName { get; set; } = string.Empty;
+
 
         [Required(ErrorMessage = "required!")]
         [RegularExpression("^[a-zA-Z0-9 ]*$", ErrorMessage = "Only Alphabets and Numbers allowed.")]

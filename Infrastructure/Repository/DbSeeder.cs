@@ -26,16 +26,16 @@ namespace Infrastructure.Repository
             {
                 var ranks = new List<MRank>
                 {
-                    new() { RankName = "General",                RankAbbreviation = "Gen",     Orderby = 1 },
-                    new() { RankName = "Lieutenant General",     RankAbbreviation = "Lt Gen",  Orderby = 2 },
-                    new() { RankName = "Major General",          RankAbbreviation = "Maj Gen", Orderby = 3 },
-                    new() { RankName = "Brigadier",             RankAbbreviation = "Brig",    Orderby = 4 },
-                    new() { RankName = "Colonel",               RankAbbreviation = "Col",     Orderby = 5 },
-                    new() { RankName = "Colonel (Time Scale)",  RankAbbreviation = "Col(TS)", Orderby = 6 },
-                    new() { RankName = "Lieutenant Colonel",    RankAbbreviation = "Lt Col",  Orderby = 7 },
-                    new() { RankName = "Major",                 RankAbbreviation = "Maj",     Orderby = 8 },
-                    new() { RankName = "Captain",               RankAbbreviation = "Capt",    Orderby = 9 },
-                    new() { RankName = "Lieutenant",            RankAbbreviation = "Lt",      Orderby = 10 }
+                    new() {   RankAbbreviation = "Gen",     Orderby = 1 },
+                    new() {   RankAbbreviation = "Lt Gen",  Orderby = 2 },
+                    new() {   RankAbbreviation = "Maj Gen", Orderby = 3 },
+                    new() {  RankAbbreviation = "Brig",    Orderby = 4 },
+                    new() {  RankAbbreviation = "Col",     Orderby = 5 },
+                    new() {  RankAbbreviation = "Col(TS)", Orderby = 6 },
+                    new() {  RankAbbreviation = "Lt Col",  Orderby = 7 },
+                    new() {  RankAbbreviation = "Maj",     Orderby = 8 },
+                    new() {  RankAbbreviation = "Capt",    Orderby = 9 },
+                    new() {  RankAbbreviation = "Lt",      Orderby = 10 }
                 };
 
                 await context.MRank.AddRangeAsync(ranks);

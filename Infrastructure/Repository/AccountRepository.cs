@@ -166,5 +166,7 @@ namespace Infrastructure.Repository
          select map.IndexId
      ).Distinct().ToArrayAsync();
         }
+
+        
     }
 }

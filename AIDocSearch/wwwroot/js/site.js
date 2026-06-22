@@ -12,10 +12,10 @@ $(document).ajaxStart(function () {
     $("#loading").hide();
 });
 
-var currentUrl = window.location.pathname.toLowerCase();
+let currentUrl = window.location.pathname.toLowerCase();
 
 $(".navbar-nav a.nav-link").each(function () {
-    var linkUrl = $(this).attr("href").toLowerCase();
+    let linkUrl = $(this).attr("href").toLowerCase();
 
     if (currentUrl.startsWith(linkUrl)) {
         $(".navbar-nav a.nav-link").removeClass("active");

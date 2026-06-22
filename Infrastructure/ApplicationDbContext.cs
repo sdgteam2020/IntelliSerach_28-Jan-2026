@@ -14,7 +14,7 @@ namespace Infrastructure
         public DbSet<MRank> MRank { get; set; } = null!;
         public DbSet<TrnUploadFiles> trnUploadFiles { get; set; } = null!;
         public DbSet<TrnWebServer> trnWebServer { get; set; } = null!;
-        public DbSet<WebScraperSetting> WebScraperSetting { get; set; } = null!;
+       
         public DbSet<ExceptionLog> Log { get; set; }
         public DbSet<TrnIndexUserMapping> TrnIndexUserMapping { get; set; }
 

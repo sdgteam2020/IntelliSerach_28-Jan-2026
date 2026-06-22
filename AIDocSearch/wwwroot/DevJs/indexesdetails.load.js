@@ -1,6 +1,6 @@
 // devjs/indexesdetails.load.js
 // This file fetches the data and renders table with assign buttons
-var webServerList = [];
+let webServerList = [];
 $(function () {
     function renderTable(data, type) {
         // helper to read values that may be serialized with dots in keys (e.g. "docs.count")
@@ -50,8 +50,8 @@ $(function () {
 
             data.forEach(function (item) {
 
-                var health = (item.health || '').toLowerCase();
-                var badgeClass = 'bg-success';
+                let health = (item.health || '').toLowerCase();
+                let badgeClass = 'bg-success';
 
                 if (health === 'yellow')
                     badgeClass = 'bg-warning text-dark';

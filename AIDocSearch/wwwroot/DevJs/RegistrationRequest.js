@@ -1,4 +1,4 @@
-﻿var table; // Declare table variable outside the function to preserve the instance
+﻿let table; // Declare table variable outside the function to preserve the instance
 $(document).ready(function () {
     setTimeout(BindData, 100);
     $('#tbldata').DataTable({
@@ -111,7 +111,7 @@ function BindData() {
         ],
         drawCallback: function (settings) {
             $("#tbldata tbody").off("click", ".cls-btnedit").on("click", ".cls-btnedit", function () {
-                var rowData = table.row($(this).closest("tr")).data();
+                let rowData = table.row($(this).closest("tr")).data();
                 if (rowData != null) {
                     $("#UserName").val(rowData.DomainId);
 

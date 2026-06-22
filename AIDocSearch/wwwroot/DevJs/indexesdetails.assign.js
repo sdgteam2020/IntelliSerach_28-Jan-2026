@@ -1,8 +1,8 @@
 // devjs/indexesdetails.assign.js
 // Handles assign button, modal, user search and assign operation
-var UserList = [];
-var selectedUsers = new Set();
-var uncheckeduser = new Set();
+let UserList = [];
+let selectedUsers = new Set();
+let uncheckeduser = new Set();
 
 $(function () {
    
@@ -10,10 +10,10 @@ $(function () {
     function openAssignModal(uuid) {
         selectedUsers.clear(); // ✅
         uncheckeduser.clear(); // ✅
-        var modalEl = document.getElementById('assignModal');
-        var bsModal = new bootstrap.Modal(modalEl, {});
+        let modalEl = document.getElementById('assignModal');
+        let bsModal = new bootstrap.Modal(modalEl, {});
        
-        var $modal = $(modalEl);
+        let $modal = $(modalEl);
         resetUserList()
         // clear previous results and search box
         $modal.find('#userSearch').val('');
@@ -22,10 +22,10 @@ $(function () {
         // show modal (Bootstrap 5)
         bsModal.show();
 
-        var searchTimeout;
+        let searchTimeout;
         function doSearch(q) {
 
-            var token = $('input[name="__RequestVerificationToken"]').val();
+            let token = $('input[name="__RequestVerificationToken"]').val();
             $("#assignSelectAll").prop('checked', false);
             if ($.fn.DataTable.isDataTable('#assignUserTable')) {
                 $('#assignUserTable').DataTable().columns.adjust().responsive.recalc();
@@ -51,8 +51,8 @@ $(function () {
 
                     data: function (d) {
 
-                        var sortColumn = "DomainId";
-                        var sortDirection = "asc";
+                        let sortColumn = "DomainId";
+                        let sortDirection = "asc";
 
                         if (d.order && d.order.length > 0) {
                             sortColumn = d.columns[d.order[0].column].data;
@@ -128,14 +128,14 @@ $(function () {
 
         // namespace events to avoid duplicate bindings
         $modal.off('.assign').on('input.assign', '#userSearch', function () {
-            var q = $(this).val();
+            let q = $(this).val();
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(function () { doSearch(q); }, 300);
         });
         $(document).on('change', '.assignUserChk', function () {
             
-            var userId = $(this).data('id');
-            var userName = $(this).data('username');
+            let userId = $(this).data('id');
+            let userName = $(this).data('username');
 
             if ($(this).is(':checked')) {
 
@@ -153,7 +153,7 @@ $(function () {
         });
         // select all checkbox handler (toggle)
         $modal.off('change.assign').on('change.assign', '#assignSelectAll', function () {
-            var checked = $(this).is(':checked');
+            let checked = $(this).is(':checked');
            
             $modal.find('.assignUserChk').prop('checked', checked);
         });
@@ -257,7 +257,7 @@ $(function () {
                     return;
                 }
 
-                var html = '';
+                let html = '';
 
                 if (response.data && response.data.length > 0) {
 
@@ -431,7 +431,7 @@ $(function () {
 
                 $('#fileList').html(html);
 
-                var modal = new bootstrap.Modal(
+                let modal = new bootstrap.Modal(
                     document.getElementById('fileModal')
                 );
 
@@ -449,7 +449,7 @@ $(function () {
     }
     function loadAssignedUsers(IndexId) {
 
-        var token = $('input[name="__RequestVerificationToken"]').val();
+        let token = $('input[name="__RequestVerificationToken"]').val();
 
         $.ajax({
             url: '/Index/GetIndexWiseAssginUsers',
@@ -466,7 +466,7 @@ $(function () {
 
                 if (resp.success && resp.data) {
 
-                    var users = resp.data.split(',');
+                    let users = resp.data.split(',');
 
                     users.forEach(function (user) {
 

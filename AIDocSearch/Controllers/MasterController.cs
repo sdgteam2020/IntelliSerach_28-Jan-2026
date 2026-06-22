@@ -402,7 +402,7 @@ namespace AIDocSearch.Controllers
 
         public async Task<IActionResult> AddWebServer()
         {
-            var allData = await _webServer.GetAll();
+            var allData = await _webServer.GetAllActive();
 
             ViewBag.AllData = allData;
             TempData["SuccessMessage"] = null;
@@ -415,7 +415,7 @@ namespace AIDocSearch.Controllers
         {
             DTOAddWebServerRequest Request = await _AESEncrytDecry.DecryptAESWithDTO<DTOAddWebServerRequest>(EncryptedData, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
 
-            var allData = await _webServer.GetAll();
+            var allData = await _webServer.GetAllActive();
             ViewBag.AllData = allData;
             bool isDuplicate = allData.Any(i =>
                  i.Id != Request.Id &&
@@ -486,13 +486,13 @@ namespace AIDocSearch.Controllers
                 if (ret != null && ret.Id > 0)
                 {
                     
-                    ViewBag.AllData = await _webServer.GetAll();
+                    ViewBag.AllData = await _webServer.GetAllActive();
                     TempData["SuccessMessage"] = "Record Save successfully.";
                     return View(Request);
                 }
                 else
                 {
-                    ViewBag.AllData = await _webServer.GetAll();
+                    ViewBag.AllData = await _webServer.GetAllActive();
                     ModelState.AddModelError(string.Empty, ret.Url ?? "Record Not Save.");
                     TempData["ErrorMessage"] = $"Record Not Save.";
                     return View(data);
@@ -500,7 +500,7 @@ namespace AIDocSearch.Controllers
             }
 
 
-            ViewBag.AllData = await _webServer.GetAll();
+            ViewBag.AllData = await _webServer.GetAllActive();
             return View(Request);
         }
 
@@ -512,7 +512,7 @@ namespace AIDocSearch.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetAllWebServer()
         {
-            return Json(await _webServer.GetAll());
+            return Json(await _webServer.GetAllActive());
         }
         #endregion
     }

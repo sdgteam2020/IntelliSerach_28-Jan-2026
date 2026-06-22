@@ -45,18 +45,16 @@ namespace AIDocSearch.CustomMiddleware
                 {
                     OccurredAtUtc = DateTime.UtcNow,
                     Message = ex.Message,
-                    StackTrace = ex.StackTrace,
-                    Source = ex.Source,
-                    Endpoint = endpoint?.DisplayName,
-                    Controller = controller,
-                    Action = action,
-                    HttpMethod = context.Request.Method,
-                    Path = context.Request.Path.Value ?? string.Empty,
-                    QueryString = context.Request.QueryString.HasValue ? context.Request.QueryString.Value : null,
-                    SessionUser = dto?.UserName,
-                    Roles = dto?.RoleName,
-                    RemoteIp = context.Connection.RemoteIpAddress?.ToString(),
-                    UserAgent = context.Request.Headers.UserAgent.ToString()
+                    StackTrace = $"{ex.StackTrace}" +
+                    $"Source: {ex.Source}; " +
+                    $"Endpoint: {endpoint?.DisplayName}; " +
+                    $"Controller: {controller}; " +
+                    $"Action: {action}; " +
+                    $"QueryString: {(context.Request.QueryString.HasValue ? context.Request.QueryString.Value : "None")}; " +
+                    $"SessionUser: {dto?.UserName}; " +
+                    $"Roles: {dto?.RoleName}; " +
+                    $"RemoteIp: {context.Connection.RemoteIpAddress?.ToString()}; " +
+                    $"UserAgent: {context.Request.Headers.UserAgent.ToString()}"
                 };
 
                 var data = await _iloger.AddAsync(log);

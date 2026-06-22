@@ -59,11 +59,12 @@ async function DeleteWebServer(id) {
         return;
 
     try {
-
+        const token = $('input[name="__RequestVerificationToken"]').val();
         const response = await fetch('/Master/DeleteWebServer', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                "RequestVerificationToken": token   // Pass the CSRF token in the header
             },
             body: JSON.stringify({ Id: id })
         });

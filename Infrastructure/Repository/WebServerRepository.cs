@@ -17,6 +17,11 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
+        public async Task<List<TrnWebServer>> GetAllActive()
+        {
+            return await _context.trnWebServer.Where(i => i.IsActive == true && i.IsDeleted == false).ToListAsync();
+        }
+
         public async Task<bool> SoftDeleteWebServer(int Id)
         {
             var webServer = await _context.trnWebServer

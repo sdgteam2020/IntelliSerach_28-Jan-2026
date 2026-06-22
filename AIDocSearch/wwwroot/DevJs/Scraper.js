@@ -158,7 +158,7 @@ function BindpdfScraping(Data) {
         return;
     }
 
-    var scraper = Data.Data.data;
+    let scraper = Data.Data.data;
 
     // ===== Bind Summary =====
     $("#websiteUrl").text(scraper.website_url);
@@ -186,7 +186,7 @@ function BindpdfScraping(Data) {
     // ===== Bind Table Rows =====
     if (scraper.documents && scraper.documents.length > 0) {
         $.each(scraper.documents, function (index, doc) {
-            var row = `
+            let row = `
                 <tr>
                     <td>${index + 1}</td>
                     <td>${doc.filename}</td>
@@ -243,7 +243,7 @@ function BindWebScraping(Data) {
         return;
     }
 
-    var scraper = Data.Data.Data;
+    let scraper = Data.Data.Data;
 
     // ===== Bind Summary =====
     $("#websitewebUrl").text($("#Url").val());
@@ -271,7 +271,7 @@ function BindWebScraping(Data) {
     // ===== Bind Table Rows =====
     if (scraper && scraper.length > 0) {
         $.each(scraper, function (index, doc) {
-            var row = `
+            let row = `
                 <tr>
                     <td>${index + 1}</td>
                     <td>
@@ -316,13 +316,13 @@ function BindWebScraping(Data) {
 
 function DateFormat(inputDate) {
     // Remove UTC and convert to Date
-    var date = new Date(inputDate.replace(" UTC", ""));
+    let date = new Date(inputDate.replace(" UTC", ""));
 
     function pad(n) {
         return n < 10 ? '0' + n : n;
     }
 
-    var formatted =
+    let formatted =
         pad(date.getDate()) + "/" +
         pad(date.getMonth() + 1) + "/" +
         date.getFullYear() + " " +

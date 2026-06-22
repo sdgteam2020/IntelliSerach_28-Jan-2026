@@ -5,7 +5,7 @@
     });
 
     try {
-        var token = $('input[name="__RequestVerificationToken"]').val();
+        const token = $('input[name="__RequestVerificationToken"]').val();
         const response = await fetch('/IntelliSearch/Master/GetAllMMaster', {
             method: 'POST',
             headers: {
