@@ -75,8 +75,8 @@
                     <div class="container mt-3">
                         <div class="shadow-sm border-0">
                            
-                            <div class="card-body p-0">
-                                <table class="table table-hover mb-0 align-middle" id="tblData">
+                            <div class="card-body p-0 table-responsive">
+                                <table class="table table-hover mb-0 align-middle " id="tblData">
                                     <thead class="table-light">
                                         <tr>
                                         <tr>
@@ -88,45 +88,7 @@
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        @foreach (var item in ViewBag.AllData)
-                                        {
-                                            <tr>
-                                                <td>@srNo</td>
-                                                <td>
-                                                    @item.Url
-                                                </td>
-                                                <td>
-                                                    @item.Includes
-                                                </td>
-                                                <td>
-                                                    @item.Index_Name
-                                                </td>
-                                                <td>
-                                                    @item.CreatedOn.ToString("dd/MM/yyyy HH:mm")
-                                                </td>
-                                                <td class="text-center">
-                                                    <input type="button"
-                                                           class="btn btn-primary btnEdit"
-                                                           value="Edit"
-                                                           data-id="@item.Id"
-                                                           data-url="@item.Url"
-                                                           data-Index_Name="@item.Index_Name"
-                                                           data-includes="@item.Includes" />
-                                                         <button type="button"
-                                                                class="btn btn-danger btnDel"
-                                                                data-id="@item.Id"
-                                                                >
-                                                            <i class="fa-solid fa-trash"></i> Delete
-                                                        </button>
-
-                                                          
-                                                </td>
-                                            </tr>
-                                            srNo++;
-                                        }
-
-                                    </tbody>
+                                        <tbody></tbody>
                                 </table>
                             </div>
                         </div>

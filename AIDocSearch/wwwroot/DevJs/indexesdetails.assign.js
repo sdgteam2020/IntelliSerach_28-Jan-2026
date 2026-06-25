@@ -159,13 +159,20 @@ $(function () {
         });
 
         $modal.off('click.assign').on('click.assign', '#assignSave', function () {
-           
+            const params = {
+                IndexId: uuid,
+                UserIds: Array.from(selectedUsers),
+                AllSelected: $("#assignSelectAll").is(':checked')
+            };
+
             $.ajax({
                 url: '/Index/AssignIndex',
                 method: 'POST',
                 contentType: 'application/json',
                 headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
-                data: JSON.stringify({ IndexId: uuid, UserIds: Array.from(selectedUsers), AllSelected: $("#assignSelectAll").is(':checked') }),
+                data: JSON.stringify({
+                    Data: encryptPayloadData(JSON.stringify(params))
+                }),
                 success: function (resp) {
                     if (resp && resp.Code==200) {
                         Swal.fire({
@@ -237,6 +244,7 @@ $(function () {
     $(document).on('click', '.btn-fileview-index', function () {
 
         let indexName = $(this).data('index');
+        let uuid = $(this).data('uuid');
         
         $(".Indexnameinmodal").html($(this).data('index-name'));
 
@@ -244,7 +252,8 @@ $(function () {
             url: '/Index/GetDocDetailsByIndexName',
             type: 'POST',
             data: {
-                indexName: indexName
+                indexName: encryptPayloadData(indexName) ,  //encryptPayloadData
+                    uuid: encryptPayloadData(uuid)   //encryptPayloadData
             },
             headers: {
                 'RequestVerificationToken':
@@ -253,7 +262,13 @@ $(function () {
             success: function (response) {
 
                 if (!response.success) {
-                    alert('No data found');
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "error",
+                        title: "Indexing Not Found",
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
                     return;
                 }
 
@@ -295,7 +310,7 @@ $(function () {
 
                     response.data.forEach(function (item) {
 
-                        const path = item.Path?.Real || '';
+                        const path = decryptPayloadData(item.Path?.Real) || '';
                         let fileName = path.split('\\').pop().split('/').pop();
 
                         const extension = fileName.includes('.')

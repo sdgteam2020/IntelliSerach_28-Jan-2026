@@ -1,5 +1,7 @@
 ﻿using Application.Interfaces.Repository;
+using Domain.DTOs.Response;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Repository.GenericRepository;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -17,15 +19,24 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
-        public async Task<List<TrnWebServer>> GetAllActive()
+        public async Task<List<DTOWebServerResponse>> GetAllActive(int UserId)
         {
-            return await _context.trnWebServer.Where(i => i.IsActive == true && i.IsDeleted == false).ToListAsync();
+            return await _context.trnWebServer
+        .Where(i => i.IsActive && !i.IsDeleted && i.UpdatedBy == UserId)
+        .Select(i => new DTOWebServerResponse
+        {
+            Id = i.Id,
+            Url = i.Url,
+            Includes = i.Includes,
+            Index_Name = i.Index_Name
+        })
+        .ToListAsync();
         }
 
-        public async Task<bool> SoftDeleteWebServer(int Id)
+        public async Task<bool> SoftDeleteWebServer(int Id,int UserId)
         {
             var webServer = await _context.trnWebServer
-                                .FirstOrDefaultAsync(x => x.Id == Id);
+                               .FirstOrDefaultAsync(x => x.Id == Id && x.UpdatedBy== UserId);
 
             if (webServer == null)
                 return false;

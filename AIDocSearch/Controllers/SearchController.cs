@@ -5,7 +5,9 @@ using Domain.CommonModel;
 using Domain.Constants;
 using Domain.DTOs.Requests;
 using Domain.DTOs.Response;
+using Domain.Entities;
 using Infrastructure.Shared.Helpers;
+using Infrastructure.Shared.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +28,8 @@ namespace AIDocSearch.Controllers
         private readonly IUpload _upload;
         private readonly IAPI _aPI;
         private readonly IAESEncrytDecry _AESEncrytDecry;
-
-        public SearchController(IHttpClientFactory httpClientFactory, IConfiguration _configuration, ISearch _searchService, IWebHostEnvironment env, IUploadFiles uploadFiles, IAPI aPI, IUpload upload, IAESEncrytDecry aESEncrytDecry)
+        private readonly ICurrentUserService _currentUserService;
+        public SearchController(IHttpClientFactory httpClientFactory, IConfiguration _configuration, ISearch _searchService, IWebHostEnvironment env, IUploadFiles uploadFiles, IAPI aPI, IUpload upload, IAESEncrytDecry aESEncrytDecry, ICurrentUserService currentUserService)
         {
             _httpClientFactory = httpClientFactory;
             this._searchService = _searchService;
@@ -37,6 +39,7 @@ namespace AIDocSearch.Controllers
             _upload = upload;
             _aPI = aPI;
             _AESEncrytDecry = aESEncrytDecry;
+            _currentUserService = currentUserService;
         }
 
         public async Task<IActionResult> Index(string searchInput)
@@ -87,6 +90,7 @@ namespace AIDocSearch.Controllers
         // IndexesDetails moved to IndexController for client-side binding
         #endregion
 
+        #region Upload Files
         public async Task<IActionResult> Upload()
         {
             await LoadUserFiles();
@@ -108,15 +112,14 @@ namespace AIDocSearch.Controllers
             if (ModelState.IsValid)
             {
                 string FilePath = Path.Combine(_env.WebRootPath, "UploadForIndexing");
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                
+               
                 if (Data.FileName == null)
                 {
                     ModelState.AddModelError(string.Empty, "Please select a file to upload.");
                     return View(Data);
                 }
                 string UserName = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").UserName;
-                var ret = await _upload.UploadFileAsync(Data.FileName, FilePath, Convert.ToInt32(userId), UserName);
+                var ret = await _upload.UploadFileAsync(Data.FileName, FilePath, Convert.ToInt32(_currentUserService.UserId), UserName);
                 if (ret.Code == 200)
                 {
                     //if (!IsFSCrawlerRunning())
@@ -137,6 +140,7 @@ namespace AIDocSearch.Controllers
             await LoadUserFiles();
             return View(Data);
         }
+
         public bool IsFSCrawlerRunning()
         {
             return Process.GetProcesses()
@@ -165,6 +169,67 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HttpPost]
+        public async Task<IActionResult> DeleteFiles([FromBody] DTOCommon data)
+        {
+            // Validate request
+            if (data.Id <= 0)
+                return Json(new DTOGenericResponse<object>(
+                    ConnKeyConstants.BadRequest,
+                    ConnKeyConstants.FileDeleteFailed,
+                    null));
+
+            // Get file record from database
+            var file = await _uploadFiles.Get(data.Id);
+
+            // Check if record exists
+            if (file == null)
+                return Json(new DTOGenericResponse<object>(
+                    ConnKeyConstants.BadRequest,
+                    ConnKeyConstants.FileNotExists,
+                    null));
+
+            // Verify that the current user owns the file
+            if (file.UpdatedBy != _currentUserService.UserId)
+                return Json(new DTOGenericResponse<object>(
+                    ConnKeyConstants.BadRequest,
+                    ConnKeyConstants.NotAuth,
+                    null));
+
+            // Physical upload directory path
+            string uploadPath = Path.Combine(_env.WebRootPath, "UploadForIndexing");
+
+            // Check whether the physical file exists
+            bool fileExists = await _upload.CheckFileExits(uploadPath, file.FileName);
+
+            if (!fileExists)
+                return Json(new DTOGenericResponse<object>(
+                    ConnKeyConstants.BadRequest,
+                    ConnKeyConstants.FileNotExists,
+                    null));
+
+            // Delete database record
+            var deletedRecord = await _uploadFiles.DeleteFilesAndData(data.Id);
+
+            // Verify database deletion succeeded
+            if (deletedRecord == null)
+                return Json(new DTOGenericResponse<object>(
+                    ConnKeyConstants.BadRequest,
+                    ConnKeyConstants.FileDeleteFailed,
+                    null));
+
+            // Delete physical file from server
+            bool fileDeleted = await _upload.FileDelete(uploadPath, deletedRecord.FileName);
+
+            // Return final response
+            return Json(new DTOGenericResponse<object>(
+                fileDeleted ? ConnKeyConstants.Success : ConnKeyConstants.BadRequest,
+                fileDeleted ? ConnKeyConstants.FileDeleteSucess : ConnKeyConstants.FileDeleteFailed,
+                null));
+        }
+        #endregion Upload Files
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetFilter()
         {
             if (ModelState.IsValid)
@@ -174,7 +239,7 @@ namespace AIDocSearch.Controllers
                 string Password = _configuration["UrlData:Password"] ?? string.Empty;
                 var IndexesDetails = await _searchService.IndexesDetails(Url, UserName, Password);
                 // Call the search service to get the response
-                return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.ScraperingMessage, IndexesDetails));
+                return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.SuccessMessage, IndexesDetails));
                 
 
                 DTOAPILoginRequest dTOAPILoginRequest = new DTOAPILoginRequest();

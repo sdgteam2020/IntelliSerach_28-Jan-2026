@@ -10,5 +10,6 @@ namespace Application.Interfaces.Repository
     public interface IUploadFiles : IGenericRepository<TrnUploadFiles>
     {
         Task<DTOGenericResponse<object>> GetUploadFileByUserId(int UserId);
+        Task<TrnUploadFiles> DeleteFilesAndData(int UploadId);
     }
 }

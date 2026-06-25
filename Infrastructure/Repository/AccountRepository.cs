@@ -2,6 +2,7 @@
 using Azure.Core;
 using Domain.DTOs.Requests;
 using Domain.DTOs.Response;
+using Domain.Enums;
 using Domain.IdentityEntities;
 using Infrastructure.Repository.GenericRepository;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,7 @@ namespace Infrastructure.Repository
 
         public async Task<DTODataTablesResponse<DTOUserDataResponse>> GetAllUsers(DTODataTablesRequest request)
         {
-            var Data = (from u in _context.Users.OrderByDescending(x => x.Id).Where(i => i.Id != 1)
+            var Data = (from u in _context.Users.OrderByDescending(x => x.Id).Where(i => i.Id != (int)Roles.Admin)
                         select new DTOUserDataResponse()
                         {
                             Id = u.Id,
@@ -63,13 +64,13 @@ namespace Infrastructure.Repository
                 data = paginatedData
             };
         }
-        public async Task<string> GetIndexWiseAssginUsers(string IndexId)
+        public async Task<string> GetIndexWiseAssginUsers(string IndexId,int UserId)
         {
             var users = await (
                 from u in _context.Users
-                        .Where(x => x.Id != 1 && x.Active)
+                        .Where(x => (x.Id != 1 || x.Id == UserId) && x.Active)
                 join map in _context.TrnIndexUserMapping
-                        .Where(x => x.IndexId == IndexId)
+                        .Where(x => x.IndexId == IndexId )
                     on u.Id equals map.UserId
                 select u.UserName
             ).ToListAsync();

@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class TrnIndexUserMapping: Common
+    public class TrnIndexUserMapping
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

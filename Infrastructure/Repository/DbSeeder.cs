@@ -73,7 +73,7 @@ namespace Infrastructure.Repository
                 adminUser = new ApplicationUser
                 {
                     UserName = "admin",
-                    Name = "Administrator",
+                    Name = "NK RAI",
                     Email = "admin@example.com",
                     EmailConfirmed = true,
                     Active = true,

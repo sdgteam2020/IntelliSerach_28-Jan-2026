@@ -30,7 +30,18 @@
         public const string UpdateMessage = "Data has been successfully updated.";
         public const string ExistsMessage = "The resource already exists.";
         public const string IncorrectDataMessage = "The data provided is incorrect or incomplete.";
+
+
         public const string UploadSucess = "Upload successfully.";
+        public const string FileNotExists = "The specified file was not found.";
+        public const string FileDeleteSucess = "File has been deleted successfully.";
+        public const string FileDeleteFailed = "Failed to delete the file.";
+        public const string InvalidFileName = "Invalid file name provided.";
+        public const string NotAuth = "You are not authorized to perform this action.";
+
+
+
+
 
         public const string ScraperingMessage = "Scrapering Done.";
 

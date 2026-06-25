@@ -115,6 +115,7 @@ $(function () {
                 <button
                     class="btn btn-outline-info btn-sm btn-fileview-index"
                     data-index="${item.index || ''}"
+                    data-uuid="${item.uuid || ''}"
                      data-index-name="${(item.index || '').replace('fs-', '')}"
                     >
                     👁 View Files

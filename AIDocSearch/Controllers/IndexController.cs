@@ -1,15 +1,18 @@
+using AIDocSearch.Helpers;
 using AIDocSearch.Services;
 using Application.Interfaces;
 using Application.Interfaces.Repository;
+using Domain.CommonModel;
 using Domain.Constants;
 using Domain.DTOs.Requests;
 using Domain.DTOs.Response;
 using Domain.Entities;
-using Infrastructure.Shared.Services;
 using Infrastructure;
-using System.Linq;
+using Infrastructure.Shared.Helpers;
+using Infrastructure.Shared.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AIDocSearch.Controllers
@@ -23,12 +26,13 @@ namespace AIDocSearch.Controllers
         private readonly IDateTimeService _dateTimeService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IUserAccount _userAccount;
+        private readonly IAESEncrytDecry _AESEncrytDecry;
         public IndexController(
             ISearch searchService,
             IConfiguration configuration,
             IindexUserMapping indexUserMapping,
             IDateTimeService dateTimeService,
-            ICurrentUserService currentUserService,
+            ICurrentUserService currentUserService, IAESEncrytDecry aESEncrytDecry,
             IUserAccount userAccount)
         {
             _searchService = searchService;
@@ -37,6 +41,7 @@ namespace AIDocSearch.Controllers
             _dateTimeService = dateTimeService;
             _currentUserService = currentUserService;
             _userAccount = userAccount;
+            _AESEncrytDecry = aESEncrytDecry;
         }
 
         // returns the view that will load data client-side
@@ -96,16 +101,20 @@ namespace AIDocSearch.Controllers
         public async Task<IActionResult> GetIndexWiseAssginUsers([FromForm] string IndexId)
         {
             if (_userAccount == null) return Json(new { success = false, data = Array.Empty<object>() });
-            var result = await _userAccount.GetIndexWiseAssginUsers(IndexId);
+            var result = await _userAccount.GetIndexWiseAssginUsers(IndexId, (int)_currentUserService.UserId);
             return Json(new { success = true, data = result });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AssignIndex([FromBody] DTOIndexAssignRequest request)
+        public async Task<IActionResult> AssignIndex([FromBody] EncryptedRequest Payload)
         {
-            if (!ModelState.IsValid || request == null)
+            DTOIndexAssignRequest request = await _AESEncrytDecry.DecryptAESWithDTO<DTOIndexAssignRequest>(Payload.Data, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
+            if (request == null)
+                return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.BadRequestMessage, null));
+
+            if (!TryValidateModel(request))
                 return BadRequest(new { success = false, message = "Invalid request" });
 
             await _indexUserMapping.UserAssginAndDeAssignIndex(request);
@@ -121,12 +130,7 @@ namespace AIDocSearch.Controllers
                 {
                     IndexId = request.IndexId,
                     UserId = uid,
-                    CreatedOn = _dateTimeService.NowUtc,
-                    UpdatedOn = _dateTimeService.NowUtc,
-                    CreatedBy = _currentUserService.UserId,
-                    UpdatedBy = _currentUserService.UserId,
-                    IsActive = true,
-                    IsDeleted = false
+                   
                 };
                 await _indexUserMapping.AddWithCheckIndexId(map);
             }
@@ -139,14 +143,47 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GetDocDetailsByIndexName(string indexName)
+        public async Task<IActionResult> GetDocDetailsByIndexName(string indexName,string uuid)
         {
-            string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
-            string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
-            string Password = _configuration["UrlData:Password"] ?? string.Empty;
+           string AESKey= SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey;
+             indexName = _AESEncrytDecry.DecryptAES(indexName, AESKey);
+             uuid = _AESEncrytDecry.DecryptAES(uuid, AESKey);
 
-            var data = await _searchService.GetDocDetailsByIndexName(Url ,indexName, UserName, Password);
-            return Json(new { success = true, data });
+            if(string.IsNullOrEmpty(indexName) || string.IsNullOrEmpty(uuid))
+                return Json(new { success = false });
+
+            int CurrentUserId = (int)_currentUserService.UserId;
+           
+            bool ret= await _indexUserMapping.CheckUserIndexingExists(CurrentUserId, uuid);
+            if(ret)
+            {
+                string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
+                string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
+                string Password = _configuration["UrlData:Password"] ?? string.Empty;
+
+                var retindex = await _searchService.GetDocDetailsByIndexName(Url, indexName, UserName, Password);
+                
+                List<FileSource> data = new();
+
+                foreach (var item in retindex)
+                {
+                    FileSource pathData = new FileSource
+                    {
+                        Path = new PathData()
+                    };
+
+                    pathData.Path.Real = _AESEncrytDecry.EncryptAES(item.Path.Real, AESKey); ;
+
+                    data.Add(pathData);
+                }
+                //fileSource.Path = lstfile;
+                return Json(new { success = true, data });
+            }
+            else
+            {
+                return Json(new { success = false });
+
+            }
 
         }
     }

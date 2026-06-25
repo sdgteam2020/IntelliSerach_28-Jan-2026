@@ -13,7 +13,7 @@ namespace Application.Interfaces.Repository
         Task<DTODataTablesResponse<DTOUserDataResponse>> GetAllUsers(DTODataTablesRequest request);
         Task<List<DTOUserDataResponse>> GetActiveUsers();
         Task<DTODataTablesResponse<DTOUserDataResponse>> GetActive_ForIndex_Mapping_Users(DTODataTablesRequest request,string IndexId);
-        Task<string> GetIndexWiseAssginUsers(string IndexId);
+        Task<string> GetIndexWiseAssginUsers(string IndexId,int UserId);
         Task<string[]> GetAllIndexUserWise(int? UserId);
 
 

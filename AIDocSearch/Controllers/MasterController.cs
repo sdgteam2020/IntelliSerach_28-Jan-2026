@@ -8,6 +8,7 @@ using Domain.DTOs.Requests;
 using Domain.DTOs.Response;
 using Domain.Entities;
 using Infrastructure.Shared.Helpers;
+using Infrastructure.Shared.Services;
 using iText.IO.Font.Constants;
 using iText.Kernel.Colors;
 using iText.Kernel.Font;
@@ -18,7 +19,10 @@ using iText.Kernel.Pdf.Extgstate;
 using iText.Kernel.Pdf.Xobject;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Ocsp;
 using System.Security.Claims;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AIDocSearch.Controllers
 {
@@ -31,9 +35,9 @@ namespace AIDocSearch.Controllers
         private readonly IAESEncrytDecry _AESEncrytDecry;
         private readonly IDateTimeService _dateTimeService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IUpload _iUpload;
 
-
-        public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IWebScraperSetting webScraperSetting, IWebServer webServer, IAESEncrytDecry aESEncrytDecry, IDateTimeService dateTimeService, Application.Interfaces.ICurrentUserService currentUserService)
+        public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IWebScraperSetting webScraperSetting, IWebServer webServer, IAESEncrytDecry aESEncrytDecry, IDateTimeService dateTimeService, Application.Interfaces.ICurrentUserService currentUserService, IUpload upload)
         {
             this.unitOfWork = unitOfWork;
             _env = env;
@@ -42,6 +46,7 @@ namespace AIDocSearch.Controllers
             _AESEncrytDecry = aESEncrytDecry;
             _dateTimeService= dateTimeService;
             _currentUserService = currentUserService;
+            _iUpload = upload;
         }
 
         #region Master Table
@@ -191,6 +196,9 @@ namespace AIDocSearch.Controllers
 
             if (string.IsNullOrWhiteSpace(pdfUrl))
                 return BadRequest("pdfUrl is required");
+           
+
+
 
             using var handler = new HttpClientHandler
             {
@@ -399,12 +407,10 @@ namespace AIDocSearch.Controllers
 
 
         #region Add Server
-
+        [Authorize]
         public async Task<IActionResult> AddWebServer()
         {
-            var allData = await _webServer.GetAllActive();
-
-            ViewBag.AllData = allData;
+          
             TempData["SuccessMessage"] = null;
             TempData["ErrorMessage"] = null;
             return View();
@@ -414,9 +420,15 @@ namespace AIDocSearch.Controllers
         public async Task<IActionResult> AddWebServer(string EncryptedData)
         {
             DTOAddWebServerRequest Request = await _AESEncrytDecry.DecryptAESWithDTO<DTOAddWebServerRequest>(EncryptedData, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
+            if(Request!=null)
+            {
 
-            var allData = await _webServer.GetAllActive();
-            ViewBag.AllData = allData;
+                ModelState.AddModelError(string.Empty, "Invalid data.");
+                TempData["ErrorMessage"] = $"Invalid data.";
+                return View(Request);
+            }
+            var allData = await _webServer.GetAllActive(Convert.ToInt32(_currentUserService.UserId));
+           
             bool isDuplicate = allData.Any(i =>
                  i.Id != Request.Id &&
                  !string.IsNullOrWhiteSpace(i.Includes) &&
@@ -486,13 +498,13 @@ namespace AIDocSearch.Controllers
                 if (ret != null && ret.Id > 0)
                 {
                     
-                    ViewBag.AllData = await _webServer.GetAllActive();
+                    
                     TempData["SuccessMessage"] = "Record Save successfully.";
                     return View(Request);
                 }
                 else
                 {
-                    ViewBag.AllData = await _webServer.GetAllActive();
+                    
                     ModelState.AddModelError(string.Empty, ret.Url ?? "Record Not Save.");
                     TempData["ErrorMessage"] = $"Record Not Save.";
                     return View(data);
@@ -500,19 +512,21 @@ namespace AIDocSearch.Controllers
             }
 
 
-            ViewBag.AllData = await _webServer.GetAllActive();
+            
             return View(Request);
         }
-
-        public async Task<IActionResult> DeleteWebServer(DTOCommon Data)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteWebServer([FromBody]  DTOCommon Data)
         {
-            return Json(await _webServer.SoftDeleteWebServer(Data.Id));
+            return Json(await _webServer.SoftDeleteWebServer(Data.Id,(int)_currentUserService.UserId));
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetAllWebServer()
         {
-            return Json(await _webServer.GetAllActive());
+
+            return Json(await _webServer.GetAllActive(Convert.ToInt32(_currentUserService.UserId)));
         }
         #endregion
     }

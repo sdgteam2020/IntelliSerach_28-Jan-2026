@@ -18,7 +18,69 @@ namespace Infrastructure.Shared.Services
             _uploadFilesDB = uploadFilesDB;
         }
 
+        public async Task<bool> CheckFileExits(string uploadPath, string fileName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(fileName))
+                    return false;
 
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                if (File.Exists(filePath))
+                {
+                   
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public async Task<bool> CheckFileExits(string Path)
+        {
+            try
+            {
+   
+
+                if (File.Exists(Path))
+                {
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public async Task<bool> FileDelete(string uploadPath,string fileName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(fileName))
+                    return false;
+
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         public async Task<DTOGenericResponse<object>> UploadFileAsync(
      IFormFile file,
@@ -78,8 +140,7 @@ namespace Infrastructure.Shared.Services
 
             TrnUploadFiles trnUploadFiles = new TrnUploadFiles
             {
-                FileName = savedFileName,
-                FolderName= userName,
+                FileName = userName + "\\" + savedFileName,
                 OrignalFileName = file.FileName,
                 CreatedOn = now,
                 UpdatedOn = now,

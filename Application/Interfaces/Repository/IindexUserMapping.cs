@@ -11,6 +11,8 @@ namespace Application.Interfaces.Repository
     {
         Task<TrnIndexUserMapping> AddWithCheckIndexId(TrnIndexUserMapping Data);
         Task<bool> UserAssginAndDeAssignIndex(DTOIndexAssignRequest Data);
+
+        Task<bool> CheckUserIndexingExists(int UserId,string IndexId);
         // Task<string[]> GetAllIndexUserWise(int? UserId);
     }
 }

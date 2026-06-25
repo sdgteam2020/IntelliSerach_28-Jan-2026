@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.GenericRepository;
+using Domain.DTOs.Response;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ namespace Application.Interfaces.Repository
 {
     public interface IWebServer : IGenericRepository<TrnWebServer>
     {
-        Task<bool> SoftDeleteWebServer(int Id);
-        Task<List<TrnWebServer>> GetAllActive();
+        Task<bool> SoftDeleteWebServer(int Id, int UserId);
+        Task<List<DTOWebServerResponse>> GetAllActive(int UserId);
     }
 }

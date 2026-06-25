@@ -10,6 +10,8 @@ namespace Application.Interfaces
     {
         Task<DTOGenericResponse<object>> UploadFileAsync(IFormFile file, string uploadPath, int UserId,string UserName);
 
-
+        Task<bool> FileDelete(string uploadPath,string FileName);
+        Task<bool> CheckFileExits(string uploadPath, string FileName);
+        Task<bool> CheckFileExits(string Path);
     }
 }

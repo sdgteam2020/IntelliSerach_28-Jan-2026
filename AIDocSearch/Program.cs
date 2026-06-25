@@ -271,7 +271,8 @@ app.UseAuthorization();
 // Session BEFORE endpoints (so MVC/Razor can use it)
 app.UseSession();
 app.UseMiddleware<GlobalExceptionMiddleware>();
-//app.UseMiddleware<XssProtectionMiddleware>();
+app.UseMiddleware<XssProtectionMiddleware>();
+app.UseMiddleware<SessionCheckMiddleware>();
 
 app.MapControllerRoute(
     name: "default",

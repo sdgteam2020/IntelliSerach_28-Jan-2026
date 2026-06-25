@@ -14,3 +14,19 @@
 
     return encrypted.toString();
 } 
+function decryptPayloadData(cipherText) {
+    const secret = document.getElementById("payloadaes").value;
+
+    const hash = CryptoJS.SHA256(secret).toString();
+
+    const key = CryptoJS.enc.Hex.parse(hash.substring(0, 64)); // 32 bytes
+    const iv = CryptoJS.enc.Hex.parse(hash.substring(0, 32));  // 16 bytes
+
+    const decrypted = CryptoJS.AES.decrypt(cipherText, key, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7
+    });
+
+    return decrypted.toString(CryptoJS.enc.Utf8);
+}

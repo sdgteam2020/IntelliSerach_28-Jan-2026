@@ -1,8 +1,10 @@
 ﻿using Application.Interfaces.Repository;
 using Domain.DTOs.Requests;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Repository.GenericRepository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -37,6 +39,14 @@ namespace Infrastructure.Repository
 
             // Record already exists, so return the existing one
             return existing;
+        }
+
+        public async Task<bool> CheckUserIndexingExists(int UserId, string IndexId)
+        {
+            if ((int)UsersId.Admin == UserId)
+                return true;
+          
+            return await _context.TrnIndexUserMapping.AnyAsync(i =>i.UserId == UserId && i.IndexId == IndexId);
         }
 
         public async Task<bool> UserAssginAndDeAssignIndex(DTOIndexAssignRequest Data)

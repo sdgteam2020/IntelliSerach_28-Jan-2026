@@ -97,7 +97,7 @@
                                         
                         @foreach (var item in ViewBag.AllData)
                         {
-                                            var pdfUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/UploadForIndexing/{item.FolderName}/{item.FileName}";
+                                            var pdfUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/UploadForIndexing/{item.FileName}";
                                             pdfUrl = _iAESEncrytDecry.EncryptAES(pdfUrl, dtoSession.AESKey);
                                             <tr>
                                                 <td>@srNo</td>
@@ -122,6 +122,11 @@
                                                        target="_blank">
                                                         <i class="fa fa-eye"></i>
                                                     </a>
+                                                    <button type="button"
+                                                            class="btn btn-danger btnDel"
+                                                            data-id="@item.TrnUploadId">
+                                                        <i class="fa-solid fa-trash"></i> 
+                                                    </button>
                                                 </td>
                                             </tr>
                                             srNo++;
