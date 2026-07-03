@@ -59,7 +59,7 @@ builder.Services.ConfigureApplicationCookie(o =>
     o.Events.OnValidatePrincipal = SecurityStampValidator.ValidatePrincipalAsync;
 });
 // Antiforgery cookie hardened (__Host- prefix requires Secure + path "/" + no Domain)
-builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
+builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true); 
 builder.Services.AddAntiforgery(o =>
 {
     o.Cookie.Name = "__Host-AntiForgery";
@@ -187,7 +187,7 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Account/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see .
     app.UseHsts();
 }
 

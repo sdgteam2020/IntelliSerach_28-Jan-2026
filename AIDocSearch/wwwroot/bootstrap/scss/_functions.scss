@@ -140,7 +140,7 @@
     @return $string;
 }
 
-// See https://codepen.io/kevinweber/pen/dXWoRw
+// See ###S###codepen.io/kevinweber/pen/dXWoRw
 //
 // Requires the use of quotes around data URIs.
 
@@ -161,7 +161,7 @@
 }
 
 // Color contrast
-// See https://github.com/twbs/bootstrap/pull/30168
+// See ###S###github.com/twbs/bootstrap/pull/30168
 
 // A list of pre-calculated numbers of pow(divide((divide($value, 255) + .055), 1.055), 2.4). (from 0 to 255)
 // stylelint-disable-next-line scss/dollar-variable-default, scss/dollar-variable-pattern
@@ -197,8 +197,8 @@ $_luminance-list: .0008 .001 .0011 .0013 .0015 .0017 .002 .0022 .0025 .0027 .003
 }
 
 // Return WCAG2.1 relative luminance
-// See https://www.w3.org/TR/WCAG/#dfn-relative-luminance
-// See https://www.w3.org/TR/WCAG/#dfn-contrast-ratio
+// See ###S###www.w3.org/TR/WCAG/#dfn-relative-luminance
+// See ###S###www.w3.org/TR/WCAG/#dfn-contrast-ratio
 @function luminance($color) {
     $rgb: ( "r": red($color), "g": green($color), "b": blue($color) );
 

@@ -273,7 +273,7 @@ const getTimerProgressBar = () => elementByClass(swalClasses['timer-progress-bar
  */
 const getCloseButton = () => elementByClass(swalClasses.close);
 
-// https://github.com/jkup/focusable/blob/master/index.js
+// ###S###github.com/jkup/focusable/blob/master/index.js
 const focusable = `
   a[href],
   area[href],
@@ -350,7 +350,7 @@ const isLoading = () => {
 
 /**
  * Securely set innerHTML of an element
- * https://github.com/sweetalert2/sweetalert2/issues/1926
+ * ###S###github.com/sweetalert2/sweetalert2/issues/1926
  *
  * @param {HTMLElement} elem
  * @param {string} html
@@ -370,7 +370,7 @@ const setInnerHtml = (elem, html) => {
         if (body) {
             Array.from(body.childNodes).forEach(child => {
                 if (child instanceof HTMLVideoElement || child instanceof HTMLAudioElement) {
-                    elem.appendChild(child.cloneNode(true)); // https://github.com/sweetalert2/sweetalert2/issues/2507
+                    elem.appendChild(child.cloneNode(true)); // ###S###github.com/sweetalert2/sweetalert2/issues/2507
                 } else {
                     elem.appendChild(child);
                 }
@@ -463,7 +463,7 @@ const focusInput = input => {
 
     // place cursor at end of text in text input
     if (input.type !== 'file') {
-        // http://stackoverflow.com/a/2345915
+        // ###withouts###stackoverflow.com/a/2345915
         const val = input.value;
         input.value = '';
         input.value = val;
@@ -650,7 +650,7 @@ const selfOrParentIsScrollable = (element, stopElement) => {
 };
 
 /**
- * borrowed from https://stackoverflow.com/a/46352119
+ * borrowed from ###S###stackoverflow.com/a/46352119
  *
  * @param {HTMLElement} elem
  * @returns {boolean}
@@ -1083,8 +1083,8 @@ function handleGrowParam(container, grow) {
  * This module contains `WeakMap`s for each effectively-"private  property" that a `Swal` has.
  * For example, to set the private property "foo" of `this` to "bar", you can `privateProps.foo.set(this, 'bar')`
  * This is the approach that Babel will probably take to implement private methods/fields
- *   https://github.com/tc39/proposal-private-methods
- *   https://github.com/babel/babel/pull/7555
+ *   ###S###github.com/tc39/proposal-private-methods
+ *   ###S###github.com/babel/babel/pull/7555
  * Once we have the changes from that PR in Babel, and our core class fits reasonable in *one module*
  *   then we can use that language feature.
  */
@@ -1358,9 +1358,9 @@ renderInputType.textarea = (textarea, params) => {
      */
     const getMargin = el => parseInt(window.getComputedStyle(el).marginLeft) + parseInt(window.getComputedStyle(el).marginRight);
 
-    // https://github.com/sweetalert2/sweetalert2/issues/2291
+    // ###S###github.com/sweetalert2/sweetalert2/issues/2291
     setTimeout(() => {
-        // https://github.com/sweetalert2/sweetalert2/issues/1699
+        // ###S###github.com/sweetalert2/sweetalert2/issues/1699
         if ('MutationObserver' in window) {
             const initialPopupWidth = parseInt(window.getComputedStyle(getPopup()).width);
             const textareaResizeHandler = () => {
@@ -1708,7 +1708,7 @@ const renderPopup = (instance, params) => {
     }
 
     // Width
-    // https://github.com/sweetalert2/sweetalert2/issues/2170
+    // ###S###github.com/sweetalert2/sweetalert2/issues/2170
     if (params.toast) {
         applyNumericalStyle(container, 'width', params.width);
         popup.style.width = '100%';
@@ -1992,9 +1992,9 @@ const keydownHandler = (innerParams, event, dismissWith) => {
     }
 
     // Ignore keydown during IME composition
-    // https://developer.mozilla.org/en-US/docs/Web/API/Document/keydown_event#ignoring_keydown_during_ime_composition
-    // https://github.com/sweetalert2/sweetalert2/issues/720
-    // https://github.com/sweetalert2/sweetalert2/issues/2406
+    // ###S###developer.mozilla.org/en-US/docs/Web/API/Document/keydown_event#ignoring_keydown_during_ime_composition
+    // ###S###github.com/sweetalert2/sweetalert2/issues/720
+    // ###S###github.com/sweetalert2/sweetalert2/issues/2406
     if (event.isComposing || event.keyCode === 229) {
         return;
     }
@@ -2028,7 +2028,7 @@ const keydownHandler = (innerParams, event, dismissWith) => {
  * @param {SweetAlertOptions} innerParams
  */
 const handleEnter = (event, innerParams) => {
-    // https://github.com/sweetalert2/sweetalert2/issues/2386
+    // ###S###github.com/sweetalert2/sweetalert2/issues/2386
     if (!callIfFunction(innerParams.allowEnterKey)) {
         return;
     }
@@ -2120,8 +2120,8 @@ const handleEsc = (event, innerParams, dismissWith) => {
  * This module contains `WeakMap`s for each effectively-"private  property" that a `Swal` has.
  * For example, to set the private property "foo" of `this` to "bar", you can `privateProps.foo.set(this, 'bar')`
  * This is the approach that Babel will probably take to implement private methods/fields
- *   https://github.com/tc39/proposal-private-methods
- *   https://github.com/babel/babel/pull/7555
+ *   ###S###github.com/tc39/proposal-private-methods
+ *   ###S###github.com/babel/babel/pull/7555
  * Once we have the changes from that PR in Babel, and our core class fits reasonable in *one module*
  *   then we can use that language feature.
  */
@@ -2131,7 +2131,7 @@ var privateMethods = {
     swalPromiseReject: new WeakMap()
 };
 
-// From https://developer.paciellogroup.com/blog/2018/06/the-current-state-of-modal-dialog-accessibility/
+// From ###S###developer.paciellogroup.com/blog/2018/06/the-current-state-of-modal-dialog-accessibility/
 // Adding aria-hidden="true" to elements outside of the active modal dialog ensures that
 // elements not within the active modal dialog will not be surfaced if a user opens a screen
 // reader’s list of elements (headings, form controls, landmarks, etc.) in the document.
@@ -2162,11 +2162,11 @@ const unsetAriaHidden = () => {
 };
 
 // @ts-ignore
-const isSafariOrIOS = typeof window !== 'undefined' && !!window.GestureEvent; // true for Safari desktop + all iOS browsers https://stackoverflow.com/a/70585394
+const isSafariOrIOS = typeof window !== 'undefined' && !!window.GestureEvent; // true for Safari desktop + all iOS browsers ###S###stackoverflow.com/a/70585394
 
 /**
  * Fix iOS scrolling
- * http://stackoverflow.com/q/39626302
+ * ###withouts###stackoverflow.com/q/39626302
  */
 const iOSfix = () => {
     if (isSafariOrIOS && !hasClass(document.body, swalClasses.iosfix)) {
@@ -2178,7 +2178,7 @@ const iOSfix = () => {
 };
 
 /**
- * https://github.com/sweetalert2/sweetalert2/issues/1246
+ * ###S###github.com/sweetalert2/sweetalert2/issues/1246
  */
 const lockBodyScroll = () => {
     const container = getContainer();
@@ -2236,7 +2236,7 @@ const shouldPreventTouchMove = event => {
 };
 
 /**
- * https://github.com/sweetalert2/sweetalert2/issues/1786
+ * ###S###github.com/sweetalert2/sweetalert2/issues/1786
  *
  * @param {*} event
  * @returns {boolean}
@@ -2246,7 +2246,7 @@ const isStylus = event => {
 };
 
 /**
- * https://github.com/sweetalert2/sweetalert2/issues/1891
+ * ###S###github.com/sweetalert2/sweetalert2/issues/1891
  *
  * @param {TouchEvent} event
  * @returns {boolean}
@@ -2265,7 +2265,7 @@ const undoIOSfix = () => {
 
 /**
  * Measure scrollbar width for padding body during modal show/hide
- * https://github.com/twbs/bootstrap/blob/master/js/src/modal.js
+ * ###S###github.com/twbs/bootstrap/blob/master/js/src/modal.js
  *
  * @returns {number}
  */
@@ -2293,7 +2293,7 @@ const replaceScrollbarWithPadding = initialBodyOverflow => {
         return;
     }
     // if the body has overflow
-    if (document.body.scrollHeight > window.innerHeight || initialBodyOverflow === 'scroll' // https://github.com/sweetalert2/sweetalert2/issues/2663
+    if (document.body.scrollHeight > window.innerHeight || initialBodyOverflow === 'scroll' // ###S###github.com/sweetalert2/sweetalert2/issues/2663
     ) {
         // add padding so the content doesn't shift after removal of scrollbar
         previousBodyPadding = parseInt(window.getComputedStyle(document.body).getPropertyValue('padding-right'));
@@ -2321,7 +2321,7 @@ function removePopupAndResetState(instance, container, returnFocus, didClose) {
         removeKeydownHandler(globalState);
     }
 
-    // workaround for https://github.com/sweetalert2/sweetalert2/issues/2088
+    // workaround for ###S###github.com/sweetalert2/sweetalert2/issues/2088
     // for some reason removing the container in Safari will scroll the document to bottom
     if (isSafariOrIOS) {
         container.setAttribute('style', 'display:none !important');
@@ -2677,7 +2677,7 @@ function populateSelectOptions(popup, inputOptions, params) {
         const optionValue = inputOption[0];
         const optionLabel = inputOption[1];
         // <optgroup> spec:
-        // https://www.w3.org/TR/html401/interact/forms.html#h-17.6
+        // ###S###www.w3.org/TR/html401/interact/forms.html#h-17.6
         // "...all OPTGROUP elements must be specified directly within a SELECT element (i.e., groups may not be nested)..."
         // check whether this is a <optgroup>
         if (Array.isArray(optionLabel)) {
@@ -3662,7 +3662,7 @@ const bodyClickListener = event => {
     }
 };
 
-// Source: https://gist.github.com/mudge/5830382?permalink_comment_id=2691957#gistcomment-2691957
+// Source: ###S###gist.github.com/mudge/5830382?permalink_comment_id=2691957#gistcomment-2691957
 
 class EventEmitter {
     constructor() {
@@ -3677,7 +3677,7 @@ class EventEmitter {
     _getHandlersByEventName(eventName) {
         if (typeof this.events[eventName] === 'undefined') {
             // not Set because we need to keep the FIFO order
-            // https://github.com/sweetalert2/sweetalert2/pull/2763#discussion_r1748990334
+            // ###S###github.com/sweetalert2/sweetalert2/pull/2763#discussion_r1748990334
             this.events[eventName] = [];
         }
         return this.events[eventName];
@@ -3744,7 +3744,7 @@ class EventEmitter {
      */
     removeAllListeners(eventName) {
         if (this.events[eventName] !== undefined) {
-            // https://github.com/sweetalert2/sweetalert2/pull/2763#discussion_r1749239222
+            // ###S###github.com/sweetalert2/sweetalert2/pull/2763#discussion_r1749239222
             this.events[eventName].length = 0;
         }
     }
@@ -4219,7 +4219,7 @@ const fixScrollContainer = (container, scrollbarPadding, initialBodyOverflow) =>
 const addClasses = (container, popup, params) => {
     addClass(container, params.showClass.backdrop);
     if (params.animation) {
-        // this workaround with opacity is needed for https://github.com/sweetalert2/sweetalert2/issues/2059
+        // this workaround with opacity is needed for ###S###github.com/sweetalert2/sweetalert2/issues/2059
         popup.style.setProperty('opacity', '0', 'important');
         show(popup, 'grid');
         setTimeout(() => {
@@ -4252,7 +4252,7 @@ var defaultInputValidators = {
      * @returns {Promise<string | void>}
      */
     url: (string, validationMessage) => {
-        // taken from https://stackoverflow.com/a/3809435 with a small change from #1306 and #2013
+        // taken from ###S###stackoverflow.com/a/3809435 with a small change from #1306 and #2013
         return /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-z]{2,63}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)$/.test(string) ? Promise.resolve() : Promise.resolve(validationMessage || 'Invalid URL');
     }
 };
@@ -4294,7 +4294,7 @@ function setParameters(params) {
 
     // showLoaderOnConfirm && preConfirm
     if (params.showLoaderOnConfirm && !params.preConfirm) {
-        warn('showLoaderOnConfirm is set to true, but preConfirm is not defined.\n' + 'showLoaderOnConfirm should be used together with preConfirm, see usage example:\n' + 'https://sweetalert2.github.io/#ajax-request');
+        warn('showLoaderOnConfirm is set to true, but preConfirm is not defined.\n' + 'showLoaderOnConfirm should be used together with preConfirm, see usage example:\n' + '###S###sweetalert2.github.io/#ajax-request');
     }
     validateCustomTargetElement(params);
 

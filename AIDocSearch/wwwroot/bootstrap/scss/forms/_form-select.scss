@@ -1,7 +1,7 @@
 // Select
 //
 // Replaces the browser default select with a custom one, mostly pulled from
-// https://primer.github.io/.
+// ###S###primer.github.io/.
 
 .form-select {
     --#{$prefix}form-select-bg-img: #{escape-svg($form-select-indicator)};

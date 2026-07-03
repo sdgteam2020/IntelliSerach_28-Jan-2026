@@ -22,7 +22,7 @@ function BindData() {
         processing: true,
         serverSide: true,
         filter: true,
-        stateSave: true,
+        stateSave: false,
         "lengthMenu": [[5, 10, 20, 50, 100], [5, 10, 20, 50, 100]],
         order: [[1, 'desc']],
         ajax: async function (data, callback, settings) {
@@ -51,7 +51,7 @@ function BindData() {
         columns: [
             {
                 data: null,
-                name: "SerialNumber",
+                name: "Slno.",
                 orderable: false,
                 render: function (data, type, row, meta) {
                     return meta.row + (meta.settings?._iDisplayStart || 0) + 1;
@@ -68,17 +68,14 @@ function BindData() {
                     if (!data) return "NA";
 
                     let isActive = row.Active === true;
-                    let sliderChecked = isActive ? "checked" : "";
-                    let sliderClass = isActive ? "switch-success" : "switch-danger";
 
                     return `
-            <label class="form-check form-switch mb-0 ${sliderClass}">
-                <input class="form-check-input updateuser"
-                       type="checkbox"
-                       role="switch"
-                       data-id="${data}"
-                       ${sliderChecked}>
-            </label>
+            <button type="button"
+                    class="btn btn-sm ${isActive ? 'btn-success' : 'btn-danger'} updateuser"
+                    data-id="${data}"
+                    data-active="${isActive}">
+                ${isActive ? 'Active' : 'Inactive'}
+            </button>
         `;
                 }
             }
@@ -121,78 +118,82 @@ function BindData() {
         }
     });
 }
-$(document).on('change', '.updateuser', async function () {
-    let userId = $(this).data('id');
-    let isActive = $(this).prop('checked');
+$(document).on('click', '.updateuser', async function () {
+
+    const userId = $(this).data('id');
+    const isActive = $(this).data('active');      // Current status
+    const newStatus = !isActive;                  // Status after update
+
     const result = await Swal.fire({
         title: "Are you sure?",
-        text: "Do you want to " + (isActive ? "activate" : "deactivate") + " this user?",
+        text: `Do you want to ${newStatus ? "activate" : "deactivate"} this user?`,
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
         confirmButtonText: "Yes"
     });
-    if (result.isConfirmed) {
-     
 
-        const token = $('input[name="__RequestVerificationToken"]').val();
+    if (!result.isConfirmed) {
+        return;
+    }
 
-        try {
-            const resp = await fetch("/IntelliSearch/Account/UpdateApprovalStatus", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",  // Ensure content-type is set to JSON
-                    "RequestVerificationToken": token   // Pass the CSRF token in the header
-                },
-                body: JSON.stringify({
-                    Id: userId,
-                    Active: isActive
-                })
+    const token = $('input[name="__RequestVerificationToken"]').val();
+
+    try {
+        const resp = await fetch("/IntelliSearch/Account/UpdateApprovalStatus", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "RequestVerificationToken": token
+            },
+            body: JSON.stringify({
+                Id: userId,
+                Active: newStatus
+            })
+        });
+
+        if (!resp.ok) {
+            const text = await resp.text();
+
+            Swal.fire({
+                icon: "error",
+                title: "Update Failed",
+                text: text
             });
 
-            if (!resp.ok) {
-                // non-200 status (e.g., 400/500)
-                const text = await resp.text();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "error",
-                    title: "Save failed.\n" + text,
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+            return;
+        }
 
-                return;
-            }
+        const data = await resp.json();
 
-            // expecting your DTOGenericResponse JSON from the controller
-            const data = await resp.json();
-            if (data.Code == 200) {
-                BindData();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: "" + (isActive ? "Activate" : "Deactivate") + " successfully.",
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            } else {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "error",
-                    title: data.Message || "Update failed.",
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            }
-        } catch (err) {
+        if (data.Code === 200) {
+
+            BindData();
+
             Swal.fire({
                 position: "top-end",
-                icon: "error",
-                title: "Network error while saving",
+                icon: "success",
+                title: `User ${newStatus ? "activated" : "deactivated"} successfully.`,
                 showConfirmButton: false,
                 timer: 1500
             });
+
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: data.Message || "Update failed."
+            });
         }
+
+    } catch (err) {
+
+        Swal.fire({
+            icon: "error",
+            title: "Network Error",
+            text: "Unable to connect to the server."
+        });
+
+        console.error(err);
     }
 });

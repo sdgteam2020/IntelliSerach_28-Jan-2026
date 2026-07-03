@@ -14,7 +14,7 @@ namespace Infrastructure.Shared.Services
         public async Task<string> GetResponse(DTOSerchRequest Request, string Url, string UserName, string Password)
         {
             Request.Filter = Request.Filter == "All" ? "*" : Request.Filter;
-            Request.Filter = Request.Filter.Replace("https://", "").Replace("http://", "").Trim();
+            Request.Filter = Request.Filter.Replace("###S###", "").Replace("###withouts###", "").Trim();
             
 
             var filters = new List<object>();

@@ -30,7 +30,7 @@
     // stylelint-disable-next-line selector-max-universal
     > :not(caption) > * > * {
         padding: $table-cell-padding-y $table-cell-padding-x;
-        // Following the precept of cascades: https://codepen.io/miriamsuzanne/full/vYNgodb
+        // Following the precept of cascades: ###S###codepen.io/miriamsuzanne/full/vYNgodb
         color: var(--#{$prefix}table-color-state, var(--#{$prefix}table-color-type, var(--#{$prefix}table-color)));
         background-color: var(--#{$prefix}table-bg);
         border-bottom-width: $table-border-width;

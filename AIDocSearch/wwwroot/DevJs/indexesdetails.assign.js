@@ -366,7 +366,7 @@ $(function () {
                                 iconClass = 'text-warning';
                                 break;
                         }
-                        let downloadUrl = "";/* `https://192.168.10.207/pdf/${encodeURIComponent(fileName)}`; */
+                        let downloadUrl = "";/* `###S###192.168.10.207/pdf/${encodeURIComponent(fileName)}`; */
                         const normalizedPath = path.replace(/\\/g, "/");
 
                         const match = webServerList.find(item =>

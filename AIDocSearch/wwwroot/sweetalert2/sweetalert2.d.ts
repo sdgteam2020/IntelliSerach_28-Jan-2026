@@ -1274,7 +1274,7 @@ declare module 'sweetalert2' {
 
     /**
      * Set to `true` to put the popup on top of all other elements (Top Layer).
-     * Top layer docs: https://developer.mozilla.org/en-US/docs/Glossary/Top_layer
+     * Top layer docs: ###S###developer.mozilla.org/en-US/docs/Glossary/Top_layer
      *
      * @default false
      */

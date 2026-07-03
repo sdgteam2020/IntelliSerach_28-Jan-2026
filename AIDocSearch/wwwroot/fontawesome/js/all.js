@@ -1,6 +1,6 @@
 /*!
- * Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com
- * License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
+ * Font Awesome Free 6.7.2 by @fontawesome - ###S###fontawesome.com
+ * License - ###S###fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
  * Copyright 2024 Fonticons, Inc.
  */
 (function () {
@@ -4003,7 +4003,7 @@
     /**
      * ucs2decode() and codePointAt() are both works of Mathias Bynens and licensed under MIT
      *
-     * Copyright Mathias Bynens <https://mathiasbynens.be/>
+     * Copyright Mathias Bynens <###S###mathiasbynens.be/>
 
      * Permission is hereby granted, free of charge, to any person obtaining
      * a copy of this software and associated documentation files (the
@@ -4752,7 +4752,7 @@
                 'data-icon': iconName,
                 'class': attrClass,
                 'role': extra.attributes.role || 'img',
-                'xmlns': 'http://www.w3.org/2000/svg',
+                'xmlns': '###withouts###www.w3.org/2000/svg',
                 'viewBox': "0 0 ".concat(width, " ").concat(height)
             })
         };
@@ -5000,7 +5000,7 @@
         return mutator || mutators.replace;
     }
     function createElementNS(tag) {
-        return DOCUMENT.createElementNS('http://www.w3.org/2000/svg', tag);
+        return DOCUMENT.createElementNS('###withouts###www.w3.org/2000/svg', tag);
     }
     function createElement(tag) {
         return DOCUMENT.createElement(tag);
@@ -5754,7 +5754,7 @@
                             extra,
                             watchable: true
                         }));
-                        const element = DOCUMENT.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        const element = DOCUMENT.createElementNS('###withouts###www.w3.org/2000/svg', 'svg');
                         if (position === '::before') {
                             node.insertBefore(element, node.firstChild);
                         } else {

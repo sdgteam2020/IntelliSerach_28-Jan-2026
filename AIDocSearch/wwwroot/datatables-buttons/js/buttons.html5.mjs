@@ -3,7 +3,7 @@
  * © SpryMedia Ltd - datatables.net/license
  *
  * FileSaver.js (1.3.3) - MIT license
- * Copyright © 2016 Eli Grey - http://eligrey.com
+ * Copyright © 2016 Eli Grey - ###withouts###eligrey.com
  */
 
 import jQuery from 'jquery';
@@ -60,7 +60,7 @@ var _saveAs = (function (view) {
         get_URL = function () {
             return view.URL || view.webkitURL || view;
         },
-        save_link = doc.createElementNS('http://www.w3.org/1999/xhtml', 'a'),
+        save_link = doc.createElementNS('###withouts###www.w3.org/1999/xhtml', 'a'),
         can_use_save_link = 'download' in save_link,
         click = function (node) {
             var event = new MouseEvent('click');
@@ -167,7 +167,7 @@ var _saveAs = (function (view) {
                     else {
                         var opened = view.open(object_url, '_blank');
                         if (!opened) {
-                            // Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
+                            // Apple does not allow window.open, see ###S###developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
                             view.location.href = object_url;
                         }
                     }
@@ -565,20 +565,20 @@ function _excelColWidth(data, col) {
 var excelStrings = {
     '_rels/.rels':
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+        '<Relationships xmlns="###withouts###schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="###withouts###schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
         '</Relationships>',
 
     'xl/_rels/workbook.xml.rels':
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
-        '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+        '<Relationships xmlns="###withouts###schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="###withouts###schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+        '<Relationship Id="rId2" Type="###withouts###schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
         '</Relationships>',
 
     '[Content_Types].xml':
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+        '<Types xmlns="###withouts###schemas.openxmlformats.org/package/2006/content-types">' +
         '<Default Extension="xml" ContentType="application/xml" />' +
         '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml" />' +
         '<Default Extension="jpeg" ContentType="image/jpeg" />' +
@@ -589,7 +589,7 @@ var excelStrings = {
 
     'xl/workbook.xml':
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+        '<workbook xmlns="###withouts###schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="###withouts###schemas.openxmlformats.org/officeDocument/2006/relationships">' +
         '<fileVersion appName="xl" lastEdited="5" lowestEdited="5" rupBuild="24816"/>' +
         '<workbookPr showInkAnnotation="0" autoCompressPictures="0"/>' +
         '<bookViews>' +
@@ -603,14 +603,14 @@ var excelStrings = {
 
     'xl/worksheets/sheet1.xml':
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac">' +
+        '<worksheet xmlns="###withouts###schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="###withouts###schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="###withouts###schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="###withouts###schemas.microsoft.com/office/spreadsheetml/2009/9/ac">' +
         '<sheetData/>' +
         '<mergeCells count="0"/>' +
         '</worksheet>',
 
     'xl/styles.xml':
         '<?xml version="1.0" encoding="UTF-8"?>' +
-        '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac">' +
+        '<styleSheet xmlns="###withouts###schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="###withouts###schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="###withouts###schemas.microsoft.com/office/spreadsheetml/2009/9/ac">' +
         '<numFmts count="6">' +
         '<numFmt numFmtId="164" formatCode="[$$-409]#,##0.00;-[$$-409]#,##0.00"/>' +
         '<numFmt numFmtId="165" formatCode="&quot;£&quot;#,##0.00"/>' +
@@ -799,7 +799,7 @@ var excelStrings = {
 // Pattern matching for special number formats. Perhaps this should be exposed
 // via an API in future?
 // Ref: section 3.8.30 - built in formatters in open spreadsheet
-//   https://www.ecma-international.org/news/TC45_current_work/Office%20Open%20XML%20Part%204%20-%20Markup%20Language%20Reference.pdf
+//   ###S###www.ecma-international.org/news/TC45_current_work/Office%20Open%20XML%20Part%204%20-%20Markup%20Language%20Reference.pdf
 var _excelSpecials = [
     {
         match: /^\-?\d+\.\d%$/,
@@ -1390,7 +1390,7 @@ DataTable.ext.buttons.excelHtml5 = {
         _addToZip(zip, xlsx);
 
         // Modern Excel has a 218 character limit on the file name + path of the file (why!?)
-        // https://support.microsoft.com/en-us/office/excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3
+        // ###S###support.microsoft.com/en-us/office/excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3
         // So we truncate to allow for this.
         var filename = exportInfo.filename;
 
@@ -1443,7 +1443,7 @@ DataTable.ext.buttons.excelHtml5 = {
 };
 
 //
-// PDF export - using pdfMake - http://pdfmake.org
+// PDF export - using pdfMake - ###withouts###pdfmake.org
 //
 DataTable.ext.buttons.pdfHtml5 = {
     className: 'buttons-pdf buttons-html5',

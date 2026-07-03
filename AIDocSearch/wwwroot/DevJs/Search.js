@@ -139,7 +139,7 @@ async function searchContent(reset = true) {
                     if (cleanPath == "") {
                         Mainurl = canonical_url;
                         cleanPath = canonical_url;
-                        //fileurl = "";
+                        fileurl = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
                         baseurl = getBaseUrl(Mainurl)
                     }
                     else {
@@ -150,7 +150,7 @@ async function searchContent(reset = true) {
 
                     let html = `
     <div class="google-result">
-        <a href="${fileurlbase}${fileUrl}"
+        <a href="${fileurlbase}${fileurl}"
            target="_blank"
            class="result-title">
            ${Mainurl}
