@@ -420,7 +420,7 @@ namespace AIDocSearch.Controllers
         public async Task<IActionResult> AddWebServer(string EncryptedData)
         {
             DTOAddWebServerRequest Request = await _AESEncrytDecry.DecryptAESWithDTO<DTOAddWebServerRequest>(EncryptedData, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
-            if(Request!=null)
+            if(Request==null)
             {
 
                 ModelState.AddModelError(string.Empty, "Invalid data.");

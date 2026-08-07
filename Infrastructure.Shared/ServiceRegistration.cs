@@ -18,8 +18,8 @@ namespace Infrastructure.Shared
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<IUpload, Upload>();
             services.AddScoped<IDateTimeService, DateTimeService>();
-           
 
+            services.AddSingleton<LogBuffer>();
 
         }
     }

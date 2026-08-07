@@ -17,8 +17,8 @@ $(document).ready(function () {
 
         $('.filter').removeClass('active');
         $(this).addClass('active');
-
-        selectedFilter = $(this).text();
+     
+        selectedFilter = $(this).attr('title');
 
         GetFilter(selectedFilter);
     });
@@ -110,7 +110,7 @@ async function searchContent(reset = true) {
 
                     let Mainurl = "";
                     let baseurl = "";
-                    let fileurl = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
+                    let fileurl = ""
                     let fileurlbase = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
 
                    
@@ -122,16 +122,19 @@ async function searchContent(reset = true) {
                     );
 
                     if (match) {
-                         const marker = match.Includes.replace("/", "").replace(/\\/g, "/");
-                         const index = normalizedPath.indexOf(marker);
+                        const marker = match.Includes.replace("/", "").replace(/\\/g, "/");
+                        const index = normalizedPath.indexOf(marker);
 
-                            const result = index >= 0
-                                ? normalizedPath.substring(index + marker.length + 1)
-                                : normalizedPath;
+                        const result = index >= 0
+                            ? normalizedPath.substring(index + marker.length + 1)
+                            : normalizedPath;
                         fileUrl = match.Url + "/" + result;
 
                         const encrypted = encryptPayloadData(fileUrl);
                         fileUrl = encodeURIComponent(encrypted);
+                    } else {
+
+                        fileUrl = null;
                     }
 
 
@@ -139,7 +142,7 @@ async function searchContent(reset = true) {
                     if (cleanPath == "") {
                         Mainurl = canonical_url;
                         cleanPath = canonical_url;
-                        fileurl = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
+                        fileUrl = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
                         baseurl = getBaseUrl(Mainurl)
                     }
                     else {
@@ -150,7 +153,7 @@ async function searchContent(reset = true) {
 
                     let html = `
     <div class="google-result">
-        <a href="${fileurlbase}${fileurl}"
+        <a href="${fileurlbase}${fileUrl}"
            target="_blank"
            class="result-title">
            ${Mainurl}
@@ -167,9 +170,7 @@ async function searchContent(reset = true) {
                     <span class="badge bg-primary">
                         Score: ${relevance}
                     </span>
-                     <span class="badge bg-secondary">
-                        Path: ${normalizedPath}
-                    </span>
+                     
                     
                 </div>
          <!-- END SCORE DISPLAY -->
@@ -321,9 +322,9 @@ async function GetFilter(active) {
             let listItemddl = "";
            
             if (active == 0 || active =="All")
-                listItemddl += `<li class="filter active">All</li>`;
+                listItemddl += `<li class="filter active" title="All">All</li>`;
             else
-                listItemddl += `<li class="filter">All</li>`;
+                listItemddl += `<li class="filter" title="All">All</li>`;
             if (data.Data) {
                 let urls = data.Data;
 
@@ -332,9 +333,9 @@ async function GetFilter(active) {
                     if (displayLabel != "" ) {
                         if (displayLabel == active)
                             // Using the .Url and .Abbr properties from your FilterItem model
-                            listItemddl += `<li class="filter active" title="${urls[i].index}">${urls[i].index}</li>`;
+                            listItemddl += `<li class="filter active" title="${urls[i].index}">${urls[i].index.replace("fs-","")}</li>`;
                         else
-                            listItemddl += `<li class="filter" title="${urls[i].index}">${urls[i].index}</li>`;
+                            listItemddl += `<li class="filter" title="${urls[i].index}">${urls[i].index.replace("fs-", "") }</li>`;
                     }
                 }
                 $(".filters").html(listItemddl);
