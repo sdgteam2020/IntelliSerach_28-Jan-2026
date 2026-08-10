@@ -1,0 +1,924 @@
+/* ============================================
+   Futuristic Dashboard Layout - CSS Variables
+   ============================================ */
+:root {
+    --fut-primary-neon: #00d9ff;
+    --fut-secondary-neon: #ff00e6;
+    --fut-accent-neon: #7b61ff;
+    --fut-dark-bg: #0a0e27;
+    --fut-card-bg: rgba(255, 255, 255, 0.05);
+    --fut-card-border: rgba(255, 255, 255, 0.15);
+    --fut-text-primary: #ffffff;
+    --fut-text-secondary: #b8c5d6;
+    --fut-gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --fut-gradient-2: linear-gradient(135deg, #00d9ff 0%, #7b61ff 100%);
+    --fut-gradient-hero: linear-gradient(180deg, #0a0e27 0%, #1a1f3a 50%, #0f1629 100%);
+    --fut-shadow-glow: 0 0 20px rgba(0, 217, 255, 0.3);
+    --fut-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.37);
+    --fut-transition-standard: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light theme overrides (applied when <html> has class 'light-theme') */
+html.light-theme {
+    --fut-primary-neon: #0066cc;
+    --fut-secondary-neon: #cc6600;
+    --fut-accent-neon: #5a4bd6;
+    --fut-dark-bg: #f5f7fb;
+    --fut-card-bg: rgba(255, 255, 255, 0.95);
+    --fut-card-border: rgba(15, 23, 42, 0.06);
+    --fut-text-primary: #0b1230;
+    --fut-text-secondary: #394a6a;
+    --fut-gradient-hero: linear-gradient(180deg, #ffffff 0%, #f2f6fb 50%, #eef4ff 100%);
+    --fut-gradient-2: linear-gradient(135deg, #00a8ff 0%, #7b61ff 100%);
+    --fut-shadow-glow: 0 0 14px rgba(0, 168, 255, 0.15);
+    --fut-shadow-card: 0 6px 20px rgba(18, 42, 80, 0.06);
+}
+
+/* Ensure navbar/footer contrast in light theme */
+html.light-theme .custom-navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
+}
+
+html.light-theme .footer {
+    background: #ffffff !important;
+    border-top: 1px solid rgba(15, 23, 42, 0.06) !important;
+    color: var(--fut-text-secondary) !important;
+}
+
+/* Fix text colors and controls for light theme */
+html.light-theme .custom-navbar .nav-link,
+html.light-theme .custom-navbar .navbar-text,
+html.light-theme .custom-navbar .nav-item .nav-link {
+    color: var(--fut-text-primary) !important;
+}
+
+/* Theme toggle button readable in light mode */
+html.light-theme #themeToggle {
+    color: var(--fut-text-primary) !important;
+    border-color: rgba(15, 23, 42, 0.08) !important;
+    background: transparent !important;
+}
+
+/* Navbar brand image filter for light theme */
+html.light-theme .custom-navbar .navbar-brand img {
+    filter: none !important;
+}
+
+/* Search wrapper adjustments for light theme */
+html.light-theme .fut-search-wrapper {
+    background: var(--fut-card-bg) !important; /* likely white */
+    border-color: var(--fut-card-border) !important;
+    box-shadow: var(--fut-shadow-card) !important;
+}
+
+/* Ensure placeholders and inputs are dark in light theme */
+html.light-theme .fut-search-input,
+html.light-theme .fut-search-input::placeholder {
+    color: var(--fut-text-primary) !important;
+    opacity: 0.85;
+}
+
+/* Loader appearance for light theme: make GIF/icon visible on light background */
+html.light-theme .loader {
+    background: rgba(255,255,255,0.9) !important;
+}
+
+html.light-theme .loader-container img {
+    /* If the loader GIF is light (white), invert it to be visible on light background */
+    filter: invert(1) contrast(1.05) !important;
+}
+
+/* ============================================
+   Global Overrides & Utilities
+   ============================================ */
+body {
+    background: var(--fut-dark-bg);
+    color: var(--fut-text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.fut-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* ============================================
+   Hero Section
+   ============================================ */
+.fut-hero {
+    position: relative;
+    min-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--fut-gradient-hero);
+    overflow: hidden;
+    padding: 3rem 1rem;
+}
+
+.fut-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(123, 97, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255, 0, 230, 0.05) 0%, transparent 50%);
+    animation: fut-bg-float 15s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes fut-bg-float {
+    0%, 100% {
+        opacity: 0.5;
+        transform: scale(1) translateY(0);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1) translateY(-20px);
+    }
+}
+
+.fut-hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    width: 100%;
+    max-width: 900px;
+}
+
+.fut-logo {
+    width: 140px;
+    height: 140px;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 30px rgba(0, 217, 255, 0.4));
+    animation: fut-logo-pulse 3s ease-in-out infinite;
+}
+
+@keyframes fut-logo-pulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 30px rgba(0, 217, 255, 0.4));
+    }
+    50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 40px rgba(0, 217, 255, 0.6));
+    }
+}
+
+.fut-title {
+    font-size: 3rem;
+    font-weight: 700;
+    background: var(--fut-gradient-2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.fut-subtitle {
+    font-size: 1.25rem;
+    color: var(--fut-text-secondary);
+    margin-bottom: 3rem;
+    font-weight: 400;
+}
+
+/* ============================================
+   Search Form Styles
+   ============================================ */
+.fut-search-form {
+    width: 100%;
+    max-width: 750px;
+    margin: 0 auto;
+}
+
+.fut-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 0.45rem 0.6rem;
+    transition: box-shadow 0.18s ease, transform 0.12s ease, border-color 0.18s ease;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.25);
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(10px)) {
+    .fut-search-wrapper {
+        background: rgba(26, 31, 58, 0.9);
+    }
+}
+
+.fut-search-wrapper:hover {
+    border-color: var(--fut-primary-neon);
+    box-shadow: var(--fut-shadow-glow);
+}
+
+.fut-search-wrapper.is-focused {
+    border-color: var(--fut-primary-neon);
+    box-shadow: 0 8px 28px rgba(0, 217, 255, 0.12);
+    transform: translateY(-2px);
+}
+
+.fut-search-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 0.75rem;
+    opacity: 0.7;
+    transition: var(--fut-transition-standard);
+}
+
+.fut-search-wrapper.is-focused .fut-search-icon {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px var(--fut-primary-neon));
+}
+
+.fut-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1.05rem;
+    color: var(--fut-text-primary);
+    padding: 0.6rem 0.5rem;
+}
+
+.fut-search-input::placeholder {
+    color: var(--fut-text-secondary);
+    opacity: 0.6;
+}
+
+
+.fut-search-btn {
+    background: linear-gradient(90deg, #167bff 0%, #1fa2ff 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    box-shadow: 0 6px 20px rgba(23,125,255,0.12);
+}
+
+.fut-search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(23,125,255,0.18);
+}
+
+.fut-search-btn:active {
+    transform: translateY(0);
+}
+
+/* ============================================
+   Glass Cards
+   ============================================ */
+.fut-cards-section {
+    padding: 2rem 1rem;
+    position: relative;
+    z-index: 5;
+}
+
+.fut-cards-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.fut-card {
+    background: var(--fut-card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--fut-card-border);
+    border-radius: 20px;
+    padding: 2rem;
+    transition: var(--fut-transition-standard);
+    box-shadow: var(--fut-shadow-card);
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fut-card-reveal 0.6s ease-out forwards;
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(10px)) {
+    .fut-card {
+        background: rgba(26, 31, 58, 0.85);
+    }
+}
+
+@keyframes fut-card-reveal {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fut-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.fut-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.fut-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.fut-card:hover {
+    border-color: var(--fut-primary-neon);
+    box-shadow: 0 12px 40px rgba(0, 217, 255, 0.3);
+    transform: translateY(-8px);
+}
+
+.fut-card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: var(--fut-gradient-2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.fut-card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--fut-text-primary);
+}
+
+.fut-card-text {
+    font-size: 1rem;
+    color: var(--fut-text-secondary);
+    line-height: 1.6;
+}
+
+.fut-card-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.fut-card-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--fut-text-secondary);
+}
+
+.fut-card-list li:last-child {
+    border-bottom: none;
+}
+
+/* ============================================
+   Navbar Adjustments
+   ============================================ */
+.custom-navbar {
+    background: linear-gradient(90deg, rgba(8,12,30,0.95), rgba(12,18,42,0.95)) !important;
+    box-shadow: 0 2px 10px rgba(2,6,23,0.45);
+    border-bottom: 1px solid rgba(255,255,255,0.03) !important;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Brand image smaller and aligned for professional look */
+.custom-navbar .navbar-brand img {
+    width: 56px;
+    height: 56px;
+    margin-right: 0.5rem;
+    filter: none;
+}
+
+.custom-navbar .navbar-brand .brand-text {
+    color: var(--fut-text-primary);
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+.custom-navbar .nav-link {
+    transition: color 0.18s ease, background 0.18s ease;
+    color: rgba(255,255,255,0.92) !important;
+    padding: 0.45rem 0.75rem;
+    border-radius: 6px;
+    margin-right: 6px;
+}
+
+.custom-navbar .nav-link:hover,
+.custom-navbar .nav-link:focus {
+    background: rgba(255,255,255,0.03);
+    color: var(--fut-primary-neon) !important;
+    text-decoration: none;
+}
+
+/* Subtle underline on active link */
+.custom-navbar .nav-link.active {
+    background: rgba(255,255,255,0.04);
+    box-shadow: inset 0 -2px 0 var(--fut-primary-neon);
+}
+
+/* Toggler color adjustments */
+.custom-navbar .navbar-toggler {
+    border-color: rgba(255,255,255,0.08);
+}
+.custom-navbar .navbar-toggler-icon {
+    filter: invert(1) brightness(2);
+}
+
+/* ============================================
+   Footer Adjustments
+   ============================================ */
+.footer {
+    background: rgba(10, 14, 39, 0.95) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(0, 217, 255, 0.2) !important;
+    color: var(--fut-text-secondary) !important;
+    padding: 0.75rem 0;
+}
+
+.footer.bg-white {
+    background: rgba(10, 14, 39, 0.95) !important;
+}
+
+html.light-theme .footer.bg-white {
+    background: #ffffff !important;
+}
+
+.ai-tagline {
+    background: var(--fut-gradient-2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+@media (max-width: 768px) {
+    .fut-hero {
+        min-height: 70vh;
+        padding: 2rem 1rem;
+    }
+
+    .fut-logo {
+        width: 100px;
+        height: 100px;
+    }
+
+    .fut-title {
+        font-size: 2rem;
+    }
+
+    .fut-subtitle {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .fut-search-wrapper {
+        border-radius: 30px;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .fut-search-input {
+        font-size: 1rem;
+        padding: 0.5rem 0;
+    }
+
+    .fut-search-btn {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .fut-cards-section {
+        padding: 2rem 1rem;
+    }
+
+    .fut-cards-row {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .fut-card {
+        padding: 1.5rem;
+    }
+
+    .fut-card-icon {
+        font-size: 2rem;
+    }
+
+    .fut-card-title {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .fut-title {
+        font-size: 1.75rem;
+    }
+
+    .fut-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .fut-search-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 0.5rem;
+    }
+
+    .fut-search-input {
+        font-size: 0.95rem;
+    }
+
+    .fut-search-btn {
+        padding: 0.5rem 1.25rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================
+   Search Results, Filters, and Pagination
+   ============================================ */
+.filters {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.6rem 0.4rem;
+    margin: 0 0 1rem 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.filters .filter {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+    /*color: var(--fut-text-secondary);*/
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    transition: var(--fut-transition-standard);
+}
+
+.filters .filter:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #0066cc;
+}
+
+.filters .filter.active {
+    background: linear-gradient(90deg, #0066cc 0%, #5a4bd6 100%);
+    color: #fff !important;
+    box-shadow: 0 8px 26px rgba(90, 75, 214, 0.14);
+}
+
+.search-suggestions,
+#suggestions {
+    max-width: 100%;
+}
+
+.google-result {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    display: block;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.result-left {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.result-right {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.result-title {
+    display: inline-block;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--fut-primary-neon);
+    text-decoration: none;
+    margin-bottom: 0.4rem;
+}
+
+.result-title:hover {
+    text-decoration: underline;
+}
+
+.result-url a {
+    color: var(--fut-text-secondary);
+    font-size: 0.95rem;
+    text-decoration: none;
+}
+
+.result-snippet {
+    margin-top: 0.4rem;
+    color: var(--fut-text-secondary);
+}
+
+.result-snippet ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.result-snippet li {
+    padding: 0.25rem 0;
+}
+
+.highlightQuery {
+    background: rgba(94, 251, 186, 0.12);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--fut-text-primary);
+    font-weight: 600;
+}
+
+.result-score {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.75rem;
+}
+
+.result-score .badge,
+.result-score .score-pill,
+.score-pill {
+    display: inline-block;
+    min-width: 46px;
+    text-align: center;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(90deg, #167bff 0%, #1fa2ff 100%);
+    box-shadow: 0 6px 16px rgba(23, 125, 255, 0.12);
+}
+
+.result-score .score-label {
+    font-size: 0.75rem;
+    color: var(--fut-text-secondary);
+    margin-left: 0.5rem;
+}
+
+.result-score .badge {
+    background: linear-gradient(90deg, rgba(0, 123, 255, 0.95), rgba(30, 160, 255, 0.95));
+    border: none;
+    color: #fff;
+    padding: 0.35rem 0.6rem;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.page-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--fut-text-primary);
+    border-radius: 999px;
+    padding: 0.5rem 0.7rem;
+    margin: 0 0.25rem;
+    transition: var(--fut-transition-standard);
+}
+
+.page-btn.active {
+    background: var(--fut-primary-neon);
+    color: #fff;
+    border-color: var(--fut-primary-neon);
+    box-shadow: 0 6px 18px rgba(23,125,255,0.12);
+}
+
+/* Compact pagination containers */
+#paginationTop, #paginationBottom {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+    justify-content: flex-end;
+    margin: 0.25rem 0;
+    padding: 0;
+}
+
+/* Compact total result box */
+#CountSearch {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(34, 139, 86, 0.08);
+    border: 1px solid rgba(34,139,86,0.14);
+    color: var(--fut-text-primary);
+    padding: 0.45rem 0.75rem;
+    border-radius: 8px;
+    margin: 0 !important;
+}
+
+/* Reduce spacing around results */
+.google-result {
+    padding: 0.85rem 0.8rem;
+}
+
+/* Smaller result title spacing */
+.result-title { margin-bottom: 0.25rem; }
+
+@media (max-width: 768px) {
+    .filters {
+        gap: 0.4rem;
+        padding: 0.4rem;
+    }
+
+    .result-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .result-right {
+        align-self: flex-end;
+        margin-top: 0.5rem;
+    }
+
+    .result-score {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Light theme overrides for filters and results */
+html.light-theme .filters .filter {
+    background: rgba(0, 0, 0, 0.02);
+    color: var(--fut-text-secondary);
+    border: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+html.light-theme .filters .filter.active {
+    background: var(--fut-primary-neon);
+    color: #fff !important;
+}
+
+html.light-theme .google-result {
+    border-bottom: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+/* ============================================
+   Main Content Padding (Footer Overlap Fix)
+   ============================================ */
+main.pb-3 {
+    padding-bottom: 120px !important;
+}
+
+/* ============================================
+   Accessibility & Focus States
+   ============================================ */
+.fut-search-input:focus,
+.fut-search-btn:focus {
+    outline: 2px solid var(--fut-primary-neon);
+    outline-offset: 2px;
+}
+
+.fut-card:focus-within {
+    border-color: var(--fut-primary-neon);
+    box-shadow: 0 0 30px rgba(0, 217, 255, 0.4);
+}
+
+/* ============================================
+   Loading & Error States
+   ============================================ */
+.fut-error {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: #ff6b6b;
+}
+
+/* ============================================
+   Global Button Styles - override Bootstrap defaults
+   ============================================ */
+.btn {
+    border-radius: 10px !important;
+    padding: 0.55rem 0.9rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.2px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.12);
+    border: none !important;
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Primary button: vibrant gradient */
+.btn-primary {
+    background: linear-gradient(90deg,#167bff 0%,#1fa2ff 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 28px rgba(23,125,255,0.14) !important;
+    border: none !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(23,125,255,0.18) !important;
+}
+
+/* Secondary button: subtle outline with glass look */
+.btn-secondary {
+    background: transparent !important;
+    color: var(--fut-text-primary) !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    backdrop-filter: blur(6px);
+}
+
+.btn-secondary:hover, .btn-secondary:focus {
+    background: rgba(255,255,255,0.03) !important;
+    transform: translateY(-2px);
+}
+
+/* Outline variants: colorful border */
+.btn-outline-primary {
+    background: transparent !important;
+    color: #167bff !important;
+    border: 1px solid rgba(22,123,255,0.18) !important;
+}
+
+.btn-outline-primary:hover {
+    background: rgba(22,123,255,0.06) !important;
+}
+
+/* Size variations */
+.btn-sm {
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 8px !important;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.25rem !important;
+    font-size: 1.05rem !important;
+    border-radius: 12px !important;
+}
+
+/* Icon buttons */
+.btn-icon {
+    padding: 0.4rem 0.5rem !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn .fa, .btn .fas, .btn .fal, .btn .far {
+    margin-right: 0.5rem;
+}
+
+/* Focus and accessibility */
+.btn:focus {
+    outline: 3px solid rgba(0,217,255,0.16) !important;
+    outline-offset: 3px !important;
+}
+
+/* Make close buttons match aesthetic */
+.btn-close {
+    background: transparent !important;
+    border: none !important;
+    width: 36px;
+    height: 36px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
+}
+
+/* Small utility for emphasized action */
+.btn-emphasize {
+    background: linear-gradient(90deg,#00d9ff 0%,#7b61ff 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 10px 28px rgba(0,217,255,0.12) !important;
+}
+
+/* Light theme button tweaks */
+html.light-theme .btn-secondary {
+    border: 1px solid rgba(15,23,42,0.06) !important;
+    color: var(--fut-text-primary) !important;
+}
+

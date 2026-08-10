@@ -310,17 +310,29 @@ $(function () {
 
                     response.data.forEach(function (item) {
 
-                        const path = decryptPayloadData(item.Path?.Real) || '';
-                        let fileName = path.split('\\').pop().split('/').pop();
+                        let extension = "";
+                        let path = "";
+                        let fileName =""
+                        if (item.Path.Real != null) {
+                            path = decryptPayloadData(item.Path?.Real) || '';
+                            let fileName = path.split('\\').pop().split('/').pop();
 
-                        const extension = fileName.includes('.')
-                            ? fileName.split('.').pop().toLowerCase()
-                            : '';
+                            extension = fileName.includes('.')
+                                ? fileName.split('.').pop().toLowerCase()
+                                : '';
+                        } if (item.url != null) {
+                            extension = "web";
+                            path=item.url
+                        }
 
                         let icon = 'fa-solid fa-file';
                         let iconClass = 'text-secondary';
-
+                        
                         switch (extension) {
+                            case 'web':
+                                icon = 'fa fa-globe me-2';
+                                iconClass = 'text-danger';
+                                break;
                             case 'pdf':
                                 icon = 'fa-solid fa-file-pdf';
                                 iconClass = 'text-danger';
@@ -388,8 +400,10 @@ $(function () {
                         const isPdf = extension === 'pdf';
 
                         let fileUrl;
-
-                        if (isPdf) {
+                        if (extension == "web") {
+                            fileUrl = path;
+                        }
+                        else if (isPdf) {
                             const encrypted = encryptPayloadData(downloadUrl);
                             fileUrl = `/Master/WatermarkPdfFromUrl?pdfUrl=${encodeURIComponent(encrypted)}`;
                         }
@@ -418,6 +432,7 @@ $(function () {
        target="_blank"
        class="text-decoration-none"
        title="${fileName}">
+
         <i class="${isPdf ? 'fa-solid fa-eye' : 'fa-solid fa-download'} me-1"></i>
         ${fileName}
     </a>

@@ -19,6 +19,20 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
+        public async Task<TrnWebServer> AddWebServer(TrnWebServer Data)
+        {
+            if (Data.Id == 0)
+            {
+                return await AddWithReturn(Data);
+            }
+            else if (Data.Id > 0)
+            {
+                await UpdateWithReturn(Data);
+                return Data;
+            }
+            return Data;
+        }
+
         public async Task<List<DTOWebServerResponse>> GetAllActive(int UserId)
         {
             return await _context.trnWebServer

@@ -1,0 +1,400 @@
+﻿@model Domain.DTOs.Requests.DTOScraperRequest
+@{
+    ViewData["Title"] = "Scraper";
+}
+<link asp-href-include="~/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/responsive.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/responsive.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/buttons.bootstrap4.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/fixedHeader.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/jquery.dataTables.min.css" rel="stylesheet" />
+<link asp-href-include="~/css/stylesheetfordatatable.css" rel="stylesheet" />
+
+
+<script asp-src-include="~/js/datatables/jquery.datatables.min.js"></script>
+<script asp-src-include="~/js/datatables/dataTables.responsive.min.js"></script>
+<script asp-src-include="~/js/datatables/responsive.dataTables.min.js"></script>
+<script asp-src-include="~/js/datatables/dataTables.bootstrap4.min.js"></script>
+<script asp-src-include="~/js/datatables/responsive.bootstrap4.min.js"></script> <!-- DataTables Responsive extension and specifically integrates Responsive behavior with Bootstrap 4 styling. -->
+<script asp-src-include="~/js/datatables/dataTables.buttons.min.js"></script> <!-- It adds the foundational functionality needed to add custom buttons (like Export, Print, or custom actions) to a DataTable.-->
+<script asp-src-include="~/js/datatables/buttons.bootstrap4.min.js"></script> <!-- Export buttons (like Copy, CSV, Excel, PDF, Print) to match Bootstrap 4 design and layout. -->
+@* <script asp-src-include="~/js/datatables/jszip.min.js"></script> *@ <!-- for Excel export -->
+@* <script asp-src-include="~/js/datatables/pdfmake.min.js"></script> *@ <!-- for PDF export -->
+@* <script asp-src-include="~/js/datatables/vfs_fonts.js"></script> *@ <!-- required by pdfmake -->
+<script asp-src-include="~/js/datatables/buttons.html5.min.js"></script> <!-- All HTML5 export buttons -->
+<script asp-src-include="~/js/datatables/buttons.print.min.js"></script> <!-- Adds a "Print" button to DataTables toolbar for print preview and printing -->
+<script asp-src-include="~/js/datatables/datatables-call.js"></script>
+<div class="container mt-1">
+   
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>Scraper</h4>
+                </div>
+                <div class="card-body">
+                     <form id="ScraperForm" class=" align-items-center gap-3">
+                       
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            @Html.AntiForgeryToken()
+                            <div class="row">
+                           
+
+                            <div class="row align-items-center mb-3 ">
+                        <div class="col-md-2">
+                            <label asp-for="Url" class="col-form-label"></label>
+                        </div>
+
+                        <div class="col-md-4">
+                                    <input asp-for="Url" class="form-control" value="https://192.168.10.40/" required />
+                            <span asp-validation-for="Url" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label asp-for="Abbreviation" class="col-form-label"></label>
+                        </div>
+
+                        <div class="col-md-2">
+                            <input asp-for="Abbreviation" class="form-control" required value="mou" />
+                            <span asp-validation-for="Abbreviation" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100" id="btnsave">
+                                Go Scrap
+                            </button>
+                        </div>
+                    </div>
+
+                           
+                            </div>
+
+                           
+                            
+                        
+                    </form>
+
+                    <div class="container mt-4 webviewcontainer">
+
+                      
+                        <!-- Table -->
+                      
+                
+<div class="card shadow-sm ">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0">
+                <i class="fa fa-globe me-2"></i>
+                Web Scraping Jobs
+            </h5>
+            <small class="text-muted">
+                Scrapy crawl job information
+            </small>
+        </div>
+
+                                <span id="crawl_status"
+                                      class="badge fs-5 px-4 py-2">
+                                    Waiting
+                                </span>
+                                
+
+    </div>
+
+                      
+                            <div class="card-body">
+
+                                <!-- Crawl Summary -->
+                                <div class="row g-3">
+
+                                    <!-- Website URL -->
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fa fa-globe me-1"></i>
+                                                Website URL
+                                            </small>
+
+                                            <div class="fw-semibold text-break" id="websitewebUrl">
+                                                -
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status -->
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fa fa-info-circle me-1"></i>
+                                                Status
+                                            </small>
+
+                                            <div id="crawl_status_div">
+                                                <span class="badge bg-secondary">
+                                                    Waiting
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Job ID -->
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fa fa-tasks me-1"></i>
+                                                Job ID
+                                            </small>
+
+                                            <div class="fw-semibold text-break" id="job_id">
+                                                -
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Alias -->
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fa fa-tag me-1"></i>
+                                                Alias
+                                            </small>
+
+                                            <div class="fw-semibold text-break" id="alias">
+                                                -
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Index Name -->
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fa fa-database me-1"></i>
+                                                Index Name
+                                            </small>
+
+                                            <div class="fw-semibold text-break" id="index_name">
+                                                -
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Deleted Documents -->
+                                    <div class="col-md-4">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fa fa-trash me-1"></i>
+                                                Deleted Existing Documents
+                                            </small>
+
+                                            <div class="fw-semibold" id="deleted_existing_docs">
+                                                0
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Registry Reused -->
+                                    <div class="col-md-4 d-none">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                Registry Reused
+                                            </small>
+
+                                            <div id="registry_reused">
+                                                -
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Continue From Last -->
+                                    <div class="col-md-4 d-none">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                Continue From Last
+                                            </small>
+
+                                            <div id="continue_from_last">
+                                                -
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Recovery Resumed -->
+                                    <div class="col-md-4 d-none">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                Recovery Resumed
+                                            </small>
+
+                                            <div id="recovery_resumed">
+                                                -
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Purge Applied -->
+                                    <div class="col-md-4 d-none">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                Purge Applied
+                                            </small>
+
+                                            <div id="purge_applied">
+                                                -
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Message -->
+                                    <div class="col-md-6">
+                                        <div class="border rounded p-2">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fa fa-comment me-1"></i>
+                                                Message
+                                            </small>
+
+                                            <div class="fw-semibold text-break" id="scraping_message">
+                                                -
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="col-4">
+                                        <div class="border rounded p-3">
+                                         @*    <small class="text-muted d-block mb-2">
+                                                <i class="fa fa-link me-1"></i>
+                                                Actions
+                                            </small> *@
+
+                                            <button type="button" id="btn_view_pdfs" class="btn btn-outline-danger w-100 d-none" style="display:none;"> 
+                                                <i class="fa fa-file-pdf me-1"></i>View All Scraped PDFs
+                                            </button>
+                                           
+                                                @*  <a id="status_url"
+                                                   href="javascript:void(0);"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fa fa-info-circle me-1"></i>
+                                                    Status
+                                                </a>
+                                                
+
+
+                                               <a id="logs_url"
+                                                   href="#"
+                                                   target="_blank"
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fa fa-file-text me-1"></i>
+                                                    Logs
+                                                </a>
+
+                                                <a id="config_url"
+                                                   href="#"
+                                                   target="_blank"
+                                                   class="btn btn-sm btn-outline-dark">
+                                                    <i class="fa fa-cog me-1"></i>
+                                                    Config
+                                                </a>
+ *@
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-start">
+
+                                        <div class="mb-3 d-none">
+                                            <strong>Status:</strong>
+                                            <span id="popup_crawl_status"
+                                                  class="badge bg-primary">
+                                                Running
+                                            </span>
+                                        </div>
+
+                                    <div class="mb-2  d-none">
+                                            <strong>Job ID:</strong>
+                                            <div id="popup_job_id"
+                                                 class="text-muted text-break">
+                                                -
+                                            </div>
+                                        </div>
+
+                                        <hr>
+
+                                        <div class="row g-2 text-center">
+
+                                            <div class="col-4">
+                                                <div class="border rounded p-2">
+                                                    <small class="text-muted d-block">
+                                                        Pages
+                                                    </small>
+                                                    <strong id="popup_pages_crawled">
+                                                        0
+                                                    </strong>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <div class="border rounded p-2">
+                                                    <small class="text-muted d-block">
+                                                        Indexed
+                                                    </small>
+                                                    <strong id="popup_docs_indexed">
+                                                        0
+                                                    </strong>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <div class="border rounded p-2">
+                                                    <small class="text-muted d-block">
+                                                        Links
+                                                    </small>
+                                                    <strong id="popup_links_found">
+                                                        0
+                                                    </strong>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <strong>Errors:</strong>
+                                            <span id="popup_errors"
+                                                  class="badge bg-secondary">
+                                                0
+                                            </span>
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <strong>Message:</strong>
+                                            <div id="popup_message"
+                                                 class="text-muted text-break">
+                                                Starting crawl...
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3 text-center"
+                                             id="popup_loading">
+
+                                            <i class="fa fa-spinner fa-spin me-2"></i>
+                                            Checking current status...
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            
+
+</div>
+
+
+                        
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/devjs/scraper.js"></script>

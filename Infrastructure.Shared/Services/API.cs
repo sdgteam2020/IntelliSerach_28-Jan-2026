@@ -81,16 +81,17 @@ namespace Infrastructure.Shared.Services
                 using var client = new HttpClient(handler);
 
                 // ===== Headers (Same as JS) =====
-                client.DefaultRequestHeaders.Add("X-CSRFToken", Data.CSRFToken);
-                client.DefaultRequestHeaders.Add("Cookie", "csrftoken=" + Data.CSRFToken + "; sessionid=" + Data.session_key + "");
+               // /client.DefaultRequestHeaders.Add("X-CSRFToken", Data.CSRFToken);
+               client.DefaultRequestHeaders.Add("X-API-Key", Data.session_key);
+               // client.DefaultRequestHeaders.Add("Cookie", "csrftoken=" + Data.CSRFToken + "; sessionid=" + Data.session_key + "");
 
                 // ===== Body =====
                 var payload = new
                 {
-                    url = Data.url,
-                    max_pdfs = Data.max_pdfs,
-                    abbr=Data.Abbreviation,
-                    max_pages=100
+                    start_url = Data.url,
+                    //max_pdfs = Data.max_pdfs,
+                    alias = Data.Abbreviation,
+                    max_pages = 100
                 };
 
                 var json = JsonSerializer.Serialize(payload);
@@ -146,7 +147,7 @@ namespace Infrastructure.Shared.Services
             }
         }
 
-        public async Task<DTOWebScraperDataResponse> GetData(DTOWebScraperDataRequest Data, string APIcrawlseoURL)
+        public async Task<DTOScrapyCrawlResponse> GetData(DTOWebScraperDataRequest Data, string APIcrawlseoURL)
         {
             try
             {
@@ -159,15 +160,17 @@ namespace Infrastructure.Shared.Services
                 using var client = new HttpClient(handler);
 
                 // ===== Headers (Same as JS) =====
-                client.DefaultRequestHeaders.Add("X-CSRFToken", Data.CSRFToken);
-                client.DefaultRequestHeaders.Add("Cookie", "csrftoken=" + Data.CSRFToken + "; sessionid=" + Data.session_key + "");
+                client.DefaultRequestHeaders.Add("X-API-Key", Data.session_key);
+                //client.DefaultRequestHeaders.Add("X-CSRFToken", Data.CSRFToken);
+                //client.DefaultRequestHeaders.Add("Cookie", "csrftoken=" + Data.CSRFToken + "; sessionid=" + Data.session_key + "");
 
                 // ===== Body =====
                 var payload = new
                 {
-                    url = Data.url,
-                    max_pages = Data.max_pages,
-                    abbr = Data.Abbreviation
+                    start_url = Data.url,
+                    //max_pdfs = Data.max_pdfs,
+                    alias = Data.Abbreviation,
+                    max_pages = 100
                 };
 
                 var json = JsonSerializer.Serialize(payload);
@@ -178,47 +181,35 @@ namespace Infrastructure.Shared.Services
                 var response = await client.PostAsync(APIcrawlseoURL, content);
               
                 var rawResponse = await response.Content.ReadAsStringAsync();
-
+                
                 if (!response.IsSuccessStatusCode)
                 {
-                    if ((int)response.StatusCode == 500)
-                    {
-                        return new DTOWebScraperDataResponse
+                    var result1 = JsonSerializer.Deserialize<DTOValidationErrorResponse>(rawResponse);
+                  
+                        return new DTOScrapyCrawlResponse
                         {
-                            //Status = false,
-                            message = $"API Error {(int)response.StatusCode}: {rawResponse}"
+                           
+                            Code = 400,
+                            Message = result1.Detail.Message
                         };
-                    }
-                    var resulterror = JsonSerializer.Deserialize<ErrorResponseDto>(rawResponse);
-                    if (resulterror == null)
-                    {
-                        return new DTOWebScraperDataResponse
-                        {
-                            //Status = false,
-                            message = $"API Error {(int)response.StatusCode}: {rawResponse}"
-                        };
-                    }
-                    return new DTOWebScraperDataResponse
-                    {
-                        //Status = false,
-                        message = $"API Error {(int)response.StatusCode}: {resulterror.Errors[0]}"
-                    };
+                   
+                   
                 }
+                var result = JsonSerializer.Deserialize<DTOScrapyCrawlResponse>(rawResponse);
 
-                var result = JsonSerializer.Deserialize<DTOWebScraperDataResponse>(rawResponse);
 
-                return result ?? new DTOWebScraperDataResponse
+                return result ?? new DTOScrapyCrawlResponse
                 {
-                    //Status = false,
-                    message = "Empty response from API."
+                    Code = 400,
+                    Message = "Empty response from API."
                 };
             }
             catch (Exception ex)
             {
-                return new DTOWebScraperDataResponse
+                return new DTOScrapyCrawlResponse
                 {
-                    //Status = false,
-                    message = ex.Message
+                    Code = 400,
+                    Message = ex.Message
                 };
             }
         }

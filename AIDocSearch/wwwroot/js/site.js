@@ -56,3 +56,19 @@ async function getSalt() {
 
     return encrypted.toString(); // Base64
 }
+
+// Apply saved theme early to avoid flash of un-themed content.
+(function () {
+    try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light') {
+            document.documentElement.classList.add('light-theme');
+        } else if (t === 'dark') {
+            document.documentElement.classList.remove('light-theme');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            document.documentElement.classList.add('light-theme');
+        }
+    } catch (e) {
+        // ignore
+    }
+})();

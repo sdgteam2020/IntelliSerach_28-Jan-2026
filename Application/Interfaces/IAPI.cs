@@ -12,7 +12,7 @@ namespace Application.Interfaces
 
         public Task<DTOScraperDataResponse> GetData(DTOScraperDataRequest Data, string APIcrawlURL);
 
-        public Task<DTOWebScraperDataResponse> GetData(DTOWebScraperDataRequest Data, string APIcrawlseoURL);
+        public Task<DTOScrapyCrawlResponse> GetData(DTOWebScraperDataRequest Data, string APIcrawlseoURL);
 
         Task<DTOFilterResponse> GetFilter(DTOWebScraperDataRequest Data, string APIuniqueurls);
     }

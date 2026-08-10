@@ -17,7 +17,7 @@ namespace Infrastructure
        
         public DbSet<ExceptionLog> Log { get; set; }
         public DbSet<TrnIndexUserMapping> TrnIndexUserMapping { get; set; }
-
+        public DbSet<WebScraperSetting> WebScraperSetting { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

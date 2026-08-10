@@ -13,7 +13,7 @@ html {
 }
 
 .bg-primary {
-    background-color: #044C92 !important;
+    background-color: #069494 !important;
 }
 
 .custom-navbar {
@@ -249,7 +249,7 @@ footer {
 .card {
     border-width: 0px 1px 1px 4px !important;
     border-style: solid !important;
-    border-color: rgb(4 76 146) rgb(4 76 146) rgb(4 76 146) rgb(4 76 146) !important;
+    border-color: rgb(4 76 146) rgb(4 76 146) rgb(4 76 146) #069494 !important;
 }
 .card-header:first-child {
     border-radius: 0 0 0 0 !important;

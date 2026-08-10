@@ -369,8 +369,7 @@ namespace AIDocSearch.Controllers
                     };
                 }
 
-                if (Request.Id > 0)
-                {
+                
                     WebScraperSetting ret = null;
                     if(data.Id==0)
                         ret=await _webScraperSetting.AddWithReturn(data);
@@ -387,12 +386,7 @@ namespace AIDocSearch.Controllers
                         ModelState.AddModelError(string.Empty, ret.max_pages.ToString() ?? "Record Not Save.");
                         return View(data);
                     }
-                }
-                else
-                {
-                    TempData["SuccessMessage"] = "Not Allow Only Update Allow.";
-                    return View(Request);
-                }
+                
             }
 
             return View(Request);

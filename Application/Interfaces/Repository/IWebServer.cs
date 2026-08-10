@@ -11,5 +11,6 @@ namespace Application.Interfaces.Repository
     {
         Task<bool> SoftDeleteWebServer(int Id, int UserId);
         Task<List<DTOWebServerResponse>> GetAllActive(int UserId);
+        public Task<TrnWebServer> AddWebServer(TrnWebServer Data);
     }
 }

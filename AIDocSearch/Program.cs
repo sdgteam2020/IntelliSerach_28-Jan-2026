@@ -7,6 +7,7 @@ using Infrastructure.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore; // Ensure this is included
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.ResponseCompression;
 using Newtonsoft.Json.Serialization;
 using Infrastructure.Repository;
 
@@ -41,9 +42,11 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(opts =>
 // Force immediate security-stamp validation on every request (small installs/dev only).
 // NOTE: Setting to TimeSpan.Zero will validate the security stamp on each request and
 // can increase DB load. Use a small interval in production if needed (e.g., 1 minute).
+// Reduce frequency of security-stamp validation to avoid DB hit on every request
 builder.Services.Configure<SecurityStampValidatorOptions>(options =>
 {
-    options.ValidationInterval = TimeSpan.Zero;
+    // Validate every 5 minutes instead of on every request
+    options.ValidationInterval = TimeSpan.FromMinutes(5);
 });
 builder.Services.ConfigureApplicationCookie(o =>
 {
@@ -140,6 +143,24 @@ builder.Services.AddSession(options =>
     //options.Cookie.SameSite = SameSiteMode.Strict;
 });
 
+// Response compression (Brotli/Gzip)
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
+
+builder.Services.Configure<BrotliCompressionProviderOptions>(opts =>
+{
+    opts.Level = System.IO.Compression.CompressionLevel.Fastest;
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(opts =>
+{
+    opts.Level = System.IO.Compression.CompressionLevel.Fastest;
+});
+
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     // Use the default property (Pascal) casing
@@ -147,6 +168,9 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 });
 
 var app = builder.Build();
+
+// Enable response compression to reduce payload size
+app.UseResponseCompression();
 
 // Run database seeder at startup
 using (var scope = app.Services.CreateScope())
@@ -220,7 +244,8 @@ app.Use(async (ctx, next) =>
         "style-src 'self'; " + // allow Bootstrap inline styles
         "img-src 'self' data:; " +
         "font-src 'self' data:; " +
-        "connect-src 'self'; " +
+        //"connect-src 'self'; " +
+        "connect-src 'self' https://192.168.10.208 wss://192.168.10.208; " +
         "frame-ancestors 'self'; " +
         "base-uri 'self'; " +
         "form-action 'self';";
@@ -267,9 +292,11 @@ app.UseStaticFiles(new StaticFileOptions
 }); 
 app.UseRouting();
 app.UseCors("CorsPolicy");
-app.UseAuthorization();
-// Session BEFORE endpoints (so MVC/Razor can use it)
+// Ensure session is available before authorization and MVC execution
 app.UseSession();
+app.UseAuthorization();
+// Request timing middleware to log slow requests
+app.UseMiddleware<AIDocSearch.CustomMiddleware.RequestTimingMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<XssProtectionMiddleware>();
 app.UseMiddleware<SessionCheckMiddleware>();

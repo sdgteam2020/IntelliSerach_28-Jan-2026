@@ -14,7 +14,7 @@
     }
 
 .card-header-custom {
-    background: linear-gradient(135deg, #044C92, #106dc9);
+    background: linear-gradient(135deg, #000000, #069494);
     color: white;
     padding: 2px;
     display: flex;
@@ -143,3 +143,163 @@
     .file-card small {
         word-break: break-word;
     }
+
+/* Modal styling overrides for a modern, attractive look */
+.modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 20px 50px rgba(2,6,23,0.45);
+}
+
+.modal-header {
+    background: linear-gradient(90deg, #0b57a1 0%, #0f73d1 100%);
+    color: #fff;
+    border-bottom: none;
+    padding: 1rem 1.25rem;
+    align-items: center;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+/* Style close button to be circular and subtle */
+.modal-header .btn-close {
+    background: rgba(255,255,255,0.08);
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+}
+
+.modal-header .btn-close i {
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.modal-body {
+    padding: 1rem 1.25rem;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+}
+
+.modal-footer {
+    background: transparent;
+    border-top: none;
+    padding: 0.75rem 1.25rem 1.25rem 1.25rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* Make modal buttons more attractive and consistent */
+.modal-footer .btn {
+    border-radius: 8px;
+    padding: 0.55rem 1rem;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(3,100,200,0.08);
+}
+
+/* Primary (Assign) */
+.modal-footer .btn-primary {
+    background: linear-gradient(90deg,#167bff 0%,#1fa2ff 100%);
+    border: none;
+    color: #fff;
+}
+
+/* Secondary (Close) */
+.modal-footer .btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(15,23,42,0.08);
+    color: var(--fut-text-primary);
+}
+
+/* Responsive adjustments for modal footer on small screens */
+@media (max-width: 576px) {
+    .modal-footer { flex-direction: column-reverse; align-items: stretch; }
+    .modal-footer .btn { width: 100%; }
+    .modal-header .btn-close { position: absolute; right: 12px; top: 12px; }
+}
+
+/* Make input in modal search rounded and subtle */
+.modal-body .form-control {
+    border-radius: 8px;
+    border: 1px solid rgba(15,23,42,0.06);
+    padding: 0.5rem 0.75rem;
+}
+
+/* Compact, eye-catching button styles for this page */
+.index-card .action-area .btn,
+.modal-footer .btn,
+.index-card .card .btn {
+    padding: 0.36rem 0.6rem;
+    font-size: 0.92rem;
+    border-radius: 10px;
+    min-height: 34px;
+    line-height: 1;
+    position: relative;
+}
+
+.index-card .action-area .btn-primary,
+.modal-footer .btn-primary {
+    background: linear-gradient(90deg,#0b74ff 0%,#4da6ff 100%);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(11,116,255,0.14);
+    padding: 0.36rem 0.75rem;
+}
+
+.index-card .action-area .btn-primary:hover,
+.modal-footer .btn-primary:hover {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.index-card .action-area .btn-secondary,
+.modal-footer .btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(15,23,42,0.06);
+    color: var(--fut-text-primary);
+    padding: 0.32rem 0.55rem;
+}
+
+/* Icon-only small button */
+.btn-icon-small {
+    padding: 0.28rem 0.4rem !important;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+/* Subtle shimmer on primary hover */
+.index-card .action-area .btn-primary::after,
+.modal-footer .btn-primary::after {
+    content: '';
+    position: absolute;
+    left: -40%;
+    top: 0;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0));
+    transform: skewX(-20deg);
+    opacity: 0;
+    transition: opacity 0.3s ease, left 0.35s ease;
+}
+
+.index-card .action-area .btn-primary:hover::after,
+.modal-footer .btn-primary:hover::after {
+    opacity: 1;
+    left: 100%;
+}
+
+@media (max-width: 576px) {
+    .index-card .action-area .btn,
+    .modal-footer .btn { width: 100%; }
+    .btn-icon-small { margin-right: 0; }
+}

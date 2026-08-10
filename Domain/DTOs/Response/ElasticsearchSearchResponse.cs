@@ -28,6 +28,7 @@ namespace Domain.DTOs.Response
     {
         public FileInfoData File { get; set; }
         public PathData Path { get; set; }
+        public string url { get; set; }
     }
 
     public class FileInfoData

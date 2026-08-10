@@ -1,4 +1,4 @@
-﻿@model Domain.DTOs.Requests.DTOWebScraperSettingRequest
+﻿@model Domain.DTOs.Requests.DTOAddWebServerRequest
 <link asp-href-include="~/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
 <link asp-href-include="~/datatables/responsive.bootstrap4.min.css" rel="stylesheet" />
 <link asp-href-include="~/datatables/responsive.dataTables.min.css" rel="stylesheet" />
@@ -26,12 +26,12 @@
         <div class="col-md-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Web Scraper Setting</h4>
+                    <h4 class="mb-0">Add Web Server alias</h4>
                 </div>
 
                 <div class="card-body">
-                    <form asp-controller="Master"
-                          asp-action="AddWebScraperSetting"
+                    <form asp-controller="Scraper"
+                          asp-action="AddWebServer"
                           method="post"
                           enctype="multipart/form-data"
                           autocomplete="off">
@@ -40,27 +40,35 @@
 
                         <div class="row align-items-end">
                             <input asp-for="Id" type="hidden" />
-                            <div class="col-md-2">
-                                <label asp-for="max_pages" class="form-label"></label>
-                            </div>
-
-                            <div class="col-md-3">
-                                <input asp-for="max_pages" class="form-control" required />
-                                <span asp-validation-for="max_pages" class="text-danger"></span>
+                            <div class="col-md-1">
+                                <label asp-for="Url" class="form-label"></label>
                             </div>
 
                             <div class="col-md-2">
-                                <label asp-for="max_pdfs" class="form-label"></label>
+                                <input asp-for="Url" class="form-control" required />
+                                <span asp-validation-for="Url" class="text-danger"></span>
                             </div>
 
-                            <div class="col-md-3">
-                                <input asp-for="max_pdfs" class="form-control" required />
-                                <span asp-validation-for="max_pdfs" class="text-danger"></span>
+                            <div class="col-md-1">
+                                <label asp-for="Includes" class="form-label"></label>
+                            </div>
+
+                            <div class="col-md-2">
+                                <input asp-for="Includes" class="form-control" required />
+                                <span asp-validation-for="Includes" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <label asp-for="Index_Name" class="form-label"></label>
+                            </div>
+
+                            <div class="col-md-2">
+                                <input asp-for="Index_Name" class="form-control" required />
+                                <span asp-validation-for="Index_Name" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-2">
                                 <button type="submit" class="btn btn-primary w-100">
-                                    Add
+                                    Save
                                 </button>
                             </div>
 
@@ -76,7 +84,7 @@
                         @if (!ViewData.ModelState.IsValid)
                         {
                             <div class="alert alert-danger mt-3">
-                                Please fix the errors.
+                                Please fix the errors. @TempData["ErrorMessage"]
                             </div>
                         }
 
@@ -86,15 +94,17 @@
                     }
                     <div class="container mt-3">
                         <div class="card shadow-sm border-0">
-                            
+                          
 
                             <div class="card-body p-0">
-                                <table class="table table-hover mb-0 align-middle">
-                                    <thead class="table-light">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="table-dark">
                                         <tr>
                                             <th style="width:80px">Sr. No</th>
-                                            <th>max_pages</th>
-                                            <th>max_pdfs</th>
+                                            <th>Url</th>
+                                            <th>Path Pattern</th>
+                                            <th>Index Name</th>
+                                            <th>CreateOn</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -104,19 +114,26 @@
                                             <tr>
                                                 <td>@srNo</td>
                                                 <td>
-                                                    @item.max_pages
+                                                    @item.Url
                                                 </td>
                                                 <td>
-                                                    @item.max_pdfs
+                                                    @item.Includes
                                                 </td>
-                                                
+                                                <td>
+                                                    @item.Index_Name
+                                                </td>
+                                                <td>
+                                                    @item.CreatedOn.ToString("dd/MM/yyyy HH:mm")
+                                                </td>
                                                 <td class="text-center">
                                                     <input type="button"
                                                            class="btn btn-primary btnEdit"
                                                            value="Edit"
                                                            data-id="@item.Id"
-                                                           data-max_pages="@item.max_pages"
-                                                           data-max_pdfs="@item.max_pdfs" />
+                                                           data-url="@item.Url"
+                                                           data-Index_Name="@item.Index_Name"
+                                                           data-includes="@item.Includes" />
+                                                          
                                                 </td>
                                             </tr>
                                             srNo++;
@@ -132,4 +149,4 @@
         </div>
     </div>
 </div>
-<script src="~/devjs/webscrapersetting.js"></script>
+<script src="~/devjs/addwebserver.js"></script>

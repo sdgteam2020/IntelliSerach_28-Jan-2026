@@ -171,8 +171,10 @@ namespace AIDocSearch.Controllers
                     {
                         Path = new PathData()
                     };
-
-                    pathData.Path.Real = _AESEncrytDecry.EncryptAES(item.Path.Real, AESKey); ;
+                    if(item.Path!=null)
+                    pathData.Path.Real = _AESEncrytDecry.EncryptAES(item.Path.Real, AESKey);
+                    else
+                    pathData.url = item.url;
 
                     data.Add(pathData);
                 }

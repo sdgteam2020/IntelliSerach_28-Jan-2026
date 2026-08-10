@@ -322,7 +322,8 @@ namespace Infrastructure.Shared.Services
                 {
         "file.FileName",
         "file.Extension",
-        "path.real"
+        "path.real",
+        "url"
     },
                 query = new
                 {

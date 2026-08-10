@@ -101,90 +101,110 @@ async function searchContent(reset = true) {
                     const score = hit._score ?? 0;
                     const canonical_url = hit._source?.canonical_url || '';
                     const h1 = hit._source?.h1 || '';
-                    const headings_h1 = hit._source?.headings_h1 || '';
+                    const job_id = hit._source?.job_id || '';
+                    const headings_h1 = hit._source?.headings || '';
+                    const url = hit._source?.url || '';
+                    const title = hit._source?.title || '';
                     const maxScore = data.hits.max_score || 1;
                     const relevance = ((hit._score / maxScore) * 100).toFixed(0);
 
                     let cleanPath = virtualPath.replace(/\\\\/g, '').replace('\\', '');
                     //${ highlights.map(h => `${h} `).join(' ') }
-
-                    let Mainurl = "";
-                    let baseurl = "";
-                    let fileurl = ""
-                    let fileurlbase = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
-
-                   
-
-                    const normalizedPath = realPath.replace(/\\/g, "/");
-
-                    const match = webServerList.find(item =>
-                        normalizedPath.includes(item.Includes)
-                    );
-
-                    if (match) {
-                        const marker = match.Includes.replace("/", "").replace(/\\/g, "/");
-                        const index = normalizedPath.indexOf(marker);
-
-                        const result = index >= 0
-                            ? normalizedPath.substring(index + marker.length + 1)
-                            : normalizedPath;
-                        fileUrl = match.Url + "/" + result;
-
-                        const encrypted = encryptPayloadData(fileUrl);
-                        fileUrl = encodeURIComponent(encrypted);
-                    } else {
-
-                        fileUrl = null;
-                    }
+                    if (job_id == undefined || job_id=="") {
+                        let Mainurl = "";
+                        let baseurl = "";
+                        let fileurl = ""
+                        let fileurlbase = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
 
 
-                       
-                    if (cleanPath == "") {
-                        Mainurl = canonical_url;
-                        cleanPath = canonical_url;
-                        fileUrl = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
-                        baseurl = getBaseUrl(Mainurl)
-                    }
-                    else {
-                        Mainurl = cleanPath;
-                       
-                        baseurl = "";//cleanPath.split("\\")[0];
-                    }
 
-                    let html = `
+                        const normalizedPath = realPath.replace(/\\/g, "/");
+
+                        const match = webServerList.find(item =>
+                            normalizedPath.includes(item.Includes)
+                        );
+
+                        if (match) {
+                            const marker = match.Includes.replace("/", "").replace(/\\/g, "/");
+                            const index = normalizedPath.indexOf(marker);
+
+                            const result = index >= 0
+                                ? normalizedPath.substring(index + marker.length + 1)
+                                : normalizedPath;
+                            fileUrl = match.Url + "/" + result;
+
+                            const encrypted = encryptPayloadData(fileUrl);
+                            fileUrl = encodeURIComponent(encrypted);
+                        } else {
+
+                            fileUrl = null;
+                        }
+
+
+
+                        if (cleanPath == "") {
+                            Mainurl = canonical_url;
+                            cleanPath = canonical_url;
+                            fileUrl = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
+                            baseurl = getBaseUrl(Mainurl)
+                        }
+                        else {
+                            Mainurl = cleanPath;
+
+                            baseurl = "";//cleanPath.split("\\")[0];
+                        }
+
+                        let html = `
     <div class="google-result">
-        <a href="${fileurlbase}${fileUrl}"
-           target="_blank"
-           class="result-title">
-           ${Mainurl}
-        </a>
-
-        <div class="result-url">
-            <a href="${fileurlbase}${cleanPath}" target="_blank">
-              ${baseurl}
-            </a>
+        <div class="result-header">
+            <div class="result-left">
+                <a href="${fileurlbase}${fileUrl}" target="_blank" class="result-title"> <i class="fa fa-file me-2"></i>${Mainurl}</a>
+                <div class="result-url"><a href="${fileurlbase}${cleanPath}" target="_blank">${baseurl}</a></div>
+            </div>
+            <div class="result-right">
+                <div class="result-score">
+                    <span class="score-pill">Score ${relevance}</span>
+                    <div class="score-label"></div>
+                </div>
+            </div>
         </div>
 
-        <!-- SCORE DISPLAY -->
-        <div class="result-score">
-                    <span class="badge bg-primary">
-                        Score: ${relevance}
-                    </span>
-                     
-                    
-                </div>
-         <!-- END SCORE DISPLAY -->
-         
         <div class="result-snippet">
-         
             <ul>
                 ${highlights}
             </ul>
         </div>
     </div>
     `;
+                        $('#results').append(html);
+                    } else {
 
-                    $('#results').append(html);
+                        let html = `
+    <div class="google-result">
+        <div class="result-header">
+            <div class="result-left">
+                <a href="${url}" target="_blank" class="result-title"> <i class="fa fa-globe me-2"></i> ${url}</a>
+              
+            </div>
+            <div class="result-right">
+                <div class="result-score">
+                    <span class="score-pill">Score ${relevance}</span>
+                   
+                </div>
+            </div>
+        </div>
+
+        <div class="result-snippet">
+            <ul>
+                ${highlights}
+            </ul>
+        </div>
+    </div>
+    `;
+                        $('#results').append(html);
+                    }
+
+                   
 
                     renderPagination();
                     $("#loading").hide();
