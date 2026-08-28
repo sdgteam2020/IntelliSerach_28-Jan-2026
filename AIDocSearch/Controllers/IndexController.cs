@@ -71,7 +71,7 @@ namespace AIDocSearch.Controllers
             }
             else
             {
-                return Json(new { success = true, data, type = "Admin" });
+                return Json(new { success = true, data = data.Where(i=>i.index.Contains("fs-")).ToList(), type = "Admin" });
             }
         }
         [HttpPost]

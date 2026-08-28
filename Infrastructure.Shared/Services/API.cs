@@ -91,7 +91,7 @@ namespace Infrastructure.Shared.Services
                     start_url = Data.url,
                     //max_pdfs = Data.max_pdfs,
                     alias = Data.Abbreviation,
-                    max_pages = 100
+                    max_pages = Data.max_pdfs
                 };
 
                 var json = JsonSerializer.Serialize(payload);
@@ -170,7 +170,7 @@ namespace Infrastructure.Shared.Services
                     start_url = Data.url,
                     //max_pdfs = Data.max_pdfs,
                     alias = Data.Abbreviation,
-                    max_pages = 100
+                    max_pages = Data.max_pages
                 };
 
                 var json = JsonSerializer.Serialize(payload);
@@ -190,7 +190,7 @@ namespace Infrastructure.Shared.Services
                         {
                            
                             Code = 400,
-                            Message = result1.Detail.Message
+                            Message = "API ERROR : "+result1.Detail.Message
                         };
                    
                    
@@ -204,12 +204,36 @@ namespace Infrastructure.Shared.Services
                     Message = "Empty response from API."
                 };
             }
+            catch (HttpRequestException ex)
+            {
+                return new DTOScrapyCrawlResponse
+                {
+                    Code = 400,
+                    Message =
+                        "HTTP Connection Error: " +
+                        ex.Message +
+                        " | Inner: " +
+                        ex.InnerException?.Message
+                };
+            }
+            catch (TaskCanceledException ex)
+            {
+                return new DTOScrapyCrawlResponse
+                {
+                    Code = 408,
+                    Message = "API request timed out: " + ex.Message
+                };
+            }
             catch (Exception ex)
             {
                 return new DTOScrapyCrawlResponse
                 {
                     Code = 400,
-                    Message = ex.Message
+                    Message =
+                        "Exception: " +
+                        ex.Message +
+                        " | Inner: " +
+                        ex.InnerException?.Message
                 };
             }
         }

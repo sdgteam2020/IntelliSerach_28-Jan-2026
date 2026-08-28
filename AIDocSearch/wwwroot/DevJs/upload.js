@@ -32,7 +32,7 @@ async function DeleteUpload(id) {
 
     try {
         const token = $('input[name="__RequestVerificationToken"]').val();
-        const response = await fetch('/Search/DeleteFiles', {
+        const response = await fetch('/IntelliSearch/Search/DeleteFiles', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

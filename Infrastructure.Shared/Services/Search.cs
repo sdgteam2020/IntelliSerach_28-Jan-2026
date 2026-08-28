@@ -11,259 +11,412 @@ namespace Infrastructure.Shared.Services
 {
     public class Search : ISearch
     {
-        public async Task<string> GetResponse(DTOSerchRequest Request, string Url, string UserName, string Password)
+        public async Task<string> GetResponse(
+    DTOSerchRequest Request,
+    string Url,
+    string UserName,
+    string Password)
         {
             Request.Filter = Request.Filter == "All" ? "*" : Request.Filter;
-            Request.Filter = Request.Filter.Replace("###S###", "").Replace("###withouts###", "").Trim();
-            
 
             var filters = new List<object>();
             var shouldQueries = new List<object>();
 
-            // Always add phrase match (boosted)
-            shouldQueries.Add(
-                new MatchPhraseWrapper
-                {
-                    match_phrase = new MatchPhraseQuerywithoutfuzzy
+            // ============================================================
+            // Fields searched for Web Crawler data
+            // ============================================================
+
+            var searchFields = new List<string>
+    {
+        "title^5",
+        "headings^4",
+        "meta_description^3",
+
+        "table_rows.columns.label^3",
+        "table_rows.columns.name^3",
+        "table_rows.columns.value^3",
+
+        "table_rows.raw_text^2.5",
+        "table_rows.raw^2",
+
+        "content^2"
+    };
+
+            // ============================================================
+            // SEARCH TYPE
+            //
+            // Type 1 = Normal search
+            // Type 2 = Fuzzy search
+            // Type 3 = Exact/Phrase search
+            // ============================================================
+
+            if (Request.Type == 3)
+            {
+                // Exact phrase only
+                shouldQueries.Add(
+                    new MultiMatchWrapper
                     {
-                        content = new ContentQuerywithoutfuzzy
+                        multi_match = new MultiMatchQuery
                         {
                             query = Request.DataString,
+                            type = "phrase",
+                            fields = searchFields,
+                            boost = 3
+                        }
+                    }
+                );
+            }
+            else
+            {
+                // --------------------------------------------------------
+                // Phrase match gets higher priority
+                // --------------------------------------------------------
+
+                shouldQueries.Add(
+                    new MultiMatchWrapper
+                    {
+                        multi_match = new MultiMatchQuery
+                        {
+                            query = Request.DataString,
+                            type = "phrase",
+                            fields = searchFields,
                             boost = 2
                         }
                     }
-                }
-            );
+                );
 
-           if (Request.Type == 2 || Request.Type == 1) // Fuzzy
-            {
-                shouldQueries.Add(
-                    new MatchWrapper
-                    {
-                        match = new MatchQuery
+                // --------------------------------------------------------
+                // Normal / Fuzzy search
+                // --------------------------------------------------------
+
+                if (Request.Type == 1 || Request.Type == 2)
+                {
+                    shouldQueries.Add(
+                        new MultiMatchWrapper
                         {
-                            content = new ContentQuery
+                            multi_match = new MultiMatchQuery
                             {
                                 query = Request.DataString,
-                                boost = 1,
-                                fuzziness = Request.Type == 2 ? "AUTO" : "0",
+                                type = "best_fields",
+                                fields = searchFields,
+
+                                // Type 2 = fuzzy
+                                // Type 1 = no fuzzy matching
+                                fuzziness = Request.Type == 2
+                                    ? "AUTO"
+                                    : "0",
+
                                 fuzzy_transpositions = Request.Type == 2
                             }
                         }
-                    }
-                );
+                    );
+                }
             }
-            else if (Request.Type == 3) // Exact
+
+            // ============================================================
+            // FILTER
+            // ============================================================
+
+            if (Request.Filter == "*!")
             {
-                shouldQueries.Clear(); // Only exact search
-                shouldQueries.Add(
-                    new MatchPhraseWrapper
+                // Keep your existing special case
+
+                filters.Add(
+                    new
                     {
-                        match_phrase = new MatchPhraseQuerywithoutfuzzy
+                        @bool = new
                         {
-                            content = new ContentQuerywithoutfuzzy
+                            should = new List<object>
                             {
-                                query = Request.DataString,
-                                boost = 3
+                        new
+                        {
+                            wildcard = new Dictionary<string, string>
+                            {
+                                {
+                                    "path.real",
+                                    $"*\\\\{Request.Filter}\\\\*"
+                                }
                             }
+                        }
+                            },
+
+                            minimum_should_match = 1
                         }
                     }
                 );
-            }
-            // ✅ CASE 1: ALL → path filter on asdc_new ONLY
-            if (Request.Filter == "*!")
-            {
-                filters.Add(new
-                {
-                    terms = new
-                    {
-                        _index = new List<string> { "*" }
-                    }
-                });
-
-                filters.Add(new
-                {
-                    @bool = new BoolFilter
-                    {
-                        should = new List<object>
-            {
-                new WildcardWrapper
-                {
-                    Wildcard = new Dictionary<string, string>
-                    {
-                       { "path.real", $"*\\\\{Request.Filter}\\\\*" }
-
-                    }
-                }
-            },
-                        minimum_should_match = 1
-                    }
-                });
             }
             else if (Request.Filter == "*")
             {
-                // ✅ CASE 2: Specific domain → index filter ONLY
-                var indexList = new List<string> { "*" };
-
-                filters.Add(new
-                {
-                    terms = new
-                    {
-                        _index = indexList
-                    }
-                });
+                // IMPORTANT:
+                // No _index filter is required for All.
+                //
+                // Do NOT use:
+                //
+                // terms : { "_index" : ["*"] }
+                //
+                // because terms query performs exact matching.
+                //
+                // Calling /_search without index filter already searches
+                // all available indexes accessible through this URL.
             }
             else if (!string.IsNullOrWhiteSpace(Request.Filter))
             {
-                filters.Add(new
-                {
-                    @bool = new
-                    {
-                        should = new List<object>
-            {
-                // 🔹 1. seo_{Filter} → full index
-                new
-                {
-                    @bool = new
-                    {
-                        filter = new List<object>
-                        {
-                            new
-                            {
-                                terms = new
-                                {
-                                    _index = new List<string> { $"{Request.Filter}" }
-                                }
-                            }
-                        }
-                    }
-                },
+                // ========================================================
+                // Specific selected source
+                //
+                // Example:
+                // Request.Filter = "fs-mou"
+                //
+                // Search:
+                // 1. fs-mou index directly
+                // 2. asdc_new where path.real contains \fs-mou\
+                // ========================================================
 
-                // 🔹 2. asdc_new → ONLY path.real contains "asdc_new"
-                new
-                {
-                    @bool = new
+                filters.Add(
+                    new
                     {
-                        filter = new List<object>
+                        @bool = new
                         {
-                            new
+                            should = new List<object>
                             {
-                                terms = new
+                        // ------------------------------------------------
+                        // 1. Actual Web Crawler index
+                        // ------------------------------------------------
+
+                        new
+                        {
+                            @bool = new
+                            {
+                                filter = new List<object>
                                 {
-                                    _index = new List<string> { "asdc_new" }
+                                    new
+                                    {
+                                        terms = new
+                                        {
+                                            _index = new List<string>
+                                            {
+                                                Request.Filter
+                                            }
+                                        }
+                                    }
                                 }
-                            },
-                            new
+                            }
+                        },
+
+                        // ------------------------------------------------
+                        // 2. Files stored inside asdc_new
+                        // ------------------------------------------------
+
+                        new
+                        {
+                            @bool = new
                             {
-                                wildcard = new Dictionary<string, string>
+                                filter = new List<object>
                                 {
-                                     { "path.real", $"*\\\\{Request.Filter}\\\\*" }
+                                    new
+                                    {
+                                        terms = new
+                                        {
+                                            _index = new List<string>
+                                            {
+                                                "asdc_new"
+                                            }
+                                        }
+                                    },
+
+                                    new
+                                    {
+                                        wildcard =
+                                            new Dictionary<string, string>
+                                            {
+                                                {
+                                                    "path.real",
+                                                    $"*\\\\{Request.Filter}\\\\*"
+                                                }
+                                            }
+                                    }
                                 }
                             }
                         }
+                            },
+
+                            minimum_should_match = 1
+                        }
                     }
-                }
-            },
-                        minimum_should_match = 1
-                    }
-                });
+                );
             }
 
-            //else if (!string.IsNullOrWhiteSpace(Request.Filter))
-            //{
-            //    // ✅ CASE 2: Specific domain → index filter ONLY
-            //    var indexList = new List<string> { $"seo_{Request.Filter}" };
+            // ============================================================
+            // ELASTICSEARCH QUERY
+            // ============================================================
 
-            //    filters.Add(new
-            //    {
-            //        terms = new
-            //        {
-            //            _index = indexList
-            //        }
-            //    });
-            //}
-
-            // Convert the elasticsearchQuery object to a JSON string
             var dto = new DTOSearchQueryRequest
             {
                 from = Request.from,
                 size = Request.size,
-                min_score = 1.1,   // ✅ FILTER LOW RELEVANCE RESULTS
-                query = new Query
-                {
-                    function_score = new FunctionScore
-                    {
-                        boost_mode = "multiply",
-                        score_mode = "sum",
-                        query = new FunctionScoreQuery
-                        {
-                            @bool = new BoolQuery
-                            {
-                                should = shouldQueries,
 
-                                filter = filters.Any() ? filters : null   // 👈 OPTIONAL FILTER
-                            }
-                        }
+                query = new SearchQuery
+                {
+                    @bool = new SearchBoolQuery
+                    {
+                        should = shouldQueries,
+
+                        filter = filters.Any()
+                            ? filters
+                            : null,
+
+                        minimum_should_match = 1
                     }
                 },
-                //KnnDto = new KnnDto
-                //{
-                //    Field = "embedding",
-                //    QueryVector = new List<float> { 0.1f, 0.2f, 0.3f },
-                //    K = 10,
-                //    NumCandidates = 100,
-                //    Boost = 3
-                //},
-                // ✅ HIGHLIGHT ADDED HERE
+
+                // ========================================================
+                // HIGHLIGHT ALL SEARCHABLE WEB CRAWLER FIELDS
+                // ========================================================
+
                 highlight = new Highlight
                 {
                     pre_tags = new[]
-          {
-            "<mark class=\"marks\">"
-        },
-                    post_tags = new[] { "</mark>" },
-                    fields = new Dictionary<string, HighlightField>
-        {
-            {
-                "content",
-                new HighlightField
-                {
-                    fragment_size = 150,
-                    number_of_fragments = 3
-                }
-            }
-        }
-                }
+                    {
+                "<mark class=\"marks\">"
+            },
 
+                    post_tags = new[]
+                    {
+                "</mark>"
+            },
+
+                    fields = new Dictionary<string, HighlightField>
+            {
+                {
+                    "title",
+                    new HighlightField
+                    {
+                        number_of_fragments = 0
+                    }
+                },
+
+                {
+                    "headings",
+                    new HighlightField
+                    {
+                        fragment_size = 300,
+                        number_of_fragments = 3
+                    }
+                },
+
+                {
+                    "meta_description",
+                    new HighlightField
+                    {
+                        fragment_size = 300,
+                        number_of_fragments = 3
+                    }
+                },
+
+                {
+                    "content",
+                    new HighlightField
+                    {
+                        type="unified",
+                        fragment_size = 600,
+                        number_of_fragments = 3,
+                        boundary_scanner= "sentence"
+                    }
+                },
+
+                //{
+                //    "table_rows.raw_text",
+                //    new HighlightField
+                //    {
+                //        fragment_size = 150,
+                //        number_of_fragments = 3
+                //    }
+                //},
+
+                //{
+                //    "table_rows.raw",
+                //    new HighlightField
+                //    {
+                //        fragment_size = 150,
+                //        number_of_fragments = 3
+                //    }
+                //},
+
+                //{
+                //    "table_rows.columns.label",
+                //    new HighlightField
+                //    {
+                //        fragment_size = 150,
+                //        number_of_fragments = 3
+                //    }
+                //},
+
+                //{
+                //    "table_rows.columns.name",
+                //    new HighlightField
+                //    {
+                //        fragment_size = 150,
+                //        number_of_fragments = 3
+                //    }
+                //},
+
+                //{
+                //    "table_rows.columns.value",
+                //    new HighlightField
+                //    {
+                //        fragment_size = 150,
+                //        number_of_fragments = 3
+                //    }
+                //}
+            }
+                }
             };
 
-            //"content", new
-            //{
-            //    pre_tags = new[] { "<strong style=\"background-color:green;color:white; font-weight:bold; padding:1px;\">" },
-            //    post_tags = new[] { "</strong>" }
-            //}
+            // ============================================================
+            // SERIALIZE
+            // ============================================================
 
-            string jsonBody = JsonConvert.SerializeObject(dto);
+            string jsonBody = JsonConvert.SerializeObject(
+                dto,
+                Formatting.None,
+                new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                }
+            );
 
-            // Add this line before making the request to bypass SSL certificate validation for all requests in this handler's lifetime
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            // ============================================================
+            // ELASTICSEARCH REQUEST
+            // ============================================================
 
-            // Create HttpClient with basic auth
-            using var client = CreateHttpClient(UserName, Password);
-            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(Url, content);
-            var responseString = await response.Content.ReadAsStringAsync();
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
+
+            using var client = CreateHttpClient(
+                UserName,
+                Password
+            );
+
+            using var content = new StringContent(
+                jsonBody,
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await client.PostAsync(
+                Url,
+                content
+            );
+
+            var responseString =
+                await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
-                // With the following corrected line:
-
                 return responseString;
             }
-            else
-            {
-                return "Not Found";
-            }
+
+            return "Not Found";
         }
 
         private static HttpClient CreateHttpClient(string username, string password)

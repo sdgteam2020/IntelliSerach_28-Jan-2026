@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Ocsp;
+using System.Net;
 using System.Security.Claims;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -196,14 +197,18 @@ namespace AIDocSearch.Controllers
 
             if (string.IsNullOrWhiteSpace(pdfUrl))
                 return BadRequest("pdfUrl is required");
-           
+
 
 
 
             using var handler = new HttpClientHandler
             {
+                UseProxy = true,
+                UseDefaultCredentials = true,
+                DefaultProxyCredentials = CredentialCache.DefaultCredentials,
+
                 ServerCertificateCustomValidationCallback =
-        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+           HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
             };
             string extension = Path.GetExtension(new Uri(pdfUrl).AbsolutePath)?.ToLower();
 
@@ -212,7 +217,10 @@ namespace AIDocSearch.Controllers
             {
                 return Redirect(pdfUrl);
             }
-            using var httpClient = new HttpClient(handler);
+            using var httpClient = new HttpClient(handler)
+            {
+                Timeout = TimeSpan.FromSeconds(60)
+            };
 
             byte[] pdfBytes;
 
@@ -220,9 +228,28 @@ namespace AIDocSearch.Controllers
             {
                 pdfBytes = await httpClient.GetByteArrayAsync(pdfUrl);
             }
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(
+                    $"Unable to download PDF.\n" +
+                    $"URL: {pdfUrl}\n" +
+                    $"Message: {ex.Message}\n" +
+                    $"Inner: {ex.InnerException?.Message}");
+            }
+            catch (TaskCanceledException ex)
+            {
+                return BadRequest(
+                    $"PDF download timed out.\n" +
+                    $"URL: {pdfUrl}\n" +
+                    $"Message: {ex.Message}");
+            }
             catch (Exception ex)
             {
-                return BadRequest($"Unable to download PDF. {ex.Message}");
+                return BadRequest(
+                    $"PDF download failed.\n" +
+                    $"URL: {pdfUrl}\n" +
+                    $"Message: {ex.Message}\n" +
+                    $"Inner: {ex.InnerException?.Message}");
             }
 
             string outFileName = Path.GetFileName(new Uri(pdfUrl).AbsolutePath);

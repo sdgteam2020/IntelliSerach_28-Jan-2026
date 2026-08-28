@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.ResponseCompression;
 using Newtonsoft.Json.Serialization;
 using Infrastructure.Repository;
+using System.Collections.Generic;
+using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 var configration = builder.Configuration;
@@ -169,6 +171,12 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 
 var app = builder.Build();
 
+// If this app is hosted as an IIS application under a virtual path '/IntelliSearch',
+// set PathBase early so URL generation, LinkGenerator, cookies and antiforgery tokens
+// are produced with the correct base path. Adjust this value if the IIS application
+// is mounted under a different virtual directory.
+app.UsePathBase("/IntelliSearch");
+
 // Enable response compression to reduce payload size
 app.UseResponseCompression();
 
@@ -238,14 +246,30 @@ app.Use(async (ctx, next) =>
     }
 
     // 1) Content Security Policy
+    var connectList = new List<string> { "'self'" };
+    try
+    {
+        var cfg = app.Configuration.GetSection("SecurityHeaders:ConnectSrc").Get<string[]>();
+        if (cfg != null && cfg.Length > 0)
+        {
+            // ensure values are trimmed and non-empty
+            connectList.AddRange(cfg.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()));
+        }
+    }
+    catch
+    {
+        // ignore configuration errors and fall back to 'self'
+    }
+
+    var connectDirective = "connect-src " + string.Join(' ', connectList) + "; ";
+
     ctx.Response.Headers["Content-Security-Policy"] =
         "default-src 'self'; " +
         "script-src 'self'; " +
         "style-src 'self'; " + // allow Bootstrap inline styles
         "img-src 'self' data:; " +
         "font-src 'self' data:; " +
-        //"connect-src 'self'; " +
-        "connect-src 'self' https://192.168.10.208 wss://192.168.10.208; " +
+        connectDirective +
         "frame-ancestors 'self'; " +
         "base-uri 'self'; " +
         "form-action 'self';";
@@ -268,7 +292,7 @@ app.Use(async (ctx, next) =>
     ctx.Response.Headers.Remove("X-Powered-By");
     ctx.Response.Headers.Remove("x-aspnet-version");
 
-    ctx.Request.PathBase = "/";
+   // ctx.Request.PathBase = "/";
 
     await next();
 });
@@ -278,7 +302,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
     MinimumSameSitePolicy = SameSiteMode.Strict
 });
 app.UseHttpsRedirection();
-app.UsePathBase("/IntelliSearch");
+//app.UsePathBase("/IntelliSearch");
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>

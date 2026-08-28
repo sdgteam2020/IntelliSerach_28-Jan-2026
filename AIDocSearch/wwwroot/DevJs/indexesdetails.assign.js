@@ -43,7 +43,7 @@ $(function () {
                 pageLength: 10,
 
                 ajax: {
-                    url: '/Index/SearchUsers',
+                    url: '/IntelliSearch/Index/SearchUsers',
                     type: 'POST',
                     headers: {
                         'RequestVerificationToken': token
@@ -166,7 +166,7 @@ $(function () {
             };
 
             $.ajax({
-                url: '/Index/AssignIndex',
+                url: '/IntelliSearch/Index/AssignIndex',
                 method: 'POST',
                 contentType: 'application/json',
                 headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
@@ -249,7 +249,7 @@ $(function () {
         $(".Indexnameinmodal").html($(this).data('index-name'));
 
         $.ajax({
-            url: '/Index/GetDocDetailsByIndexName',
+            url: '/IntelliSearch/Index/GetDocDetailsByIndexName',
             type: 'POST',
             data: {
                 indexName: encryptPayloadData(indexName) ,  //encryptPayloadData
@@ -315,14 +315,15 @@ $(function () {
                         let fileName =""
                         if (item.Path.Real != null) {
                             path = decryptPayloadData(item.Path?.Real) || '';
-                            let fileName = path.split('\\').pop().split('/').pop();
+                            fileName = path.split('\\').pop().split('/').pop();
 
                             extension = fileName.includes('.')
                                 ? fileName.split('.').pop().toLowerCase()
                                 : '';
                         } if (item.url != null) {
                             extension = "web";
-                            path=item.url
+                            path = item.url;
+                            fileName = item.url;
                         }
 
                         let icon = 'fa-solid fa-file';
@@ -405,13 +406,20 @@ $(function () {
                         }
                         else if (isPdf) {
                             const encrypted = encryptPayloadData(downloadUrl);
-                            fileUrl = `/Master/WatermarkPdfFromUrl?pdfUrl=${encodeURIComponent(encrypted)}`;
+                            fileUrl = `/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl=${encodeURIComponent(encrypted)}`;
                         }
                         else {
                             // fileUrl = downloadUrl;
                             const encrypted = encryptPayloadData(downloadUrl);
-                            fileUrl = `/Master/WatermarkPdfFromUrl?pdfUrl=${encodeURIComponent(encrypted)}`;
+                            fileUrl = `/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl=${encodeURIComponent(encrypted)}`;
                         }
+                        let Icon_for_Download_Url = "";
+                        if (extension=="web")
+                            Icon_for_Download_Url = "fa fa-external-link";
+                        else if (isPdf)
+                            Icon_for_Download_Url = "fa-solid fa-eye";
+                        else
+                            Icon_for_Download_Url = "fa-solid fa-download";
 
                        
                         html += `
@@ -433,9 +441,10 @@ $(function () {
        class="text-decoration-none"
        title="${fileName}">
 
-        <i class="${isPdf ? 'fa-solid fa-eye' : 'fa-solid fa-download'} me-1"></i>
-        ${fileName}
+        <i class="${Icon_for_Download_Url} me-1"></i>
+       ${fileName.length > 20 ? fileName.substring(0, 20) + '...' : fileName}
     </a>
+   
 </h6>
 
                             <small class="text-muted">
@@ -482,7 +491,7 @@ $(function () {
         let token = $('input[name="__RequestVerificationToken"]').val();
 
         $.ajax({
-            url: '/Index/GetIndexWiseAssginUsers',
+            url: '/IntelliSearch/Index/GetIndexWiseAssginUsers',
             type: 'POST',
             headers: {
                 'RequestVerificationToken': token

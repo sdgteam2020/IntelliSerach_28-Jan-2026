@@ -11,8 +11,6 @@ let statusPollingTimer = null;
 
 
 
-
-
     $("#ScraperForm").on("submit", async function (e) {
         // $(".pdfviewcontainer").addClass("d-none");
         // $(".webviewcontainer").addClass("d-none");
@@ -100,6 +98,8 @@ let statusPollingTimer = null;
 
                     // Example: { code: 200, message: "...", data: { ... } }
                     if (data.Code === 200) {
+
+                        $("#popup_loading").removeClass("d-none");
                         if ($("#pdfOption").is(":checked")) {
                             BindpdfScraping(data)
                             $(".pdfviewcontainer").removeClass("d-none");
@@ -327,7 +327,8 @@ function setStatusUrl(url) {
             CheckCrawlStatus(url);
         } else {
 
-            // Show PDF button 
+            // Show PDF button
+            $("#btn_view_pdfs").removeClass("d-none");
             $("#btn_view_pdfs").show().off("click").on("click", function () { LoadPdfLinks(currentCrawlJobId); });
             clearInterval(statusPollingTimer);
             statusPollingTimer = null;
@@ -608,7 +609,7 @@ function UpdateCrawlStatusPopup(Data) {
 
         $("#popup_loading").html(`
     <i class="fa fa-check-circle text-success me-2" ></i >
-        Crawl finished
+       ${status}
             `);
     }
 }
@@ -773,19 +774,7 @@ function LoadPdfLinks(jobId) {
         return;
     }
 
-    Swal.fire({
-        title: "Loading Scraped Links...",
-        html: `
-    <div class="py-3" >
-                <i class="fa fa-spinner fa-spin fa-2x"></i>
-                <div class="mt-2">
-                    Please wait...
-                </div>
-            </div >
-    `,
-        showConfirmButton: false,
-        allowOutsideClick: false
-    });
+  
 
     $.ajax({
 
@@ -853,7 +842,7 @@ function ShowPdfListPopup(response) {
     if (pdfLinks.length === 0) {
 
         html = `
-    <div class="text-center text-muted py-4" >
+            <div class="text-center text-muted py-4">
 
                 <i class="fa fa-file-pdf-o fa-2x mb-2"></i>
 
@@ -861,9 +850,8 @@ function ShowPdfListPopup(response) {
                     No PDF links found.
                 </div>
 
-            </div >
-    `;
-
+            </div>
+        `;
     }
     else {
 
@@ -872,148 +860,147 @@ function ShowPdfListPopup(response) {
         // ==========================================
 
         html = `
-    <div class="table-responsive"
-style = "max-height:400px; overflow-y:auto;" >
+            <div class="table-responsive">
 
-    <table class="table table-bordered table-hover
-                              align-middle mb-0">
+                <table id="tblPdfList"
+                       class="table table-bordered table-hover align-middle mb-0"
+                       style="width:100%;">
 
-        <thead class="table-light">
+                    <thead class="table-light">
 
-            <tr>
+                        <tr>
 
-                <th style="width:60px;"
-                    class="text-center">
-                    #
-                </th>
+                            <th class="text-center">
+                                #
+                            </th>
 
-                <th>
-                    Pdf URL
-                </th>
+                            <th>
+                                Page URL
+                            </th>
 
-                <th style="width:100px;"
-                    class="text-center">
-                    PDF
-                </th>
+                            <th class="text-center">
+                                PDF
+                            </th>
 
-            </tr>
+                        </tr>
 
-        </thead>
+                    </thead>
 
-        <tbody>
-            `;
+                    <tbody>
+        `;
 
-            // ==========================================
-            // Bind PDF Rows
-            // ==========================================
+        // ==========================================
+        // Bind PDF Rows
+        // ==========================================
 
-            $.each(pdfLinks, function (index, item) {
+        $.each(pdfLinks, function (index, item) {
 
             const pdfUrl = item.pdf_url || "";
             const pageUrl = item.page_url || "";
 
             html += `
-            <tr>
+                <tr>
 
-                <!-- # -->
-                <td class="text-center">
-                    <span class="badge bg-secondary">
-                        ${index + 1}
-                    </span>
-                </td>
+                    <!-- Serial Number -->
+                    <td class="text-center">
 
-                <!-- Page URL -->
-                <td>
+                        <span class="badge bg-secondary">
+                            ${index + 1}
+                        </span>
 
-                    ${
-                        pageUrl
-                            ?
-                            `
-                            <a href="${escapeAttribute(pageUrl)}"
-                               target="_blank"
-                               class="text-decoration-none text-break">
+                    </td>
 
-                                <i class="fa fa-external-link me-1"></i>
+                    <!-- Page URL -->
+                    <td>
 
-                                ${escapeHtml(pageUrl)}
+                        ${pageUrl
+                    ?
+                    `
+                                <a href="${escapeAttribute(pageUrl)}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="text-decoration-none text-break">
 
-                            </a>
-                            `
-                            :
-                            `
-                            <span class="text-muted">
-                                -
-                            </span>
-                            `
-                    }
+                                    <i class="fa fa-external-link me-1"></i>
 
-                </td>
+                                    ${escapeHtml(pageUrl)}
 
-                <!-- PDF -->
-                <td class="text-center">
+                                </a>
+                                `
+                    :
+                    `
+                                <span class="text-muted">
+                                    -
+                                </span>
+                                `
+                }
 
-                    ${
-                        pdfUrl
-                            ?
-                            `
-                            <a href="${escapeAttribute(pdfUrl)}"
-                               target="_blank"
-                               class="text-danger"
-                               title="Open PDF">
+                    </td>
 
-                               <i class="fa fa-file-pdf me-2"></i>
+                    <!-- PDF -->
+                    <td class="text-center">
 
-                            </a>
-                            `
-                            :
-                            `
-                            <span class="text-muted"
-                                  title="PDF URL not available">
+                        ${pdfUrl
+                    ?
+                    `
+                                <a href="${escapeAttribute(pdfUrl)}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="text-danger"
+                                   title="Open PDF">
 
-                                <i class="fa fa-file-pdf-o"
-                                   style="font-size:30px;">
-                                </i>
+                                    <i class="fa fa-file-pdf fa-lg"></i>
 
-                            </span>
-                            `
-                    }
+                                </a>
+                                `
+                    :
+                    `
+                                <span class="text-muted"
+                                      title="PDF URL not available">
 
-                </td>
+                                    <i class="fa fa-file-pdf fa-lg"></i>
 
-            </tr>
+                                </span>
+                                `
+                }
+
+                    </td>
+
+                </tr>
             `;
         });
 
-            // ==========================================
-            // Close Table + Download Button
-            // ==========================================
+        // ==========================================
+        // Close Table
+        // ==========================================
 
-            html += `
-        </tbody>
+        html += `
+                    </tbody>
 
-    </table>
+                </table>
 
-            </div >
+            </div>
 
-    <div class="mt-3 pt-3 border-top">
+            <div class="mt-3 pt-3 border-top">
 
-        <button type="button"
-            id="btn_download_all_pdfs"
-            class="btn btn-danger w-100">
+                <button type="button"
+                        id="btn_download_all_pdfs"
+                        class="btn btn-danger w-100">
 
-            <i class="fa fa-download me-2"></i>
+                    <i class="fa fa-download me-2"></i>
 
-            Download & Index All PDFs
+                    Download & Index All PDFs
 
-            <span class="badge bg-light text-danger ms-2">
-                ${pdfLinks.length}
-            </span>
+                    <span class="badge bg-light text-danger ms-2">
+                        ${pdfLinks.length}
+                    </span>
 
-        </button>
+                </button>
 
-    </div>
-`;
+            </div>
+        `;
     }
+
 
     // ==========================================
     // Show SweetAlert Modal
@@ -1022,13 +1009,13 @@ style = "max-height:400px; overflow-y:auto;" >
     Swal.fire({
 
         title: `
-    <i class="fa fa-file-pdf-o text-danger me-2" ></i >
-        Scraped PDFs
-            `,
+            <i class="fa fa-file-pdf text-danger me-2"></i>
+            Scraped PDFs
+        `,
 
         html: html,
 
-        width: 850,
+        width: 950,
 
         showConfirmButton: true,
 
@@ -1041,7 +1028,79 @@ style = "max-height:400px; overflow-y:auto;" >
         didOpen: function () {
 
             // ==========================================
-            // Download All
+            // Initialize DataTable
+            // ==========================================
+
+            if ($("#tblPdfList").length > 0) {
+
+                $("#tblPdfList").DataTable({
+
+                    pageLength: 10,
+
+                    lengthMenu: [
+                        [5, 10, 25, 50, -1],
+                        [5, 10, 25, 50, "All"]
+                    ],
+
+                    paging: true,
+
+                    searching: true,
+
+                    ordering: true,
+
+                    info: true,
+
+                    responsive: true,
+
+                    autoWidth: false,
+
+                    order: [],
+
+                    columnDefs: [
+
+                        {
+                            targets: 0,
+                            orderable: false,
+                            searchable: false,
+                            width: "60px"
+                        },
+
+                        {
+                            targets: 2,
+                            orderable: false,
+                            searchable: false,
+                            width: "100px"
+                        }
+
+                    ],
+
+                    language: {
+
+                        search: "",
+
+                        searchPlaceholder: "Search PDF / URL...",
+
+                        lengthMenu: "Show _MENU_ records",
+
+                        info: "Showing _START_ to _END_ of _TOTAL_ PDFs",
+
+                        infoEmpty: "No PDFs available",
+
+                        zeroRecords: "No matching PDF found",
+
+                        paginate: {
+                            previous: "Previous",
+                            next: "Next"
+                        }
+
+                    }
+
+                });
+            }
+
+
+            // ==========================================
+            // Download All PDFs
             // ==========================================
 
             $("#btn_download_all_pdfs")
@@ -1051,11 +1110,28 @@ style = "max-height:400px; overflow-y:auto;" >
                     DownloadAllPdfs(response.job_id);
 
                 });
+
+        },
+
+        willClose: function () {
+
+            // ==========================================
+            // Destroy DataTable
+            // ==========================================
+
+            if (
+                $("#tblPdfList").length > 0 &&
+                $.fn.DataTable.isDataTable("#tblPdfList")
+            ) {
+
+                $("#tblPdfList").DataTable().destroy();
+
+            }
+
         }
 
     });
 }
-
 
 // ==========================================
 // HTML Encode
@@ -1107,22 +1183,7 @@ function DownloadAllPdfs(jobId) {
         return;
     }
 
-    Swal.fire({
-        title: "Downloading PDFs...",
-        html: `
-    <div class="py-3" >
 
-                <i class="fa fa-spinner fa-spin fa-2x"></i>
-
-                <div class="mt-3">
-                    Download process started.
-                </div>
-
-            </div >
-    `,
-        showConfirmButton: false,
-        allowOutsideClick: false
-    });
 
     $.ajax({
 
@@ -1244,10 +1305,10 @@ function reset()
  
     // Reset variables
     currentCrawlJobId = null;
-
+    $("#popup_loading").addClass("d-none");
     // Reset URL
     // $("#Url").val("");
-
+    $("#btn_view_pdfs").addClass("d-none");
     // Reset summary
     $("#websitewebUrl").text("-");
     $("#job_id").text("-");
@@ -1263,7 +1324,8 @@ function reset()
 
     // Hide PDF button
     $("#btn_view_pdfs").hide();
-    $("#popup_loading").html("")
+    $("#popup_loading").html(` <i class="fa fa-spinner fa-spin me-2"></i>
+                                           Checking final status......`)
     // Clear table if still present
     $("#webTable tbody").empty();
 

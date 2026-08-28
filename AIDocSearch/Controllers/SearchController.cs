@@ -238,8 +238,9 @@ namespace AIDocSearch.Controllers
                 string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
                 string Password = _configuration["UrlData:Password"] ?? string.Empty;
                 var IndexesDetails = await _searchService.IndexesDetails(Url, UserName, Password);
+
                 // Call the search service to get the response
-                return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.SuccessMessage, IndexesDetails));
+                return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.SuccessMessage, IndexesDetails.Where(i => i.index.Contains("fs-")).ToList()));
                 
 
                 DTOAPILoginRequest dTOAPILoginRequest = new DTOAPILoginRequest();

@@ -678,11 +678,11 @@ html.light-theme .footer.bg-white {
     box-shadow: 0 6px 16px rgba(23, 125, 255, 0.12);
 }
 
-.result-score .score-label {
-    font-size: 0.75rem;
-    color: var(--fut-text-secondary);
-    margin-left: 0.5rem;
-}
+    .result-score .score-label {
+        font-size: 0.75rem;
+        color: #006efd;
+        margin-left: 0.5rem;
+    }
 
 .result-score .badge {
     background: linear-gradient(90deg, rgba(0, 123, 255, 0.95), rgba(30, 160, 255, 0.95));

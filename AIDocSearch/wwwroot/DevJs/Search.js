@@ -93,9 +93,10 @@ async function searchContent(reset = true) {
                     $('#resultTime').html(`Search completed in ${elapsed} ms`);
                 }
                 hits.forEach(hit => {
+                 
                     const virtualPath = hit._source?.path?.virtual || '';
                     const realPath = hit._source?.path?.real || '';
-                    const highlights = hit.highlight?.content || [];
+                    let highlights = hit.highlight?.content || [];
                     // const content = hit._source?.content?.join(" ... ") || hit._source?.content || "";
                     const pathhh = hit._index;
                     const score = hit._score ?? 0;
@@ -107,6 +108,55 @@ async function searchContent(reset = true) {
                     const title = hit._source?.title || '';
                     const maxScore = data.hits.max_score || 1;
                     const relevance = ((hit._score / maxScore) * 100).toFixed(0);
+                    // ========================================================
+                    // GET HIGHLIGHTS FROM ALL SEARCH FIELDS
+                    // ========================================================
+
+                   let  highlight = hit.highlight || {};
+
+                    const contentHighlights =
+                        highlight.content || [];
+
+                    const headingHighlights =
+                        highlight.headings || [];
+
+                    const titleHighlights =
+                        highlight.title || [];
+
+                    const metaDescriptionHighlights =
+                        highlight.meta_description || [];
+
+                    const tableRawTextHighlights =
+                        highlight['table_rows.raw_text'] || [];
+
+                    const tableRawHighlights =
+                        highlight['table_rows.raw'] || [];
+
+                    const tableLabelHighlights =
+                        highlight['table_rows.columns.label'] || [];
+
+                    const tableNameHighlights =
+                        highlight['table_rows.columns.name'] || [];
+
+                    const tableValueHighlights =
+                        highlight['table_rows.columns.value'] || [];
+
+
+                    // ========================================================
+                    // COMBINE ALL HIGHLIGHTS
+                    // ========================================================
+
+                     highlights = [
+                        ...titleHighlights,
+                        ...headingHighlights,
+                        ...metaDescriptionHighlights,
+                        ...tableLabelHighlights,
+                        ...tableNameHighlights,
+                        ...tableValueHighlights,
+                        // ...tableRawTextHighlights,
+                        // ...tableRawHighlights,
+                        ...contentHighlights
+                    ];
 
                     let cleanPath = virtualPath.replace(/\\\\/g, '').replace('\\', '');
                     //${ highlights.map(h => `${h} `).join(' ') }
@@ -123,6 +173,7 @@ async function searchContent(reset = true) {
                         const match = webServerList.find(item =>
                             normalizedPath.includes(item.Includes)
                         );
+
 
                         if (match) {
                             const marker = match.Includes.replace("/", "").replace(/\\/g, "/");
@@ -163,8 +214,9 @@ async function searchContent(reset = true) {
             </div>
             <div class="result-right">
                 <div class="result-score">
+                    <div class="score-label me-2">${pathhh}</div>
                     <span class="score-pill">Score ${relevance}</span>
-                    <div class="score-label"></div>
+                   
                 </div>
             </div>
         </div>
@@ -188,6 +240,7 @@ async function searchContent(reset = true) {
             </div>
             <div class="result-right">
                 <div class="result-score">
+                     <div class="score-label me-2">${pathhh}</div>
                     <span class="score-pill">Score ${relevance}</span>
                    
                 </div>

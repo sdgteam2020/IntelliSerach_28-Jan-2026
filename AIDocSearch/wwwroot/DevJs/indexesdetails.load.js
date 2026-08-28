@@ -86,7 +86,7 @@ $(function () {
                         ${getVal(item, 'DocsCount', 'docs.count') || 0}
                     </div>
                     <div class="metric-label">
-                        Documents
+                      Active
                     </div>
                 </div>
 
@@ -118,7 +118,7 @@ $(function () {
                     data-uuid="${item.uuid || ''}"
                      data-index-name="${(item.index || '').replace('fs-', '')}"
                     >
-                    👁 View Files
+                    👁 View
                 </button>
 
                 ${type === "Admin" ? `
@@ -173,7 +173,7 @@ $(function () {
     function load() {
         let token = $('input[name="__RequestVerificationToken"]').val();
         $.ajax({
-            url: '/Index/GetIndexesDetails',
+            url: '/IntelliSearch/Index/GetIndexesDetails',
             method: 'POST',
             headers: { 'RequestVerificationToken': token },
             success: function (resp) {

@@ -66,7 +66,7 @@
         .pagination button:hover {
             background-color: #f1f3f4;
             color: #174ea6;
-            border: 1px solid #4285f4;
+            
         }
 
         .pagination button.active {
@@ -117,7 +117,7 @@
 }
 
 .marks {
-    background: #a4ffa7;
+    background: #fff;
     font-weight: bold
 }
 /* Filter bar container */

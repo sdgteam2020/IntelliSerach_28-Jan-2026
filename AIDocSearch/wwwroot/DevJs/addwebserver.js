@@ -40,7 +40,7 @@ async function DeleteWebServer(id) {
 
     try {
         const token = $('input[name="__RequestVerificationToken"]').val();
-        const response = await fetch('/Master/DeleteWebServer', {
+        const response = await fetch('/IntelliSearch/Master/DeleteWebServer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ async function BindData() {
 
     try {
 
-        const response = await fetch('/Master/GetAllWebServer', {
+        const response = await fetch('/IntelliSearch/Master/GetAllWebServer', {
             method: 'POST',
             headers: {
                 'RequestVerificationToken': token
