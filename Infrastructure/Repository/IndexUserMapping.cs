@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Repository;
+﻿using Application.Interfaces;
+using Application.Interfaces.Repository;
 using Domain.DTOs.Requests;
 using Domain.Entities;
 using Domain.Enums;
@@ -41,10 +42,15 @@ namespace Infrastructure.Repository
             return existing;
         }
 
-        public async Task<bool> CheckUserIndexingExists(int UserId, string IndexId)
-        {
-            if ((int)UsersId.Admin == UserId)
+        public async Task<bool> CheckUserIndexingExists(int UserId, string IndexId, String RoleName)
+        { // Admin has access to all indexes
+            if (string.Equals(RoleName, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
                 return true;
+            }
+
+            //if ((int)UsersId.Admin == UserId)
+            //    return true;
           
             return await _context.TrnIndexUserMapping.AnyAsync(i =>i.UserId == UserId && i.IndexId == IndexId);
         }

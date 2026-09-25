@@ -11,7 +11,7 @@
                     <h4>Indexes Details</h4>
                 </div>
                 <div class="card-body">
-
+                   
                     <div class="row" id="tableContainer">
                         <!-- table will be injected by JS -->
                     </div>
@@ -47,6 +47,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fa-solid fa-x text-white"></i></button>
                           </div>
                           <div class="modal-body">
+                            
                                     <div class="row justify-content-end mb-2">
                                         <div class="col-auto">
                                             <div class="d-flex align-items-center">
@@ -76,13 +77,14 @@
                         </div>
                       </div>
                     </div>
-                    <div class="modal fade" id="fileModal" tabindex="-1" tabindex="-1"
+                    <div class="modal fade" id="fileModal" tabindex="-1" 
                          data-bs-backdrop="static"
                          data-bs-keyboard="false">
-                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
                             <div class="modal-content">
 
                                 <div class="modal-header">
+
                                     <h5 class="modal-title Indexnameinmodal">Files</h5>
                                     <button type="button"
                                             class="btn-close"
@@ -98,6 +100,337 @@
                             </div>
                         </div>
                     </div>
+
+
+
+                    <div class="modal fade" id="indexingstatisticsModal" tabindex="-1"
+                         data-bs-backdrop="static"
+                         data-bs-keyboard="false">
+
+                        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+
+                           <div class="modal-content crawler-modal">
+
+
+                        <div class="modal-header crawler-header">
+                                    <span class="d-none spanindexNameForDashboard"></span>
+                                    <span class="d-none spanuuidForDashboard"></span>
+
+                            
+                            <h5 class="modal-title">
+                                <i class="fa-solid fa-spider me-2"></i>
+                                Crawler Dashboard
+                            </h5>
+
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fa-solid fa-x text-white"></i></button>
+
+                        </div>
+
+
+                        <div class="modal-body">
+
+
+                        <!-- Status -->
+
+                        <div class="crawler-status">
+
+                                        <div class="crawler-status">
+
+                                            <div class="status-left">
+
+                                                <span class="live-dot"
+                                                      id="crawlerStatusDot">
+                                                </span>
+
+
+                                                <span class="running "
+                                                      id="crawlerStatusText">
+                                                    Checking1 crawler...
+                                                </span>
+
+
+                                                <span class="sync"
+                                                      id="lastSync">
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                        </div>
+
+
+
+                        <div class="dashboard-container">
+
+
+                        <h1>
+                            Search Index Analytics
+                        </h1>
+
+
+                        <div class="row g-3">
+
+
+
+                        <!-- Card -->
+
+                        <div class="col-lg-2 col-md-4">
+
+                        <div class="stat-card blue-card">
+
+                        <div class="icon">
+                        <i class="fa-solid fa-file"></i>
+                        </div>
+
+                        <div class="stat-number"
+                        id="filesDiscovered">
+                        0
+                        </div>
+
+                        <div class="stat-label">
+                        Files Discovered
+                        </div>
+
+                        </div>
+
+                        </div>
+
+
+
+                        <div class="col-lg-2 col-md-4">
+
+                        <div class="stat-card green-card" role="button" id="AllDocDetailsByIndexName">
+
+                        <div class="icon">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+
+                        <div class="stat-number"
+                        id="indexedSearchable">
+                        0
+                        </div>
+
+                        <div class="stat-label">
+                        Indexed Searchable
+                        </div>
+
+                        </div>
+
+                        </div>
+
+
+
+
+                        <div class="col-lg-2 col-md-4">
+
+                        <div class="stat-card purple-card" role="button" id="OCRDocDetailsByIndexName">
+
+                        <div class="icon">
+                        <i class="fa-solid fa-eye"></i>
+                        </div>
+
+                        <div class="stat-number"
+                        id="indexedOcr_Files">
+                        0
+                        </div>
+
+                        <div class="stat-label">
+                        OCR Enabled
+                        </div>
+
+                        </div>
+
+                        </div>
+
+
+
+
+
+                        <div class="col-lg-2 col-md-4">
+
+                                                <div class="stat-card orange-card" role="button" id="NotOCRDocDetailsByIndexName">
+
+                        <div class="icon">
+                        <i class="fa-solid fa-file-lines"></i>
+                        </div>
+
+                        <div class="stat-number"
+                        id="indexedNotOcr_Files">
+                        0
+                        </div>
+
+                        <div class="stat-label">
+                        Text Extraction
+                        </div>
+
+                        </div>
+
+                        </div>
+
+
+
+
+                        <div class="col-lg-2 col-md-4">
+
+                        <div class="stat-card red-card">
+
+                        <div class="icon">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+
+
+                        <div class="stat-number"
+                        id="failedProcess">
+                        0
+                        </div>
+
+                        <div class="stat-label">
+                        Unsupported Files
+                        </div>
+
+                        </div>
+
+                        </div>
+
+
+
+
+
+                      @*   <div class="col-lg-2 col-md-4">
+
+                        <div class="stat-card dark-card">
+
+                        <div class="icon">
+                        <i class="fa-solid fa-chart-line"></i>
+                        </div>
+
+
+                        <div class="stat-number"
+                        id="indexProgress">
+                        0
+                        </div>
+
+
+                        <div class="stat-label">
+                        Progress
+                        </div>
+
+                        </div>
+
+                        </div> *@
+
+
+                        </div>
+
+
+
+
+                        <!-- Progress -->
+
+                        <div class="progress-panel">
+
+
+                        <div class="progress-title">
+
+                        <i class="fa-solid fa-database"></i>
+                         Indexing Progress
+
+                        </div>
+
+
+
+                        <div class="row align-items-center">
+
+
+                        <div class="col-md-3">
+
+                        <div class="progress-text"
+                        id="progressText">
+
+                        0 of 0 files searchable
+
+                        </div>
+
+                        </div>
+
+
+
+                        <div class="col-md-7">
+
+
+                        <div class="progress">
+
+                        <div class="progress-bar"
+                        id="progressBar"
+                        style="width:0%">
+                        </div>
+
+                        </div>
+
+
+                        </div>
+
+
+
+
+                        <div class="col-md-2 text-end">
+
+                        <span class="progress-percent"
+                        id="progressPercent">
+
+                        0%
+
+                        </span>
+
+                        </div>
+
+
+
+                        </div>
+
+
+
+                        </div>
+
+                                        <div class="extension-panel">
+
+                                            <div class="extension-title">
+                                                <i class="fa-solid fa-file-circle-check file-check-icon"></i>
+                                                Crawled File Types
+                                            </div>
+
+                                            <div id="CrawleExtensionsContainer"
+                                                 class="extension-list">
+                                            </div>
+
+                                        </div>
+
+                                        <div class="extension-panel d-none">
+
+                        <div class="extension-title">
+                            <i class="fa-solid fa-file-circle-check"></i>
+                            Supported File Types
+                        </div>
+
+                        <div id="extensionContainer"
+                             class="extension-list ">
+
+                        </div>
+
+                    </div>
+                        </div>
+
+
+                        </div>
+
+
+                        </div>
+                        </div>
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
         </div>

@@ -6,6 +6,7 @@ namespace Application.Interfaces
     {
         int? UserId { get; }
         string? UserName { get; }
+        string? RoleName { get; }
         IEnumerable<string> Roles { get; }
     }
 }

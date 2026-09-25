@@ -75,9 +75,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-controller="Index" asp-action="IndexesDetails">Indexes Details</a>
                         </li>
-                        <li class="nav-item">
+                    @*     <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-controller="Master" asp-action="AddWebServer">Add Server Alias</a>
-                        </li>
+                        </li> *@
 
                         @if (User.IsInRole("Admin"))
                         {
@@ -85,9 +85,9 @@
                             <li class="nav-item">
                                 <a class="nav-link text-white" asp-area="" asp-controller="Scraper" asp-action="index">Scraper</a>
                             </li>
-                            <li class="nav-item">
+                           @*  <li class="nav-item">
                                 <a class="nav-link text-white" asp-area="" asp-controller="Master" asp-action="AddWebScraperSetting">Scraper Page Limit</a>
-                            </li>
+                            </li> *@
                          
                             <li class="nav-item">
                                 <a class="nav-link text-white" asp-area="" asp-controller="Account" asp-action="RegistrationRequest">User Request</a>
@@ -114,6 +114,7 @@
                             {
                                 <span class="navbar-text text-white"> <h4 class="alert-heading">Welcome ,@dtoSession.RankName @dtoSession.Name!</h4> </span>
                                 <input type="hidden" id="payloadaes" value="@dtoSession.AESKey" />
+                                <input type="hidden" id="spnUserName" value="@dtoSession.UserName" />
                             }
                         </li>
                        @*  <li class="nav-item d-flex align-items-center">

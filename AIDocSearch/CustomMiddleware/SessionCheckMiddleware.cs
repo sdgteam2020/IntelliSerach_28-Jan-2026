@@ -34,7 +34,7 @@ namespace AIDocSearch.CustomMiddleware
                     path.StartsWithSegments("/img") ||
                     path.StartsWithSegments("/images") ||
                     path.StartsWithSegments("/lib") ||
-                    path.StartsWithSegments("/favicon.ico")
+                    path.StartsWithSegments("/favicon.ico")|| path.StartsWithSegments("/crawlerHub") || path.StartsWithSegments("/api/CentralFileServer")
                     )
                 {
                     await _next(context);

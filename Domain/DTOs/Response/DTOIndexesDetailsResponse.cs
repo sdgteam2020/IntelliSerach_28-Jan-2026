@@ -32,4 +32,54 @@ namespace Domain.DTOs.Response
         public string DatasetSize { get; set; }
         public string message { get; set; }
     }
+    public class ElasticUniqueFileResponse
+    {
+        public ElasticAggregations aggregations { get; set; }
+    }
+
+
+    public class ElasticAggregations
+    {
+        public IndexAggregation indices { get; set; }
+    }
+
+
+    public class IndexAggregation
+    {
+        public List<ElasticBucket> buckets { get; set; }
+    }
+
+
+    public class ElasticBucket
+    {
+        public string key { get; set; }
+
+        public long doc_count { get; set; }
+
+        public UrlCount url_count { get; set; }
+
+        public UniqueFiles unique_files { get; set; }
+    }
+
+
+    public class UrlCount
+    {
+        public long doc_count { get; set; }
+
+        public CountValue count { get; set; }
+    }
+
+
+    public class UniqueFiles
+    {
+        public long doc_count { get; set; }
+
+        public CountValue count { get; set; }
+    }
+
+
+    public class CountValue
+    {
+        public long value { get; set; }
+    }
 }

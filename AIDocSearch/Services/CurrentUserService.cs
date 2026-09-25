@@ -31,5 +31,13 @@ namespace AIDocSearch.Services
         public IEnumerable<string> Roles => _httpContextAccessor.HttpContext?.User?.Claims
             .Where(c => c.Type == ClaimTypes.Role)
             .Select(c => c.Value) ?? Enumerable.Empty<string>();
+
+        // Return single role name
+        public string? RoleName =>
+            _httpContextAccessor.HttpContext?
+            .User?
+            .Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Role)
+            ?.Value;
     }
 }

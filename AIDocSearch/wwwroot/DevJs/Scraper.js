@@ -1,7 +1,11 @@
 ﻿let currentCrawlJobId = null;
 $(document).ready(function () {
 
- 
+    $(document).ajaxStart(function () {
+        $("#loading").hide();
+    }).ajaxStop(function () {
+        $("#loading").hide();
+    });
 // ==========================================
 // Status Button Click
 // ==========================================
@@ -62,8 +66,9 @@ let statusPollingTimer = null;
             confirmButtonText: "Yes, Scrap it!"
         }).then(async (result) => {
             if (result.isConfirmed) {
-                $("#loading").show();
+               
                 reset();
+                $("#loading").show();
                 try {
                     const encInfo = await getSalt();
                     const cipherText = encryptPayload(dto, encInfo.key, encInfo.iv);
@@ -472,7 +477,7 @@ function CheckCrawlStatus(statusUrl) {
 
     console.log("========== CHECK CRAWL STATUS ==========");
     console.log("Status URL:", statusUrl);
-
+ 
     if (!statusUrl) {
 
         console.error("Status URL is empty.");
@@ -497,7 +502,7 @@ function CheckCrawlStatus(statusUrl) {
         },
 
         success: function (response) {
-
+          
             console.log("Status API Success");
             console.log("Response:", response);
 
@@ -556,7 +561,7 @@ function UpdateCrawlStatusPopup(Data) {
     if (!Data) {
         return;
     }
-
+   
     // Job ID
     $("#popup_job_id").text(
         Data.job_id || "-"
@@ -819,6 +824,7 @@ function LoadPdfLinks(jobId) {
     });
 }
 
+
 function ShowPdfListPopup(response) {
 
     if (!response) {
@@ -873,14 +879,17 @@ function ShowPdfListPopup(response) {
                             <th class="text-center">
                                 #
                             </th>
-
+                             <th>
+                                File Name
+                            </th>
+                             <th class="text-center">
+                                PDF
+                            </th>
                             <th>
                                 Page URL
                             </th>
 
-                            <th class="text-center">
-                                PDF
-                            </th>
+                           
 
                         </tr>
 
@@ -910,35 +919,10 @@ function ShowPdfListPopup(response) {
 
                     </td>
 
-                    <!-- Page URL -->
-                    <td>
-
-                        ${pageUrl
-                    ?
-                    `
-                                <a href="${escapeAttribute(pageUrl)}"
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                   class="text-decoration-none text-break">
-
-                                    <i class="fa fa-external-link me-1"></i>
-
-                                    ${escapeHtml(pageUrl)}
-
-                                </a>
-                                `
-                    :
-                    `
-                                <span class="text-muted">
-                                    -
-                                </span>
-                                `
-                }
-
-                    </td>
-
-                    <!-- PDF -->
-                    <td class="text-center">
+                     <td class="">
+                      ${item.pdf_name}
+                     </td>
+                     <td class="text-center">
 
                         ${pdfUrl
                     ?
@@ -965,6 +949,35 @@ function ShowPdfListPopup(response) {
                 }
 
                     </td>
+                    <!-- Page URL -->
+                    <td>
+                   
+                        ${pageUrl
+                    ?
+                    `
+                                <a href="${escapeAttribute(pageUrl)}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="text-decoration-none text-break">
+
+                                    <i class="fa fa-external-link me-1"></i>
+
+                                    ${escapeHtml(pageUrl)}
+
+                                </a>
+                                `
+                    :
+                    `
+                                <span class="text-muted">
+                                    -
+                                </span>
+                                `
+                }
+
+                    </td>
+
+                    <!-- PDF -->
+                   
 
                 </tr>
             `;

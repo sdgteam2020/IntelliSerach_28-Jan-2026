@@ -13,6 +13,7 @@ using Infrastructure.Shared.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Security.AccessControl;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AIDocSearch.Controllers
@@ -61,17 +62,18 @@ namespace AIDocSearch.Controllers
             string Password = _configuration["UrlData:Password"] ?? string.Empty;
 
             var data = await _searchService.IndexesDetails(Url, UserName, Password);
-            if(_currentUserService.UserId!=1)
+           
+            if ((string)_currentUserService.RoleName =="Users")
             {
                 var userIndexes = await _userAccount.GetAllIndexUserWise(_currentUserService.UserId);
                 var filteredData = data
                   .Where(i => userIndexes.Contains(i.uuid))
                   .ToList();
-                return Json(new { success = true, data = filteredData,type= "Users" });
+                return Json(new { success = true, data = filteredData,type = (string)_currentUserService.RoleName });
             }
             else
             {
-                return Json(new { success = true, data = data.Where(i=>i.index.Contains("fs-")).ToList(), type = "Admin" });
+                return Json(new { success = true, data = data.Where(i=>i.index.Contains("fs-")).ToList(), type = (string)_currentUserService.RoleName });
             }
         }
         [HttpPost]
@@ -143,7 +145,7 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GetDocDetailsByIndexName(string indexName,string uuid)
+        public async Task<IActionResult> GetDocDetailsByIndexName(string indexName,string uuid, int OcrType)
         {
            string AESKey= SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey;
              indexName = _AESEncrytDecry.DecryptAES(indexName, AESKey);
@@ -154,30 +156,89 @@ namespace AIDocSearch.Controllers
 
             int CurrentUserId = (int)_currentUserService.UserId;
            
-            bool ret= await _indexUserMapping.CheckUserIndexingExists(CurrentUserId, uuid);
+            bool ret= await _indexUserMapping.CheckUserIndexingExists(CurrentUserId, uuid, (string)_currentUserService.RoleName);
             if(ret)
             {
                 string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
                 string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
                 string Password = _configuration["UrlData:Password"] ?? string.Empty;
 
-                var retindex = await _searchService.GetDocDetailsByIndexName(Url, indexName, UserName, Password);
-                
+                var retindex = await _searchService.GetDocDetailsByIndexName(Url, indexName, OcrType, UserName, Password);
+
                 List<FileSource> data = new();
 
                 foreach (var item in retindex)
                 {
-                    FileSource pathData = new FileSource
+                    FileSource fileData = new FileSource
                     {
-                        Path = new PathData()
-                    };
-                    if(item.Path!=null)
-                    pathData.Path.Real = _AESEncrytDecry.EncryptAES(item.Path.Real, AESKey);
-                    else
-                    pathData.url = item.url;
+                        File = new FileInfoData
+                        {
+                            FileName = item.File?.FileName,
+                            Extension = item.File?.Extension,
+                            FileSize = item.File?.FileSize ?? 0
+                        },
 
-                    data.Add(pathData);
+                        Path = new PathData(),
+
+                        url = item.url
+                    };
+
+
+                    if (item.Path != null)
+                    {
+                        fileData.Path.Real =
+                            _AESEncrytDecry.EncryptAES(
+                                item.Path.VirtualPath,
+                                AESKey
+                            );
+                    }
+
+
+                    data.Add(fileData);
                 }
+                    //fileSource.Path = lstfile;
+                    return Json(new { success = true, data });
+            }
+            else
+            {
+                return Json(new { success = false });
+
+            }
+
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetstatisticsByIndexName(string indexName, string uuid)
+        {
+            string AESKey = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey;
+            indexName = _AESEncrytDecry.DecryptAES(indexName, AESKey);
+            uuid = _AESEncrytDecry.DecryptAES(uuid, AESKey);
+
+            if (string.IsNullOrEmpty(indexName) || string.IsNullOrEmpty(uuid))
+                return Json(new { success = false });
+
+            int CurrentUserId = (int)_currentUserService.UserId;
+
+            bool ret = await _indexUserMapping.CheckUserIndexingExists(CurrentUserId, uuid, (string)_currentUserService.RoleName);
+            if (ret)
+            {
+                string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
+                string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
+                string Password = _configuration["UrlData:Password"] ?? string.Empty;
+
+                var retindex = await _searchService.GetDocCountByIndexName(Url, indexName, UserName, Password);
+                    
+                var retstatistics = await _searchService.GetstatisticsByIndexName(Url, indexName, UserName, Password);
+
+                var data = new DTODocCountByIndexNameWithStatisticResponse
+                {
+                    DTODocCountByIndexName = retindex,
+                    DTOStatisticsHits = retstatistics,
+                   
+                    
+                };
                 //fileSource.Path = lstfile;
                 return Json(new { success = true, data });
             }

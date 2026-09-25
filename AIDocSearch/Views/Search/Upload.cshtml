@@ -97,7 +97,8 @@
                                         
                         @foreach (var item in ViewBag.AllData)
                         {
-                                            var pdfUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/UploadForIndexing/{item.FileName}";
+                                            var fileNameUrl = item.FileName.Replace('\\', '/'); 
+                                            var pdfUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/IntelliSearch/UploadForIndexing/{fileNameUrl}";
                                             pdfUrl = _iAESEncrytDecry.EncryptAES(pdfUrl, dtoSession.AESKey);
                                             <tr>
                                                 <td>@srNo</td>

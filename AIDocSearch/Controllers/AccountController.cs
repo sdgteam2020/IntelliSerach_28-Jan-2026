@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using Application.Interfaces.Repository;
 using Application.Interfaces;
 using AIDocSearch.Interfaces;
+using System.Net.Http.Headers;
 
 namespace AIDocSearch.Controllers
 {
@@ -51,12 +52,15 @@ namespace AIDocSearch.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login()
         {
+
+            
+
             // Ensure a session salt exists and sign out any existing user
             var salt = _sessionService.EnsureSalt(HttpContext);
             ViewBag.hdns = salt;
             await _authService.SignOutAsync();
 
-            var model = new DTOLoginRequest { UserName = "Admin" };
+            var model = new DTOLoginRequest { UserName = "kapoor" };
             return View(model);
         }
 

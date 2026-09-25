@@ -2,9 +2,12 @@
 let from = 0, size = 5, currentQuery = '', totalHits = 0, debounceTimer = null, selectedSuggestion = -1, suggestionItems = [];
 let selectedFilter = "All"
 let webServerList = [];
-$(document).ready(function () {
-    GetFilter(0);
+let SearchableIndex = [];
+$(document).ready(async function () {
+
+    GetFilter(0, SearchableIndex);
     GetWebServerUrlMapping();
+
     $(document).on('click', '.filter', function () {
 
         // Prevent clicking again
@@ -20,7 +23,7 @@ $(document).ready(function () {
      
         selectedFilter = $(this).attr('title');
 
-        GetFilter(selectedFilter);
+        GetFilter(selectedFilter, SearchableIndex);
     });
 
     if ($('#searchInput').val() != "") {
@@ -51,9 +54,11 @@ $(document).ready(function () {
 });
 
 async function searchContent(reset = true) {
+
+   
     if (reset) { from = 0; document.getElementById('results').innerHTML = ""; }
     $("#loading").show();
-   
+    SearchableIndex = [];
     const startTime = performance.now(); // Start timing
     const token = $('input[name="__RequestVerificationToken"]').val();
     const parms = { DataString: $('#searchInput').val(), size: size, from: from, Filter: selectedFilter, Type: $('#ddlSearch').val() }
@@ -83,7 +88,15 @@ async function searchContent(reset = true) {
             if (data1.Code == 200) {
                 const data = JSON.parse(data1.Data);
                 const hits = data.hits.hits || []; totalHits = data.hits.total.value || 0;
-
+                var now = new Date();
+               
+                const Browsermemory = {
+                    Data: $('#searchInput').val(),
+                    Date: now
+                }
+                let DataForStoreinMemory = encryptPayloadDatawithkey(JSON.stringify(Browsermemory), $('#spnUserName').val());
+                 saveUserActivity(DataForStoreinMemory, "SearchHistory")
+              
                 const resultDiv = document.getElementById('results'); resultDiv.innerHTML = '';
                 if (hits.length === 0 && from === 0) { resultDiv.innerHTML = "<div class='alert alert-danger'>No results found.</div>"; $("#resultCount").html(""); $('#resultTime').html(""); $("#CountSearch").addClass("d-none"); renderPagination(); return; } else {
                     $("#CountSearch").removeClass("d-none");
@@ -98,7 +111,7 @@ async function searchContent(reset = true) {
                     const realPath = hit._source?.path?.real || '';
                     let highlights = hit.highlight?.content || [];
                     // const content = hit._source?.content?.join(" ... ") || hit._source?.content || "";
-                    const pathhh = hit._index;
+                  
                     const score = hit._score ?? 0;
                     const canonical_url = hit._source?.canonical_url || '';
                     const h1 = hit._source?.h1 || '';
@@ -108,6 +121,10 @@ async function searchContent(reset = true) {
                     const title = hit._source?.title || '';
                     const maxScore = data.hits.max_score || 1;
                     const relevance = ((hit._score / maxScore) * 100).toFixed(0);
+                    const indexName = hit._index;
+
+                    SearchableIndex.push(indexName);
+                 
                     // ========================================================
                     // GET HIGHLIGHTS FROM ALL SEARCH FIELDS
                     // ========================================================
@@ -164,58 +181,114 @@ async function searchContent(reset = true) {
                         let Mainurl = "";
                         let baseurl = "";
                         let fileurl = ""
-                        let fileurlbase = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
+                       
 
+                        let extension = "";
+                        let path = "";
+                        let fileName = ""
+                        if (realPath != null) {
+                          
+                            fileName = realPath.split('\\').pop().split('/').pop();
+
+                            extension = fileName.includes('.')
+                                ? fileName.split('.').pop().toLowerCase()
+                                : '';
+                        }else if (url != null) {
+                            extension = "web";
+                            path = url;
+                            fileName = url;
+                        }
 
 
                         const normalizedPath = realPath.replace(/\\/g, "/");
 
-                        const match = webServerList.find(item =>
-                            normalizedPath.includes(item.Includes)
-                        );
+                        let icon = 'fa-solid fa-file';
+                        let iconClass = 'text-secondary';
 
+                        switch (extension) {
+                            case 'web':
+                                icon = 'fa fa-globe me-2';
+                                iconClass = 'text-danger';
+                                break;
+                            case 'pdf':
+                                icon = 'fa-solid fa-file-pdf';
+                                iconClass = 'text-danger';
+                                break;
 
-                        if (match) {
-                            const marker = match.Includes.replace("/", "").replace(/\\/g, "/");
-                            const index = normalizedPath.indexOf(marker);
+                            case 'doc':
+                            case 'docx':
+                                icon = 'fa-solid fa-file-word';
+                                iconClass = 'text-primary';
+                                break;
 
-                            const result = index >= 0
-                                ? normalizedPath.substring(index + marker.length + 1)
-                                : normalizedPath;
-                            fileUrl = match.Url + "/" + result;
+                            case 'xls':
+                            case 'xlsx':
+                                icon = 'fa-solid fa-file-excel';
+                                iconClass = 'text-success';
+                                break;
 
-                            const encrypted = encryptPayloadData(fileUrl);
-                            fileUrl = encodeURIComponent(encrypted);
-                        } else {
+                            case 'ppt':
+                            case 'pptx':
+                                icon = 'fa-solid fa-file-powerpoint';
+                                iconClass = 'text-warning';
+                                break;
 
-                            fileUrl = null;
+                            case 'txt':
+                                icon = 'fa-solid fa-file-lines';
+                                iconClass = 'text-dark';
+                                break;
+
+                            case 'jpg':
+                            case 'jpeg':
+                            case 'png':
+                            case 'gif':
+                            case 'bmp':
+                            case 'webp':
+                                icon = 'fa-solid fa-file-image';
+                                iconClass = 'text-info';
+                                break;
+
+                            case 'zip':
+                            case 'rar':
+                            case '7z':
+                                icon = 'fa-solid fa-file-zipper';
+                                iconClass = 'text-warning';
+                                break;
                         }
+                        const isPdf = extension === 'pdf';
+                        let Icon_for_Download_Url = "";
+                        if (extension == "web")
+                            Icon_for_Download_Url = "fa fa-external-link";
+                        else if (isPdf)
+                            Icon_for_Download_Url = "fa-solid fa-eye";
+                        else
+                            Icon_for_Download_Url = "fa-solid fa-download";
 
 
 
-                        if (cleanPath == "") {
-                            Mainurl = canonical_url;
-                            cleanPath = canonical_url;
-                            fileUrl = "/IntelliSearch/Master/WatermarkPdfFromUrl?pdfUrl="
-                            baseurl = getBaseUrl(Mainurl)
-                        }
-                        else {
-                            Mainurl = cleanPath;
 
-                            baseurl = "";//cleanPath.split("\\")[0];
-                        }
+
+                        Mainurl = cleanPath;
 
                         let html = `
     <div class="google-result">
         <div class="result-header">
             <div class="result-left">
-                <a href="${fileurlbase}${fileUrl}" target="_blank" class="result-title"> <i class="fa fa-file me-2"></i>${Mainurl}</a>
-                <div class="result-url"><a href="${fileurlbase}${cleanPath}" target="_blank">${baseurl}</a></div>
+
+             <span class="text-decoration-none GetCrawlerId"
+                               title="${fileName}"
+                               data-CrawlerId="${indexName}"
+                               data-FileName="${Mainurl}">
+                                <i class="${Icon_for_Download_Url} me-1"></i>
+                                ${Mainurl.length > 20 ? Mainurl.substring(0,100) + '...' : Mainurl}
+
+                            </span>
+               
             </div>
             <div class="result-right">
                 <div class="result-score">
-                    <div class="score-label me-2">${pathhh}</div>
-                    <span class="score-pill">Score ${relevance}</span>
+                    <div class="score-label me-2">${indexName.replace("fs-","")}</div>
+                    <span class="score-pill d-none">Score ${relevance}</span>
                    
                 </div>
             </div>
@@ -240,8 +313,8 @@ async function searchContent(reset = true) {
             </div>
             <div class="result-right">
                 <div class="result-score">
-                     <div class="score-label me-2">${pathhh}</div>
-                    <span class="score-pill">Score ${relevance}</span>
+                     <div class="score-label me-2">${indexName.replace("fs-", "")}</div>
+                    <span class="score-pill d-none">Score ${relevance}</span>
                    
                 </div>
             </div>
@@ -257,8 +330,8 @@ async function searchContent(reset = true) {
                         $('#results').append(html);
                     }
 
-                   
 
+                   
                     renderPagination();
                     $("#loading").hide();
                 });
@@ -269,7 +342,10 @@ async function searchContent(reset = true) {
                 $(".msgerror").html(data1.Data ?? data1.Message);
                 $("#loading").hide();
             }
+           
         }).catch(console.error);
+
+    GetFilter(selectedFilter, SearchableIndex);
 }
 function getBaseUrl(input) {
     if (!input) return "";
@@ -363,7 +439,7 @@ function highlightQuery(text, query) {
 }
 function goPage(page) { from = (page - 1) * size; searchContent(false); }
 
-async function GetFilter(active) {
+async function GetFilter(active, SearchableIndex) {
     const userdata = new URLSearchParams({
         id: 0
     });
@@ -400,8 +476,10 @@ async function GetFilter(active) {
                 listItemddl += `<li class="filter" title="All">All</li>`;
             if (data.Data) {
                 let urls = data.Data;
+                if (SearchableIndex != null)
+                urls = data.Data.filter(index => SearchableIndex.includes(index.index));
 
-                for (let i = 0; i < data.Data.length; i++) {
+                for (let i = 0; i < urls.length; i++) {
                     let displayLabel = urls[i].index;
                     if (displayLabel != "" ) {
                         if (displayLabel == active)
@@ -413,8 +491,8 @@ async function GetFilter(active) {
                 }
                 $(".filters").html(listItemddl);
 
-                if ($('#searchInput').val() != "")
-                    searchContent();
+                // if ($('#searchInput').val() != "")
+                //     searchContent();
             }
         }
         else if (data.Code === 4) {

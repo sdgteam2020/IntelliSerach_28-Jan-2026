@@ -3,6 +3,8 @@
 let webServerList = [];
 $(function () {
     function renderTable(data, type) {
+
+       
         // helper to read values that may be serialized with dots in keys (e.g. "docs.count")
         function getVal(obj, /* names in priority */) {
             for (let i = 1; i < arguments.length; i++) {
@@ -57,7 +59,20 @@ $(function () {
                     badgeClass = 'bg-warning text-dark';
                 else if (health === 'red')
                     badgeClass = 'bg-danger';
+                // <span class="status-badge ${health}">
+                //     ${(item.health || '').toUpperCase()}
+                // </span>
 
+                let isLive = AllliveIndex.map(String).includes(String(item.index));
+
+
+                let spanHtml = `
+    
+    <span class="running ${isLive ? 'text-success' : 'text-danger'}">
+    ${isLive ? 'Crawler Connected' : 'Crawler Not Connected'}
+  </span>
+  <span class="${isLive ? 'live-dot' : 'offline-dot'}" id="${item.index || ''}"></span>
+`;
                 html.push(`
 <div class="col-12 col-md-6 col-xl-3 index-item"
      data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
@@ -69,20 +84,25 @@ $(function () {
                 <h5 class="mb-1">
                     ${(item.index || '').replace('fs-', '')}
                 </h5>
-
+                
+                                              
             </div>
-
-            <span class="status-badge ${health}">
-                ${(item.health || '').toUpperCase()}
-            </span>
+             
+      
         </div>
-
+         <div class=" crawler-status ">
+         <div class="status-left">
+         ${spanHtml}
+           </div>
+            </div>
         <div class="card-body">
-
+         
             <div class="metrics-grid">
 
-                <div class="metric-item_Storage">
-                    <div class="metric-value text-primary">
+                <div class="metric-item_Storage btn-fileview-index"  role="button" data-index="${item.index || ''}"
+                    data-uuid="${item.uuid || ''}"
+                     data-index-name="${(item.index || '').replace('fs-', '')}">
+                    <div class="metric-value text-primary ">
                         ${getVal(item, 'DocsCount', 'docs.count') || 0}
                     </div>
                     <div class="metric-label">
@@ -113,17 +133,24 @@ $(function () {
             <div class="action-area">
 
                 <button
-                    class="btn btn-outline-info btn-sm btn-fileview-index"
+                    class="btn btn-outline-info btn-sm d-none"
                     data-index="${item.index || ''}"
                     data-uuid="${item.uuid || ''}"
                      data-index-name="${(item.index || '').replace('fs-', '')}"
                     >
                     👁 View
                 </button>
-
+                 <button
+                    class="btn btn-outline-primary btn-sm btn-indexingstatistics-index text-nowrap"
+                    data-index="${item.index || ''}"
+                    data-uuid="${item.uuid || ''}"
+                     data-index-name="${(item.index || '').replace('fs-', '')}"
+                    >
+                    <i class="fa-solid fa-chart-column "></i>Crawler Statistics
+                </button>
                 ${type === "Admin" ? `
                <button
-                class="btn btn-outline-primary btn-sm btn-assign-index"
+                class="btn btn-outline-primary btn-sm btn-assign-index text-nowrap"
                 data-index="${item.uuid || ''}"
                 data-index-name="${(item.index || '').replace('fs-', '')}">
                 <i class="fas fa-user-plus"></i>  Assign
@@ -178,6 +205,8 @@ $(function () {
             headers: { 'RequestVerificationToken': token },
             success: function (resp) {
                 if (resp && resp.success) {
+
+                    
                     renderTable(resp.data, resp.type);
                 } else {
                     $('#tableContainer').html('<div class="text-danger">Failed to load data.</div>');
@@ -229,5 +258,5 @@ $(function () {
     }
     load();
     GetWebServerUrlMapping();
-
+    GetAllCrawlerStatus();
 });

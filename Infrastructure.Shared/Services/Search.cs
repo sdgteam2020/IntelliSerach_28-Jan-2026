@@ -434,34 +434,204 @@ namespace Infrastructure.Shared.Services
             return client;
         }
 
-        public async Task<List<DTOIndexesDetailsResponse>> IndexesDetails(string Url, string UserName, string Password)
+        //public async Task<List<DTOIndexesDetailsResponse>> IndexesDetails(string Url, string UserName, string Password)
+        //{
+        //    ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+        //    using var client = CreateHttpClient(UserName, Password);
+
+        //    var response = await client.GetAsync(Url);
+        //    var responseString = await response.Content.ReadAsStringAsync();
+
+        //    if (!response.IsSuccessStatusCode)
+        //        return new List<DTOIndexesDetailsResponse>();
+
+        //    // Debug check
+        //    if (!responseString.Trim().StartsWith("["))
+        //        throw new Exception("Elasticsearch did not return JSON: " + responseString);
+
+        //    var indexesDetailsResponses =
+        //        JsonConvert.DeserializeObject<List<DTOIndexesDetailsResponse>>(responseString);
+        //    var userIndices = indexesDetailsResponses
+        //                    .Where(i => !i.index.StartsWith("."))
+        //                    .ToList();
+
+        //    return userIndices ?? new List<DTOIndexesDetailsResponse>();
+        //}
+        public async Task<List<DTOIndexesDetailsResponse>> IndexesDetails(
+    string Url,
+    string UserName,
+    string Password)
         {
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
 
             using var client = CreateHttpClient(UserName, Password);
 
+            // 1. Get Index Details
             var response = await client.GetAsync(Url);
             var responseString = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
                 return new List<DTOIndexesDetailsResponse>();
 
-            // Debug check
             if (!responseString.Trim().StartsWith("["))
                 throw new Exception("Elasticsearch did not return JSON: " + responseString);
 
+
             var indexesDetailsResponses =
                 JsonConvert.DeserializeObject<List<DTOIndexesDetailsResponse>>(responseString);
+
+
             var userIndices = indexesDetailsResponses
-                            .Where(i => !i.index.StartsWith("."))
-                            .ToList();
+                .Where(i => !i.index.StartsWith("."))
+                .ToList();
+
+            var uri = new Uri(Url);
+
+            string baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
+            // 2. Get Unique Files Count (ignore chunks)
+            var searchUrl = baseUrl + "/*,-*_folder/_search";
+
+
+            var query = new
+            {
+                size = 0,
+                query = new
+                {
+                    @bool = new
+                    {
+                        // Exclude failed documents
+                        must_not = new object[]
+            {
+                new
+                {
+                    term = new Dictionary<string, object>
+                    {
+                        { "crawler.index_status", "failed" }
+                    }
+                }
+            }
+                    }
+                },
+                aggs = new
+                {
+                    indices = new
+                    {
+                        terms = new
+                        {
+                            field = "_index",
+                            size = 1000
+                        },
+
+                        aggs = new
+                        {
+                            url_count = new
+                            {
+                                filter = new
+                                {
+                                    exists = new
+                                    {
+                                        field = "url"
+                                    }
+                                },
+
+                                aggs = new
+                                {
+                                    count = new
+                                    {
+                                        cardinality = new
+                                        {
+                                            field = "url.keyword"
+                                        }
+                                    }
+                                }
+                            },
+
+
+                            unique_files = new
+                            {
+                                filter = new
+                                {
+                                    @bool = new
+                                    {
+                                        filter = new object[]
+                            {
+                                new
+                                {
+                                    term = new Dictionary<string, object>
+                                    {
+                                        { "chunk.enabled", false }
+                                    }
+                                },
+                                new
+                                {
+                                    term = new Dictionary<string, object>
+                                    {
+                                        { "crawler.is_deleted", false }
+                                    }
+                                }
+                            }
+                                    }
+                                },
+
+                                aggs = new
+                                {
+                                    count = new
+                                    {
+                                        cardinality = new
+                                        {
+                                            field = "file.FileName.keyword"
+                                        }
+                                    }
+                                },
+                            }
+                        }
+                    }
+                }
+            };
+            var jsonQuery = JsonConvert.SerializeObject(query);
+
+            var searchResponse = await client.PostAsync(
+                searchUrl,
+                new StringContent(jsonQuery, Encoding.UTF8, "application/json")
+            );
+
+
+            var searchString = await searchResponse.Content.ReadAsStringAsync();
+
+
+            var searchResult =
+                JsonConvert.DeserializeObject<ElasticUniqueFileResponse>(searchString);
+
+
+
+            // 3. Merge Unique File Count
+            foreach (var index in userIndices)
+            {
+                var bucket = searchResult?
+                    .aggregations?
+                    .indices?
+                    .buckets?
+                    .FirstOrDefault(x =>
+                        x.key.Equals(index.index, StringComparison.OrdinalIgnoreCase));
+
+
+                Console.WriteLine(
+                    $"Index: {index.index}, Found: {bucket != null}"
+                );
+
+                if(bucket!=null)
+                index.DocsCount = Convert.ToInt32(bucket.unique_files.doc_count+bucket.url_count.doc_count);
+            }
+
 
             return userIndices ?? new List<DTOIndexesDetailsResponse>();
         }
 
         public async Task<List<FileSource>> GetDocDetailsByIndexName(
        string baseUrl,
-       string indexName,
+       string indexName, int OcrType,
        string userName,
        string password)
         {
@@ -469,22 +639,94 @@ namespace Infrastructure.Shared.Services
                 (sender, cert, chain, sslPolicyErrors) => true;
 
             using var client = CreateHttpClient(userName, password);
+        
+            var filters = new List<object>
+{
+    new
+    {
+        term = new Dictionary<string, object>
+        {
+            { "chunk.enabled", false }
+        }
+    },
+    new
+    {
+        term = new Dictionary<string, object>
+        {
+            { "crawler.is_deleted", false }
+        }
+    }
+};
+
+
+            // Add OCR filter only when true/false is passed
+            if (OcrType==1 || OcrType==2)
+            {
+                filters.Add(
+                    new
+                    {
+                        term = new Dictionary<string, object>
+                        {
+                { "crawler.ocr_used", OcrType == 1 }
+                        }
+                    }
+                );
+            }
+
+
             var query = new
             {
                 _source = new[]
                 {
         "file.FileName",
         "file.Extension",
+        "file.filesize",
         "path.real",
-        "url"
+        "path.virtual",
+        "url",
+        "crawler.ocr_used"
     },
+
                 query = new
                 {
-                    match_all = new { }
+                    @bool = new
+                    {
+                        should = new object[]
+                        {
+                new
+                {
+                    @bool = new
+                    {
+                        filter = filters
+                    }
                 },
-                size = 100
-            };
 
+                new
+                {
+                    exists = new Dictionary<string, object>
+                    {
+                        { "field", "url" }
+                    }
+                }
+                        },
+
+                        minimum_should_match = 1,
+
+                        must_not = new object[]
+                        {
+                new
+                {
+                    term = new Dictionary<string, object>
+                    {
+                        { "crawler.index_status", "failed" }
+                    }
+                }
+                        }
+                    }
+                },
+
+                size = 5000
+            };
             var content = new StringContent(
                 JsonConvert.SerializeObject(query),
                 Encoding.UTF8,
@@ -506,6 +748,178 @@ namespace Infrastructure.Shared.Services
                 .Select(x => x.Source)
                 .ToList()
                 ?? new List<FileSource>();
+        }
+
+        public async Task<DTODocCountByIndexNameResponse> GetDocCountByIndexName(string baseUrl,string indexName,string userName,string password)
+        {
+
+            DTODocCountByIndexNameResponse dTODocCountByIndexNameResponse = new DTODocCountByIndexNameResponse();
+
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
+
+            using var client = CreateHttpClient(userName, password);
+            var query = new
+            {
+                size = 0,
+
+                track_total_hits = true,
+
+                query = new
+                {
+                    @bool = new
+                    {
+                        filter = new object[]
+            {
+                new
+                {
+                    term = new Dictionary<string, object>
+                    {
+                        { "chunk.enabled", false }
+                    }
+                },
+                new
+                {
+                    term = new Dictionary<string, object>
+                    {
+                        { "crawler.is_deleted", false }
+                    }
+                }
+            },
+
+                        must_not = new object[]
+            {
+                new
+                {
+                    term = new Dictionary<string, object>
+                    {
+                        { "crawler.index_status", "failed" }
+                    }
+                }
+            },
+
+                        should = new object[]
+            {
+                new
+                {
+                    exists = new Dictionary<string, object>
+                    {
+                        { "field", "url" }
+                    }
+                }
+            },
+
+                        minimum_should_match = 0
+                    }
+                },
+
+                aggs = new
+                {
+                    total_original_size = new
+                    {
+                        sum = new
+                        {
+                            field = "file.filesize"
+                        }
+                    },
+
+                    ocr_files = new
+                    {
+                        filter = new
+                        {
+                            term = new Dictionary<string, object>
+                {
+                    { "crawler.ocr_used", true }
+                }
+                        }
+                    },
+
+                    non_ocr_files = new
+                    {
+                        filter = new
+                        {
+                            term = new Dictionary<string, object>
+                {
+                    { "crawler.ocr_used", false }
+                }
+                        }
+                    },
+
+                    file_extensions = new
+                    {
+                        terms = new
+                        {
+                            field = "file.extension",
+                            size = 100
+                        }
+                    }
+                }
+            };
+            var content = new StringContent(
+                JsonConvert.SerializeObject(query),
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await client.PostAsync(
+                $"{baseUrl}/{indexName}/_search",
+                content);
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(json);
+
+            var result =
+                JsonConvert.DeserializeObject<DTODocCountByIndexName>(json);
+            if(result==null)
+                return dTODocCountByIndexNameResponse;
+
+            dTODocCountByIndexNameResponse.Total = result.Hits.Total.Value;
+            dTODocCountByIndexNameResponse.Size = result.Aggregations.Total_Original_Size.Value;
+            dTODocCountByIndexNameResponse.Ocr_Files=result.Aggregations.Ocr_Files.Doc_Count;
+            dTODocCountByIndexNameResponse.Non_Ocr_Files=result.Aggregations.Non_Ocr_Files.Doc_Count;
+            dTODocCountByIndexNameResponse.File_Extensions = result.Aggregations.File_Extensions.Buckets;
+            return dTODocCountByIndexNameResponse;
+        }
+        public async Task<List<DTOStatisticsHit>> GetstatisticsByIndexName(string baseUrl,string indexName,string userName, string password)
+        {
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
+
+            using var client = CreateHttpClient(userName, password);
+            var query = new
+            {
+                query = new
+                {
+                    term = new Dictionary<string, object>
+            {
+                {
+                    "indexName.keyword",
+                    indexName
+                }
+            }
+                    }
+                };
+            var content = new StringContent(
+                JsonConvert.SerializeObject(query),
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await client.PostAsync(
+                $"{baseUrl}/indexingstatistics/_search",
+                content);
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(json);
+
+            var result =
+                JsonConvert.DeserializeObject<DTOStatisticsDetailsResponse>(json);
+            if (result == null)
+                return null;
+
+            return result.Hits.Hits;
         }
     }
 }

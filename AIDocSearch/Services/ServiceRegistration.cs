@@ -11,6 +11,8 @@ namespace AIDocSearch.Services
             services.AddSingleton<IEncryptionService, EncryptionService>();
 
             // Register new application services
+            //services.AddSingleton<ConnectionManager>();
+
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IRegisterService, RegisterService>();
             services.AddScoped<ISessionService, SessionService>();

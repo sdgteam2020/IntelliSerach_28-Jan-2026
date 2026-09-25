@@ -1,5 +1,6 @@
 using AIDocSearch.CustomMiddleware;
 using AIDocSearch.Services;
+using AIDocSearch.Hubs;
 using Domain.IdentityEntities;
 using EntityFramework.Exceptions.SqlServer;
 using Infrastructure;
@@ -168,7 +169,14 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
     // Use the default property (Pascal) casing
     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
 });
-
+///////// Add For Central File Server
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 5 * 1024 * 1024; // 5 MB
+});
+builder.Services.AddSingleton<ConnectionManager>();
+builder.Services.AddEndpointsApiExplorer();
+//////////////
 var app = builder.Build();
 
 // If this app is hosted as an IIS application under a virtual path '/IntelliSearch',
@@ -302,6 +310,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
     MinimumSameSitePolicy = SameSiteMode.Strict
 });
 app.UseHttpsRedirection();
+
 //app.UsePathBase("/IntelliSearch");
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -316,6 +325,7 @@ app.UseStaticFiles(new StaticFileOptions
 }); 
 app.UseRouting();
 app.UseCors("CorsPolicy");
+app.MapHub<CrawlerHub>("/crawlerHub");
 // Ensure session is available before authorization and MVC execution
 app.UseSession();
 app.UseAuthorization();

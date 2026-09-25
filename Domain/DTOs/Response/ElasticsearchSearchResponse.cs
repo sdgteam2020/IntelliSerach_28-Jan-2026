@@ -10,13 +10,13 @@ namespace Domain.DTOs.Response
         public Hits Hits { get; set; }
     }
 
+
     public class Hits
     {
-        public List<Hit> HitsList { get; set; }
-
         [JsonProperty("hits")]
         public List<Hit> Hitss { get; set; }
     }
+
 
     public class Hit
     {
@@ -24,21 +24,33 @@ namespace Domain.DTOs.Response
         public FileSource Source { get; set; }
     }
 
+
     public class FileSource
     {
         public FileInfoData File { get; set; }
+
         public PathData Path { get; set; }
+
         public string url { get; set; }
     }
+
 
     public class FileInfoData
     {
         public string FileName { get; set; }
+
         public string Extension { get; set; }
+
+        [JsonProperty("filesize")]
+        public long FileSize { get; set; }
     }
+
 
     public class PathData
     {
         public string Real { get; set; }
+
+        [JsonProperty("virtual")]
+        public string VirtualPath { get; set; }
     }
 }
