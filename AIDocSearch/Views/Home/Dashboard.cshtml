@@ -44,10 +44,12 @@
                        id="searchInput"
                        name="searchInput"
                        class="fut-search-input"
-                       placeholder="Search documents, keywords, topics..."
+                       placeholder='Search text, "exact phrase", or (AI Similar Search)...'
                        aria-label="Search"
                        autofocus
-                       autocomplete="off" />
+                       autocomplete="off"
+                       pattern='(?:[A-Za-z0-9 ]+|"[A-Za-z0-9 ]+"|\([A-Za-z0-9 ]+\))'
+                       title='Only letters, numbers and spaces are allowed. Use "quotes" for exact phrase or (parentheses) for AI Similar Search.' />
 
                 <button id="searchBtn"
                         class="fut-search-btn"
@@ -75,9 +77,15 @@
                     Access powerful analytics and insights from your document repository.
                 </p>
                 <ul class="fut-card-list">
-                    <li><i class="fas fa-file-alt"></i> Total Documents: Loading...</li>
-                  
-                    <li><i class="fas fa-database"></i> Index Status: Active</li>
+                    <li>
+                        <i class="fas fa-file-alt"></i>
+                        Total Documents: <span id="totalDocuments">Loading...</span>
+                    </li>
+
+                    <li>
+                        <i class="fas fa-database"></i>
+                        Total Scraped Web: <span id="totalScrapWeb">Loading...</span>
+                    </li>
                 </ul>
             </div>
 
@@ -106,9 +114,8 @@
                     Enhance your search experience with these pro tips.
                 </p>
                 <ul class="fut-card-list">
-                    <li><i class="fas fa-keyboard"></i> Press <kbd>/</kbd> to focus search</li>
-                    <li><i class="fas fa-quote-left"></i> Use quotes for exact phrases</li>
-                    <li><i class="fas fa-filter"></i> Apply filters for precision</li>
+                    <li><i class="fas fa-quote-left"></i> Use "quotes" for exact phrase search</li>
+                    <li><i class="fas fa-circle-nodes"></i> Use (parentheses) for AI Similar Search</li>
                 </ul>
             </div>
 

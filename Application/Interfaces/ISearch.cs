@@ -13,6 +13,6 @@ namespace Application.Interfaces
         Task<List<FileSource>> GetDocDetailsByIndexName(string Url, string indexName, int OcrType, string UserName, string Password);
         Task<DTODocCountByIndexNameResponse> GetDocCountByIndexName(string Url, string indexName, string UserName, string Password);
         Task<List<DTOStatisticsHit>> GetstatisticsByIndexName(string Url, string indexName, string UserName, string Password);
-        
+        Task<DTOGetDoc_WebCountResponse> GetCountDoc_Web(string baseUrl, string userName, string password);
     }
 }

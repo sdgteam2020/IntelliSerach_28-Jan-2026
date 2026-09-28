@@ -274,7 +274,7 @@
 .live-dot {
     width: 12px;
     height: 12px;
-    background: #22c55e;
+    background: #2f9d47;
     border-radius: 50%;
     animation: pulse 1.5s infinite;
 }
@@ -574,3 +574,24 @@
     #indexingstatisticsModal ~ .modal-backdrop {
         z-index: 1060;
     }
+.ocr-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.ocr-enabled {
+    background-color: #e8f5e9;
+    color: #198754;
+    border: 1px solid #badbcc;
+}
+
+.text-extraction {
+    background-color: #e7f1ff;
+    color: #0d6efd;
+    border: 1px solid #b6d4fe;
+}

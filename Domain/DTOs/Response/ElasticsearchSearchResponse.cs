@@ -32,8 +32,13 @@ namespace Domain.DTOs.Response
         public PathData Path { get; set; }
 
         public string url { get; set; }
-    }
+        public crawler crawler { get; set; }
 
+    }
+    public class crawler
+    {
+        public bool ocr_used { get; set; }
+    }
 
     public class FileInfoData
     {

@@ -2,6 +2,7 @@
 // This file fetches the data and renders table with assign buttons
 let webServerList = [];
 $(function () {
+
     function renderTable(data, type) {
 
        
@@ -63,16 +64,31 @@ $(function () {
                 //     ${(item.health || '').toUpperCase()}
                 // </span>
 
-                let isLive = AllliveIndex.map(String).includes(String(item.index));
 
+                //every refresh
+               // let isLive = AllliveIndex.map(String).includes(String(item.index));
+//                 let spanHtml = `
+//     <span class="running ${isLive ? 'text-success' : 'text-danger'}">
+//         ${isLive ? 'Crawler Connected' : 'Crawler Not Connected'}
+//     </span>
+//     <span class="${isLive ? 'live-dot' : 'offline-dot'}" id="${item.index || ''}"></span>
+// `;
+                ////////end
+
+                ///realtime
+                let crawlerId = item.index || '';
 
                 let spanHtml = `
-    
-    <span class="running ${isLive ? 'text-success' : 'text-danger'}">
-    ${isLive ? 'Crawler Connected' : 'Crawler Not Connected'}
-  </span>
-  <span class="${isLive ? 'live-dot' : 'offline-dot'}" id="${item.index || ''}"></span>
+    <span class="running text-secondary crawler-status-text"
+          data-crawler-id="${crawlerId}">
+      
+    </span>
+
+    <span class="crawler-status-dot"
+          data-crawler-id="${crawlerId}">
+    </span>
 `;
+/////end of realtime 
                 html.push(`
 <div class="col-12 col-md-6 col-xl-3 index-item"
      data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
@@ -140,14 +156,16 @@ $(function () {
                     >
                     👁 View
                 </button>
-                 <button
-                    class="btn btn-outline-primary btn-sm btn-indexingstatistics-index text-nowrap"
-                    data-index="${item.index || ''}"
-                    data-uuid="${item.uuid || ''}"
-                     data-index-name="${(item.index || '').replace('fs-', '')}"
-                    >
-                    <i class="fa-solid fa-chart-column "></i>Crawler Statistics
-                </button>
+                <button
+    class="btn btn-outline-primary btn-sm btn-indexingstatistics-index text-nowrap"
+    data-index="${item.index || ''}"
+    data-uuid="${item.uuid || ''}"
+    data-indexingstatistics-id="${item.index || ''}"
+    data-index-name="${(item.index || '').replace('fs-', '')}">
+    
+    <i class="fa-solid fa-chart-column"></i>
+    Crawler Statistics
+</button>
                 ${type === "Admin" ? `
                <button
                 class="btn btn-outline-primary btn-sm btn-assign-index text-nowrap"
@@ -182,6 +200,13 @@ $(function () {
         html.push('</div>');
 
         $('#tableContainer').html(html.join(''));
+
+
+        ///use in realtime
+        refreshAllCrawlerStatus();
+        startCrawlerStatusMonitoring();
+        ////////
+
         $(document)
             .off('keyup', '#indexSearch')
             .on('keyup', '#indexSearch', function () {
@@ -260,3 +285,120 @@ $(function () {
     GetWebServerUrlMapping();
     GetAllCrawlerStatus();
 });
+function refreshAllCrawlerStatus() {
+
+    $('.crawler-status-text').each(function () {
+
+        let $statusText = $(this);
+
+        let crawlerId =
+            $statusText.attr('data-crawler-id');
+
+        if (!crawlerId)
+            return;
+
+        $.ajax({
+            url: '/IntelliSearch/Files/GetCrawlerStatus',
+            type: 'GET',
+
+            data: {
+                crawlerId: crawlerId
+            },
+
+            success: function (response) {
+
+                updateCrawlerStatus(
+                    crawlerId,
+                    response.connected
+                );
+            },
+
+            error: function () {
+
+                updateCrawlerStatus(
+                    crawlerId,
+                    false
+                );
+            }
+        });
+    });
+}
+function updateCrawlerStatus(
+    crawlerId,
+    connected
+) {
+
+    let $indexingstatistics = $(
+        '.btn-indexingstatistics-index[data-indexingstatistics-id="' +
+        crawlerId +
+        '"]'
+    );
+
+
+    let $text = $(
+        '.crawler-status-text[data-crawler-id="' +
+        crawlerId +
+        '"]'
+    );
+
+    let $dot = $(
+        '.crawler-status-dot[data-crawler-id="' +
+        crawlerId +
+        '"]'
+    );
+
+
+    if (connected) {
+
+        $text
+            .text('Crawler Connected')
+            .removeClass(
+                'text-danger text-secondary'
+            )
+            .addClass(
+                'text-success'
+            );
+
+        $dot
+            .removeClass(
+                'offline-dot'
+            )
+            .addClass(
+                'live-dot'
+            );
+
+    }
+    else {
+        console.log($indexingstatistics)
+        $indexingstatistics.addClass("d-none");
+        // $text
+        //     .text('Crawler Not Connected')
+        //     .removeClass(
+        //         'text-success text-secondary'
+        //     )
+        //     .addClass(
+        //         'text-danger'
+        //     );
+
+        // $dot
+        //     .removeClass(
+        //         'live-dot'
+        //     )
+        //     .addClass(
+        //         'offline-dot'
+        //     );
+    }
+}
+let crawlerStatusTimer = null;
+
+function startCrawlerStatusMonitoring() {
+
+    if (crawlerStatusTimer !== null)
+        return;
+
+    crawlerStatusTimer = setInterval(function () {
+        $("#loading").hide();
+        refreshAllCrawlerStatus();
+        $("#loading").hide();
+    }, 5000);
+}

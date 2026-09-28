@@ -61,7 +61,25 @@ async function searchContent(reset = true) {
     SearchableIndex = [];
     const startTime = performance.now(); // Start timing
     const token = $('input[name="__RequestVerificationToken"]').val();
-    const parms = { DataString: $('#searchInput').val(), size: size, from: from, Filter: selectedFilter, Type: $('#ddlSearch').val() }
+
+    let dataString = $("#searchInput").val();
+    if (
+        dataString &&
+        dataString.trim() !== "" &&
+        dataString.startsWith('"') &&
+        dataString.endsWith('"')
+    ) {
+        $('#ddlSearch').val(3)
+    }
+    else if (
+        dataString &&
+        dataString.trim() !== "" &&
+        dataString.startsWith('(') &&
+        dataString.endsWith(')')
+    ) {
+        $('#ddlSearch').val(2)
+    }
+    const parms = { DataString: dataString, size: size, from: from, Filter: selectedFilter, Type: $('#ddlSearch').val() }
    
     await fetch('/IntelliSearch/Search/SearchContent', {
         method: 'POST',

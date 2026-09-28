@@ -192,7 +192,7 @@ namespace AIDocSearch.Controllers
                                 AESKey
                             );
                     }
-
+                    fileData.crawler = item.crawler;
 
                     data.Add(fileData);
                 }

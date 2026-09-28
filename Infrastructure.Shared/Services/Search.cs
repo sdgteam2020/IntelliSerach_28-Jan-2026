@@ -50,9 +50,12 @@ namespace Infrastructure.Shared.Services
             // Type 3 = Exact/Phrase search
             // ============================================================
 
-            if (Request.Type == 3)
+            if (Request.Type == 3 ||
+    (!string.IsNullOrWhiteSpace(Request.DataString) &&
+    Request.DataString.StartsWith("\"") &&
+    Request.DataString.EndsWith("\"")))
             {
-                // Exact phrase only
+                // Exact phrase only 
                 shouldQueries.Add(
                     new MultiMatchWrapper
                     {
@@ -89,24 +92,42 @@ namespace Infrastructure.Shared.Services
                 // Normal / Fuzzy search
                 // --------------------------------------------------------
 
-                if (Request.Type == 1 || Request.Type == 2)
+                bool isFuzzy =
+     Request.Type == 2 ||
+     (
+         !string.IsNullOrWhiteSpace(Request.DataString) &&
+         Request.DataString.StartsWith("(") &&
+         Request.DataString.EndsWith(")")
+     );
+
+                if (Request.Type == 1 || isFuzzy)
                 {
+                    string searchText = Request.DataString;
+
+                    // Remove surrounding ( )
+                    if (
+                        !string.IsNullOrWhiteSpace(searchText) &&
+                        searchText.StartsWith("(") &&
+                        searchText.EndsWith(")")
+                    )
+                    {
+                        searchText = searchText.Substring(1, searchText.Length - 2);
+                    }
+
                     shouldQueries.Add(
                         new MultiMatchWrapper
                         {
                             multi_match = new MultiMatchQuery
                             {
-                                query = Request.DataString,
+                                query = searchText,
                                 type = "best_fields",
                                 fields = searchFields,
 
-                                // Type 2 = fuzzy
-                                // Type 1 = no fuzzy matching
-                                fuzziness = Request.Type == 2
+                                fuzziness = isFuzzy
                                     ? "AUTO"
                                     : "0",
 
-                                fuzzy_transpositions = Request.Type == 2
+                                fuzzy_transpositions = isFuzzy
                             }
                         }
                     );
@@ -921,5 +942,48 @@ namespace Infrastructure.Shared.Services
 
             return result.Hits.Hits;
         }
+        public async Task<DTOGetDoc_WebCountResponse> GetCountDoc_Web(
+      string baseUrl,
+      string userName,
+      string password)
+        {
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
+
+            using var client = CreateHttpClient(userName, password);
+
+            // _msearch requires NDJSON format.
+            // Every header/query must be on a separate line.
+            // Final newline is also required.
+            string requestBody =
+                "{\"index\":\"fs-*\"}\n" +
+                "{\"size\":0,\"query\":{\"bool\":{\"filter\":[{\"bool\":{\"should\":[{\"bool\":{\"filter\":[{\"term\":{\"chunk.enabled\":false}},{\"term\":{\"crawler.is_deleted\":false}}]}},{\"exists\":{\"field\":\"url\"}}],\"minimum_should_match\":1}}],\"must_not\":[{\"term\":{\"crawler.index_status\":\"failed\"}}]}}}\n" +
+                "{\"index\":\"crawler_registry_scrapy\"}\n" +
+                "{\"size\":0,\"query\":{\"exists\":{\"field\":\"normalized_url\"}}}\n";
+
+            using var content = new StringContent(
+                requestBody,
+                Encoding.UTF8,
+                "application/x-ndjson");
+
+            var response = await client.PostAsync(
+                $"{baseUrl.TrimEnd('/')}/_msearch",
+                content);
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(
+                    $"Elasticsearch error {(int)response.StatusCode}: {json}");
+
+            var result =
+                JsonConvert.DeserializeObject<DTOGetDoc_WebCountResponse>(json);
+
+            return result ?? new DTOGetDoc_WebCountResponse
+            {
+                Responses = new List<SearchResponseDto>()
+            };
+        }
+
     }
 }

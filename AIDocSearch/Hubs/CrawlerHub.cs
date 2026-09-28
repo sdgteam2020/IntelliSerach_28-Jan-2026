@@ -17,13 +17,30 @@ namespace AIDocSearch.Hubs
         /// <summary>
         /// Client -> Server: register crawler id to connection id mapping.
         /// </summary>
-        public Task RegisterCrawler(string crawlerId)
+        public async Task RegisterCrawler(string crawlerId)
         {
-            _log.LogInformation("RegisterCrawler: {CrawlerId} connected as {ConnectionId}", crawlerId, Context.ConnectionId);
-            _cm.RegisterCrawler(crawlerId, Context.ConnectionId);
-            return Task.CompletedTask;
-        }
+            _log.LogInformation(
+                "RegisterCrawler: {CrawlerId} connected as {ConnectionId}",
+                crawlerId,
+                Context.ConnectionId
+            );
 
+            _cm.RegisterCrawler(
+                crawlerId,
+                Context.ConnectionId
+            );
+
+            await Clients.All.SendAsync(
+                "CrawlerStatusChanged",
+                crawlerId,
+                true
+            );
+        }
+       
+        public bool IsCrawlerConnected(string crawlerId)
+        {
+            return _cm.TryGetConnectionId(crawlerId, out _);
+        }
         /// <summary>
         /// Client -> Server: crawler replies with a hello message.
         /// </summary>
@@ -78,12 +95,42 @@ namespace AIDocSearch.Hubs
 
             return Task.CompletedTask;
         }
-
-        public override Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            _log.LogInformation("Connection {ConnectionId} disconnected", Context.ConnectionId);
-            _cm.RemoveByConnectionId(Context.ConnectionId);
-            return base.OnDisconnectedAsync(exception);
+            string connectionId = Context.ConnectionId;
+
+            var crawler = _cm.GetAllConnections()
+                .FirstOrDefault(x => x.Value == connectionId);
+
+            if (!string.IsNullOrEmpty(crawler.Key))
+            {
+                string crawlerId = crawler.Key;
+
+                _cm.RemoveByConnectionId(connectionId);
+
+                await Clients.All.SendAsync(
+                    "CrawlerStatusChanged",
+                    crawlerId,
+                    false
+                );
+
+                _log.LogInformation(
+                    "Crawler {CrawlerId} disconnected",
+                    crawlerId
+                );
+            }
+            else
+            {
+                _cm.RemoveByConnectionId(connectionId);
+            }
+
+            await base.OnDisconnectedAsync(exception);
         }
+        //public override Task OnDisconnectedAsync(Exception? exception)
+        //{
+        //    _log.LogInformation("Connection {ConnectionId} disconnected", Context.ConnectionId);
+        //    _cm.RemoveByConnectionId(Context.ConnectionId);
+        //    return base.OnDisconnectedAsync(exception);
+        //}
     }
 }

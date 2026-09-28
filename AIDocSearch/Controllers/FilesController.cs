@@ -29,7 +29,17 @@ namespace AIDocSearch.Controllers
                 return BadRequest();
             return Ok(connections);
         }
+        [HttpGet]
+        public IActionResult GetCrawlerStatus(string crawlerId)
+        {
+            bool connected = _cm.TryGetConnectionId(crawlerId, out _);
 
+            return Json(new
+            {
+                crawlerId = crawlerId,
+                connected = connected
+            });
+        }
         [HttpPost]
         public async Task<IActionResult> GetCrawlerStatus([FromBody] DTOFilesFromCrawlerRequest data)
         {

@@ -15,7 +15,7 @@
                     <div class="row" id="tableContainer">
                         <!-- table will be injected by JS -->
                     </div>
-
+                   
                     <!-- DataTables CSS/JS includes required for the table initialization -->
                     <link asp-href-include="~/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
                     <link asp-href-include="~/datatables/responsive.bootstrap4.min.css" rel="stylesheet" />
@@ -33,6 +33,8 @@
                     <script asp-src-include="~/js/datatables/buttons.bootstrap4.min.js"></script>
                     <script asp-src-include="~/js/datatables/buttons.html5.min.js"></script>
                     <script asp-src-include="~/js/datatables/buttons.print.min.js"></script>
+
+                   
                     <link href="~/css/indexdetails.css" rel="stylesheet" />
                     @Html.AntiForgeryToken()
 
@@ -165,7 +167,7 @@
 
 
                         <h1>
-                            Search Index Analytics
+                            Index Analytics
                         </h1>
 
 
@@ -435,7 +437,9 @@
             </div>
         </div>
     </div>
-</div>
+
+
+
 
 <script src="~/devjs/indexesdetails.js"></script>
 <script src="~/devjs/indexesdetails.assign.js"></script>

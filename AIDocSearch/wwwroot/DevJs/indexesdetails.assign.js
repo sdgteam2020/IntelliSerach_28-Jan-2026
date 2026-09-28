@@ -703,10 +703,14 @@ $(function () {
                                 item,
                                 indexName
                             );
-
+                        let Ocrused = item.crawler == null
+                            ? `<span></span>`
+                            : item.crawler.ocr_used === true
+                                ? `<span class="ocr-badge ocr-enabled">OCR Enabled</span>`
+                                : `<span class="ocr-badge text-extraction">Text Extraction</span>`;
                         let fileSize = ``;
                         if (fileInfo.fileSize == "0")
-                            fileSize = `<span>-</span>`
+                            fileSize = `<span></span>`
                         else
                             fileSize = `<span class="file-size-badge"><i class="fa-solid fa-hard-drive me-1"></i>${fileInfo.fileSize}</span>`
                         html += `
@@ -744,15 +748,19 @@ $(function () {
                                                
 
                                             </small>
-                                           
-                                           ${fileSize}
+                                          
+                                         
                                         </div>
 
 
+                                          
                                     </div>
 
                                 </div>
-
+                                  <div class="text-center mb-2">
+                                 ${fileSize}
+                                 ${Ocrused}
+                                   </div>
                             </div>
 
                         </div>
@@ -797,6 +805,9 @@ $(function () {
                         <th class="file-col-name">
                            Orignal File Size
                         </th>
+                        <th class="file-col-name">
+                           Extraction Method
+                        </th>
 
                         <th class="file-col-format text-center">
                             Format
@@ -820,6 +831,12 @@ $(function () {
                             item,
                             indexName
                         );
+
+                        let Ocrused = item.crawler == null
+                            ? `<span>-</span>`
+                            : item.crawler.ocr_used === true
+                                ? `<span class="ocr-badge ocr-enabled">OCR Enabled</span>`
+                                : `<span class="ocr-badge text-extraction">Text Extraction</span>`;
                         let fileSize = ``;
                         if (fileInfo.fileSize == "0")
                             fileSize = `<span>-</span>`
@@ -856,6 +873,11 @@ $(function () {
             <td>
 
                   ${fileSize}
+
+            </td>
+            <td>
+
+               ${Ocrused}
 
             </td>
 

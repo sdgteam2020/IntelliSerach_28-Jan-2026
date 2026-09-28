@@ -58,8 +58,10 @@ namespace AIDocSearch.Controllers
 
             else
             {
-               
-                if (ModelState.IsValid)
+
+                ModelState.Clear();
+                if (TryValidateModel(Data))
+
                 {
                     if (Data == null || string.IsNullOrEmpty(Data.DataString))
                     {
@@ -272,7 +274,15 @@ namespace AIDocSearch.Controllers
                 return Json(new DTOGenericResponse<object>(ConnKeyConstants.IncorrectData, ConnKeyConstants.IncorrectDataMessage, error));
             }
         }
-
+        [HttpPost]
+        public async Task<IActionResult> GetDoc_webCount()
+        {
+            string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
+            string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
+            string Password = _configuration["UrlData:Password"] ?? string.Empty;
+            var IndexesDetails = await _searchService.GetCountDoc_Web(Url, UserName, Password);
+            return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.ScraperingMessage, IndexesDetails));
+        }
         public async Task<IActionResult> IndexMap()
         {
             return View();

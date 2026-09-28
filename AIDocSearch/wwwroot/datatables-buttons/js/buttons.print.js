@@ -3,295 +3,298 @@
  * © SpryMedia Ltd - datatables.net/license
  */
 
-(function (factory) {
-    if (typeof define === 'function' && define.amd) {
-        // AMD
-        define(['jquery', 'datatables.net', 'datatables.net-buttons'], function ($) {
-            return factory($, window, document);
-        });
-    }
-    else if (typeof exports === 'object') {
-        // CommonJS
-        var jq = require('jquery');
-        var cjsRequires = function (root, $) {
-            if (!$.fn.dataTable) {
-                require('datatables.net')(root, $);
-            }
+(function( factory ){
+	if ( typeof define === 'function' && define.amd ) {
+		// AMD
+		define( ['jquery', 'datatables.net', 'datatables.net-buttons'], function ( $ ) {
+			return factory( $, window, document );
+		} );
+	}
+	else if ( typeof exports === 'object' ) {
+		// CommonJS
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net')(root, $);
+			}
 
-            if (!$.fn.dataTable.Buttons) {
-                require('datatables.net-buttons')(root, $);
-            }
-        };
+			if ( ! $.fn.dataTable.Buttons ) {
+				require('datatables.net-buttons')(root, $);
+			}
+		};
 
-        if (typeof window === 'undefined') {
-            module.exports = function (root, $) {
-                if (!root) {
-                    // CommonJS environments without a window global must pass a
-                    // root. This will give an error otherwise
-                    root = window;
-                }
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
 
-                if (!$) {
-                    $ = jq(root);
-                }
+				if ( ! $ ) {
+					$ = jq( root );
+				}
 
-                cjsRequires(root, $);
-                return factory($, root, root.document);
-            };
-        }
-        else {
-            cjsRequires(window, jq);
-            module.exports = factory(jq, window, window.document);
-        }
-    }
-    else {
-        // Browser
-        factory(jQuery, window, document);
-    }
-}(function ($, window, document) {
-    'use strict';
-    var DataTable = $.fn.dataTable;
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
+	}
+	else {
+		// Browser
+		factory( jQuery, window, document );
+	}
+}(function( $, window, document ) {
+'use strict';
+var DataTable = $.fn.dataTable;
 
-    var _link = document.createElement('a');
 
-    /**
-     * Clone link and style tags, taking into account the need to change the source
-     * path.
-     *
-     * @param  {node}     el Element to convert
-     */
-    var _styleToAbs = function (el) {
-        var clone = $(el).clone()[0];
 
-        if (clone.nodeName.toLowerCase() === 'link') {
-            clone.href = _relToAbs(clone.href);
-        }
+var _link = document.createElement('a');
 
-        return clone.outerHTML;
-    };
+/**
+ * Clone link and style tags, taking into account the need to change the source
+ * path.
+ *
+ * @param  {node}     el Element to convert
+ */
+var _styleToAbs = function (el) {
+	var clone = $(el).clone()[0];
 
-    /**
-     * Convert a URL from a relative to an absolute address so it will work
-     * correctly in the popup window which has no base URL.
-     *
-     * @param  {string} href URL
-     */
-    var _relToAbs = function (href) {
-        // Assign to a link on the original page so the browser will do all the
-        // hard work of figuring out where the file actually is
-        _link.href = href;
-        var linkHost = _link.host;
+	if (clone.nodeName.toLowerCase() === 'link') {
+		clone.href = _relToAbs(clone.href);
+	}
 
-        // IE doesn't have a trailing slash on the host
-        // Chrome has it on the pathname
-        if (linkHost.indexOf('/') === -1 && _link.pathname.indexOf('/') !== 0) {
-            linkHost += '/';
-        }
+	return clone.outerHTML;
+};
 
-        return _link.protocol + '//' + linkHost + _link.pathname + _link.search;
-    };
+/**
+ * Convert a URL from a relative to an absolute address so it will work
+ * correctly in the popup window which has no base URL.
+ *
+ * @param  {string} href URL
+ */
+var _relToAbs = function (href) {
+	// Assign to a link on the original page so the browser will do all the
+	// hard work of figuring out where the file actually is
+	_link.href = href;
+	var linkHost = _link.host;
 
-    DataTable.ext.buttons.print = {
-        className: 'buttons-print',
+	// IE doesn't have a trailing slash on the host
+	// Chrome has it on the pathname
+	if (linkHost.indexOf('/') === -1 && _link.pathname.indexOf('/') !== 0) {
+		linkHost += '/';
+	}
 
-        text: function (dt) {
-            return dt.i18n('buttons.print', 'Print');
-        },
+	return _link.protocol + '//' + linkHost + _link.pathname + _link.search;
+};
 
-        action: function (e, dt, button, config, cb) {
-            var data = dt.buttons.exportData(
-                $.extend({ decodeEntities: false }, config.exportOptions) // XSS protection
-            );
-            var exportInfo = dt.buttons.exportInfo(config);
+DataTable.ext.buttons.print = {
+	className: 'buttons-print',
 
-            // Get the classes for the columns from the header cells
-            var columnClasses = dt
-                .columns(config.exportOptions.columns)
-                .nodes()
-                .map(function (n) {
-                    return n.className;
-                })
-                .toArray();
+	text: function (dt) {
+		return dt.i18n('buttons.print', 'Print');
+	},
 
-            var addRow = function (d, tag) {
-                var str = '<tr>';
+	action: function (e, dt, button, config, cb) {
+		var data = dt.buttons.exportData(
+			$.extend({ decodeEntities: false }, config.exportOptions) // XSS protection
+		);
+		var exportInfo = dt.buttons.exportInfo(config);
 
-                for (var i = 0, ien = d.length; i < ien; i++) {
-                    // null and undefined aren't useful in the print output
-                    var dataOut = d[i] === null || d[i] === undefined ? '' : d[i];
-                    var classAttr = columnClasses[i]
-                        ? 'class="' + columnClasses[i] + '"'
-                        : '';
+		// Get the classes for the columns from the header cells
+		var columnClasses = dt
+			.columns(config.exportOptions.columns)
+			.nodes()
+			.map(function (n) {
+				return n.className;
+			})
+			.toArray();
 
-                    str +=
-                        '<' +
-                        tag +
-                        ' ' +
-                        classAttr +
-                        '>' +
-                        dataOut +
-                        '</' +
-                        tag +
-                        '>';
-                }
+		var addRow = function (d, tag) {
+			var str = '<tr>';
 
-                return str + '</tr>';
-            };
+			for (var i = 0, ien = d.length; i < ien; i++) {
+				// null and undefined aren't useful in the print output
+				var dataOut = d[i] === null || d[i] === undefined ? '' : d[i];
+				var classAttr = columnClasses[i]
+					? 'class="' + columnClasses[i] + '"'
+					: '';
 
-            // Construct a table for printing
-            var html = '<table class="' + dt.table().node().className + '">';
+				str +=
+					'<' +
+					tag +
+					' ' +
+					classAttr +
+					'>' +
+					dataOut +
+					'</' +
+					tag +
+					'>';
+			}
 
-            if (config.header) {
-                var headerRows = data.headerStructure.map(function (row) {
-                    return (
-                        '<tr>' +
-                        row
-                            .map(function (cell) {
-                                return cell
-                                    ? '<th colspan="' +
-                                    cell.colspan +
-                                    '" rowspan="' +
-                                    cell.rowspan +
-                                    '">' +
-                                    cell.title +
-                                    '</th>'
-                                    : '';
-                            })
-                            .join('') +
-                        '</tr>'
-                    );
-                });
+			return str + '</tr>';
+		};
 
-                html += '<thead>' + headerRows.join('') + '</thead>';
-            }
+		// Construct a table for printing
+		var html = '<table class="' + dt.table().node().className + '">';
 
-            html += '<tbody>';
-            for (var i = 0, ien = data.body.length; i < ien; i++) {
-                html += addRow(data.body[i], 'td');
-            }
-            html += '</tbody>';
+		if (config.header) {
+			var headerRows = data.headerStructure.map(function (row) {
+				return (
+					'<tr>' +
+					row
+						.map(function (cell) {
+							return cell
+								? '<th colspan="' +
+										cell.colspan +
+										'" rowspan="' +
+										cell.rowspan +
+										'">' +
+										cell.title +
+										'</th>'
+								: '';
+						})
+						.join('') +
+					'</tr>'
+				);
+			});
 
-            if (config.footer && data.footer) {
-                var footerRows = data.footerStructure.map(function (row) {
-                    return (
-                        '<tr>' +
-                        row
-                            .map(function (cell) {
-                                return cell
-                                    ? '<th colspan="' +
-                                    cell.colspan +
-                                    '" rowspan="' +
-                                    cell.rowspan +
-                                    '">' +
-                                    cell.title +
-                                    '</th>'
-                                    : '';
-                            })
-                            .join('') +
-                        '</tr>'
-                    );
-                });
+			html += '<thead>' + headerRows.join('') + '</thead>';
+		}
 
-                html += '<tfoot>' + footerRows.join('') + '</tfoot>';
-            }
-            html += '</table>';
+		html += '<tbody>';
+		for (var i = 0, ien = data.body.length; i < ien; i++) {
+			html += addRow(data.body[i], 'td');
+		}
+		html += '</tbody>';
 
-            // Open a new window for the printable table
-            var win = window.open('', '');
+		if (config.footer && data.footer) {
+			var footerRows = data.footerStructure.map(function (row) {
+				return (
+					'<tr>' +
+					row
+						.map(function (cell) {
+							return cell
+								? '<th colspan="' +
+										cell.colspan +
+										'" rowspan="' +
+										cell.rowspan +
+										'">' +
+										cell.title +
+										'</th>'
+								: '';
+						})
+						.join('') +
+					'</tr>'
+				);
+			});
 
-            if (!win) {
-                dt.buttons.info(
-                    dt.i18n('buttons.printErrorTitle', 'Unable to open print view'),
-                    dt.i18n(
-                        'buttons.printErrorMsg',
-                        'Please allow popups in your browser for this site to be able to view the print view.'
-                    ),
-                    5000
-                );
+			html += '<tfoot>' + footerRows.join('') + '</tfoot>';
+		}
+		html += '</table>';
 
-                return;
-            }
+		// Open a new window for the printable table
+		var win = window.open('', '');
 
-            win.document.close();
+		if (!win) {
+			dt.buttons.info(
+				dt.i18n('buttons.printErrorTitle', 'Unable to open print view'),
+				dt.i18n(
+					'buttons.printErrorMsg',
+					'Please allow popups in your browser for this site to be able to view the print view.'
+				),
+				5000
+			);
 
-            // Inject the title and also a copy of the style and link tags from this
-            // document so the table can retain its base styling. Note that we have
-            // to use string manipulation as IE won't allow elements to be created
-            // in the host document and then appended to the new window.
-            var head = '<title>' + exportInfo.title + '</title>';
-            $('style, link').each(function () {
-                head += _styleToAbs(this);
-            });
+			return;
+		}
 
-            try {
-                win.document.head.innerHTML = head; // Work around for Edge
-            } catch (e) {
-                $(win.document.head).html(head); // Old IE
-            }
+		win.document.close();
 
-            // Add any custom scripts (for example for paged.js)
-            if (config.customScripts) {
-                config.customScripts.forEach(function (script) {
-                    var tag = win.document.createElement("script");
-                    tag.src = script;
-                    win.document.getElementsByTagName("head")[0].appendChild(tag);
-                });
-            }
+		// Inject the title and also a copy of the style and link tags from this
+		// document so the table can retain its base styling. Note that we have
+		// to use string manipulation as IE won't allow elements to be created
+		// in the host document and then appended to the new window.
+		var head = '<title>' + exportInfo.title + '</title>';
+		$('style, link').each(function () {
+			head += _styleToAbs(this);
+		});
 
-            // Inject the table and other surrounding information
-            win.document.body.innerHTML =
-                '<h1>' +
-                exportInfo.title +
-                '</h1>' +
-                '<div>' +
-                (exportInfo.messageTop || '') +
-                '</div>' +
-                html +
-                '<div>' +
-                (exportInfo.messageBottom || '') +
-                '</div>';
+		try {
+			win.document.head.innerHTML = head; // Work around for Edge
+		} catch (e) {
+			$(win.document.head).html(head); // Old IE
+		}
 
-            $(win.document.body).addClass('dt-print-view');
+		// Add any custom scripts (for example for paged.js)
+		if (config.customScripts) {
+			config.customScripts.forEach(function (script) {
+				var tag = win.document.createElement("script");
+				tag.src = script;
+				win.document.getElementsByTagName("head")[0].appendChild(tag);
+			});
+		}
 
-            $('img', win.document.body).each(function (i, img) {
-                img.setAttribute('src', _relToAbs(img.getAttribute('src')));
-            });
+		// Inject the table and other surrounding information
+		win.document.body.innerHTML =
+			'<h1>' +
+			exportInfo.title +
+			'</h1>' +
+			'<div>' +
+			(exportInfo.messageTop || '') +
+			'</div>' +
+			html +
+			'<div>' +
+			(exportInfo.messageBottom || '') +
+			'</div>';
 
-            if (config.customize) {
-                config.customize(win, config, dt);
-            }
+		$(win.document.body).addClass('dt-print-view');
 
-            // Allow stylesheets time to load
-            var autoPrint = function () {
-                if (config.autoPrint) {
-                    win.print(); // blocking - so close will not
-                    win.close(); // execute until this is done
-                }
-            };
+		$('img', win.document.body).each(function (i, img) {
+			img.setAttribute('src', _relToAbs(img.getAttribute('src')));
+		});
 
-            win.setTimeout(autoPrint, 1000);
+		if (config.customize) {
+			config.customize(win, config, dt);
+		}
 
-            cb();
-        },
+		// Allow stylesheets time to load
+		var autoPrint = function () {
+			if (config.autoPrint) {
+				win.print(); // blocking - so close will not
+				win.close(); // execute until this is done
+			}
+		};
 
-        async: 100,
+		win.setTimeout(autoPrint, 1000);
 
-        title: '*',
+		cb();
+	},
 
-        messageTop: '*',
+	async: 100,
 
-        messageBottom: '*',
+	title: '*',
 
-        exportOptions: {},
+	messageTop: '*',
 
-        header: true,
+	messageBottom: '*',
 
-        footer: true,
+	exportOptions: {},
 
-        autoPrint: true,
+	header: true,
 
-        customize: null
-    };
+	footer: true,
 
-    return DataTable;
+	autoPrint: true,
+
+	customize: null
+};
+
+
+return DataTable;
 }));
