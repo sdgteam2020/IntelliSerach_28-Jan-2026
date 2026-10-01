@@ -5,19 +5,24 @@ namespace Domain.DTOs.Requests
 {
     public class DTOSerchRequest
     {
-        [StringLength(250)]
-        [Required(ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "RequiredError")]
-        [MinLength(1, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MinLengthError")]
-        [MaxLength(250, ErrorMessageResourceType = typeof(ErrorMessages), ErrorMessageResourceName = "MaxLengthError")]
-        [RegularExpression(
-    @"^(?:[A-Za-z0-9 ]+|""[A-Za-z0-9 ]+""|\([A-Za-z0-9 ]+\))$",
-    ErrorMessageResourceType = typeof(ErrorMessages),
-    ErrorMessageResourceName = "SpecialChars")]
-        public string DataString { get; set; }
+        [Required]
+        [StringLength(250, MinimumLength = 1)]
+        public string DataString { get; set; } = string.Empty;
 
-        public int size { get; set; }
-        public int from { get; set; }
-        public string Filter { get; set; }
-        public int Type { get; set; }
+        // Maximum records returned per request
+        [Range(1, 100)]
+        public int size { get; set; } = 10;
+
+        // Pagination offset
+        [Range(0, int.MaxValue)]
+        public int from { get; set; } = 0;
+
+        public string? Filter { get; set; } = "All";
+
+        // 1 = Keyword
+        // 2 = Fuzzy
+        // 3 = Exact phrase
+        [Range(1, 3)]
+        public int Type { get; set; } = 1;
     }
 }

@@ -47,157 +47,260 @@ $(function () {
     </div>
 </div>
 
-<div class="row" id="indexCardsContainer">
+
+`);
+        html.push(`
+<div class="row mb-4">
+
+    <!-- CRAWLER INSTALLED -->
+    <div class="col-12">
+        <div class="card border-0 mb-4">
+            <div class="card-header">
+                <strong>
+                    <i class="fa-solid fa-server me-2"></i>
+                    Crawler Installed
+                </strong>
+            </div>
+
+            <div class="card-body">
+                <div class="row" id="crawlerInstalledContainer">
 `);
         if (Array.isArray(data) && data.length) {
 
-            data.forEach(function (item) {
+            // ============================================================
+            // FIRST BOX : CRAWLER INSTALLED
+            // ============================================================
 
-                let health = (item.health || '').toLowerCase();
-                let badgeClass = 'bg-success';
+            data.filter(item => item.IsCrawlerInstall === true)
+                .forEach(function (item) {
 
-                if (health === 'yellow')
-                    badgeClass = 'bg-warning text-dark';
-                else if (health === 'red')
-                    badgeClass = 'bg-danger';
-                // <span class="status-badge ${health}">
-                //     ${(item.health || '').toUpperCase()}
-                // </span>
+                    let crawlerId = item.index || '';
 
+                    let spanHtml = `
+                <span class="running text-secondary crawler-status-text"
+                      data-crawler-id="${crawlerId}">
+                </span>
 
-                //every refresh
-               // let isLive = AllliveIndex.map(String).includes(String(item.index));
-//                 let spanHtml = `
-//     <span class="running ${isLive ? 'text-success' : 'text-danger'}">
-//         ${isLive ? 'Crawler Connected' : 'Crawler Not Connected'}
-//     </span>
-//     <span class="${isLive ? 'live-dot' : 'offline-dot'}" id="${item.index || ''}"></span>
-// `;
-                ////////end
+                <span class="crawler-status-dot"
+                      data-crawler-id="${crawlerId}">
+                </span>
+            `;
 
-                ///realtime
-                let crawlerId = item.index || '';
-
-                let spanHtml = `
-    <span class="running text-secondary crawler-status-text"
-          data-crawler-id="${crawlerId}">
-      
-    </span>
-
-    <span class="crawler-status-dot"
-          data-crawler-id="${crawlerId}">
-    </span>
-`;
-/////end of realtime 
-                html.push(`
-<div class="col-12 col-md-6 col-xl-3 index-item"
-     data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
-
-    <div class="card index-card border-0">
-
-        <div class="card-header-custom">
-            <div>
-                <h5 class="mb-1">
-                    ${(item.index || '').replace('fs-', '')}
-                </h5>
-                
-                                              
-            </div>
-             
-      
-        </div>
-         <div class=" crawler-status ">
-         <div class="status-left">
-         ${spanHtml}
-           </div>
-            </div>
-        <div class="card-body">
-         
-            <div class="metrics-grid">
-
-                <div class="metric-item_Storage btn-fileview-index"  role="button" data-index="${item.index || ''}"
-                    data-uuid="${item.uuid || ''}"
-                     data-index-name="${(item.index || '').replace('fs-', '')}">
-                    <div class="metric-value text-primary ">
-                        ${getVal(item, 'DocsCount', 'docs.count') || 0}
-                    </div>
-                    <div class="metric-label">
-                      Active
-                    </div>
-                </div>
-
-                <div class="metric-item_Storage">
-                    <div class="metric-value text-danger">
-                        ${getVal(item, 'DocsDeleted', 'docs.deleted') || 0}
-                    </div>
-                    <div class="metric-label">
-                        Deleted
-                    </div>
-                </div>
-
-                <div class="metric-item_Storage">
-                    <div class="metric-value text-success">
-                        ${getVal(item, 'StoreSize', 'store.size') || '0'}
-                    </div>
-                    <div class="metric-label">
-                        Storage
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="action-area">
-
+                    let htmlCrawlerStatistics = `
                 <button
-                    class="btn btn-outline-info btn-sm d-none"
+                    class="btn btn-outline-primary btn-sm btn-indexingstatistics-index text-nowrap"
                     data-index="${item.index || ''}"
                     data-uuid="${item.uuid || ''}"
-                     data-index-name="${(item.index || '').replace('fs-', '')}"
-                    >
-                    👁 View
+                    data-indexingstatistics-id="${item.index || ''}"
+                    data-index-name="${(item.index || '').replace('fs-', '')}">
+
+                    <i class="fa-solid fa-chart-column"></i>
+                    Crawler Stats
                 </button>
-                <button
-    class="btn btn-outline-primary btn-sm btn-indexingstatistics-index text-nowrap"
-    data-index="${item.index || ''}"
-    data-uuid="${item.uuid || ''}"
-    data-indexingstatistics-id="${item.index || ''}"
-    data-index-name="${(item.index || '').replace('fs-', '')}">
-    
-    <i class="fa-solid fa-chart-column"></i>
-    Crawler Statistics
-</button>
-                ${type === "Admin" ? `
-               <button
-                class="btn btn-outline-primary btn-sm btn-assign-index text-nowrap"
-                data-index="${item.uuid || ''}"
-                data-index-name="${(item.index || '').replace('fs-', '')}">
-                <i class="fas fa-user-plus"></i>  Assign
-            </button>
-                ` : ''}
+            `;
 
-            </div>
+                    html.push(`
+                <div class="col-12 col-md-6 col-xl-3 index-item"
+                     data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
 
-        </div>
+                    <div class="card index-card border-0">
 
-    </div>
-</div>
-`);
-            });
+                        <div class="card-header-custom">
+                            <div>
+                                <h5 class="mb-1">
+                                    ${(item.index || '').replace('fs-', '')}
+                                </h5>
+                            </div>
+                        </div>
 
-        } else {
+                        <div class="crawler-status">
+                            <div class="status-left">
+                                ${spanHtml}
+                            </div>
+                        </div>
 
-            html.push(`
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center text-muted py-5">
-                    No indexes found.
+                        <div class="card-body">
+
+                            <div class="metrics-grid">
+
+                                <div class="metric-item_Storage btn-fileview-index"
+                                     role="button"
+                                     data-index="${item.index || ''}"
+                                     data-uuid="${item.uuid || ''}"
+                                     data-index-name="${(item.index || '').replace('fs-', '')}">
+
+                                    <div class="metric-value text-primary">
+                                        ${getVal(item, 'DocsCount', 'docs.count') || 0}
+                                    </div>
+
+                                    <div class="metric-label">
+                                        Active
+                                    </div>
+                                </div>
+
+                                <div class="metric-item_Storage">
+                                    <div class="metric-value text-danger">
+                                        ${getVal(item, 'DocsDeleted', 'docs.deleted') || 0}
+                                    </div>
+
+                                    <div class="metric-label">
+                                        Deleted
+                                    </div>
+                                </div>
+
+                                <div class="metric-item_Storage">
+                                    <div class="metric-value text-success">
+                                        ${getVal(item, 'StoreSize', 'store.size') || '0'}
+                                    </div>
+
+                                    <div class="metric-label">
+                                        Storage
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="action-area">
+
+                                ${htmlCrawlerStatistics}
+
+                                ${type === "Admin" ? `
+                                    <button
+                                        class="btn btn-outline-primary btn-sm btn-assign-index text-nowrap"
+                                        data-index="${item.uuid || ''}"
+                                        data-index-name="${(item.index || '').replace('fs-', '')}">
+
+                                        <i class="fas fa-user-plus"></i>
+                                        Assign
+                                    </button>
+                                ` : ''}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            `);
+                });
+        }
+
+        html.push(`
                 </div>
             </div>
         </div>
-    `);
+    </div>
+
+
+    <!-- WEBSITE SCRAPER ONLY -->
+    <div class="col-12">
+        <div class="card border-0">
+            <div class="card-header">
+                <strong>
+                    <i class="fa-solid fa-globe me-2"></i>
+                    Website Scraper Only
+                </strong>
+            </div>
+
+            <div class="card-body">
+                <div class="row" id="websiteScraperContainer">
+`);
+
+        if (Array.isArray(data) && data.length) {
+
+            // ============================================================
+            // SECOND BOX : WEBSITE SCRAPER ONLY
+            // ============================================================
+
+            data.filter(item => item.IsCrawlerInstall === false)
+                .forEach(function (item) {
+
+                    html.push(`
+                <div class="col-12 col-md-6 col-xl-3 index-item"
+                     data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
+
+                    <div class="card index-card border-0">
+
+                        <div class="card-header-custom">
+                            <div>
+                                <h5 class="mb-1">
+                                    ${(item.index || '').replace('fs-', '')}
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="metrics-grid">
+
+                                <div class="metric-item_Storage btn-fileview-index"
+                                     role="button"
+                                     data-index="${item.index || ''}"
+                                     data-uuid="${item.uuid || ''}"
+                                     data-index-name="${(item.index || '').replace('fs-', '')}">
+
+                                    <div class="metric-value text-primary">
+                                        ${getVal(item, 'DocsCount', 'docs.count') || 0}
+                                    </div>
+
+                                    <div class="metric-label">
+                                        Active
+                                    </div>
+                                </div>
+
+                                <div class="metric-item_Storage">
+                                    <div class="metric-value text-danger">
+                                        ${getVal(item, 'DocsDeleted', 'docs.deleted') || 0}
+                                    </div>
+
+                                    <div class="metric-label">
+                                        Deleted
+                                    </div>
+                                </div>
+
+                                <div class="metric-item_Storage">
+                                    <div class="metric-value text-success">
+                                        ${getVal(item, 'StoreSize', 'store.size') || '0'}
+                                    </div>
+
+                                    <div class="metric-label">
+                                        Storage
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="action-area">
+
+                                ${type === "Admin" ? `
+                                    <button
+                                        class="btn btn-outline-primary btn-sm btn-assign-index text-nowrap"
+                                        data-index="${item.uuid || ''}"
+                                        data-index-name="${(item.index || '').replace('fs-', '')}">
+
+                                        <i class="fas fa-user-plus"></i>
+                                        Assign
+                                    </button>
+                                ` : ''}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            `);
+                });
         }
 
-        html.push('</div>');
+        html.push(`
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+`);
 
         $('#tableContainer').html(html.join(''));
 
@@ -212,7 +315,7 @@ $(function () {
             .on('keyup', '#indexSearch', function () {
 
                 let searchText = $(this).val().toLowerCase().trim();
-
+                
                 $('.index-item').each(function () {
 
                     let indexName = ($(this).attr('data-index-name') || '').toLowerCase();
@@ -369,25 +472,28 @@ function updateCrawlerStatus(
 
     }
     else {
-        console.log($indexingstatistics)
-        $indexingstatistics.addClass("d-none");
-        // $text
-        //     .text('Crawler Not Connected')
-        //     .removeClass(
-        //         'text-success text-secondary'
-        //     )
-        //     .addClass(
-        //         'text-danger'
-        //     );
+        //console.log($indexingstatistics)
+       // $indexingstatistics.addClass("d-none");
+        $text
+            .text('Crawler Not Connected')
+            .removeClass(
+                'text-success text-secondary'
+            )
+            .addClass(
+                'text-danger'
+            );
 
-        // $dot
-        //     .removeClass(
-        //         'live-dot'
-        //     )
-        //     .addClass(
-        //         'offline-dot'
-        //     );
+        $dot
+            .removeClass(
+                'live-dot'
+            )
+            .addClass(
+                'offline-dot'
+            );
     }
+    // Automatically sort:
+    // Live first -> Offline second
+    sortCrawlerCards();
 }
 let crawlerStatusTimer = null;
 
@@ -401,4 +507,31 @@ function startCrawlerStatusMonitoring() {
         refreshAllCrawlerStatus();
         $("#loading").hide();
     }, 5000);
+}
+function sortCrawlerCards() {
+
+    let $container = $('#crawlerInstalledContainer');
+
+    let $cards = $container.children('.index-item');
+
+    $cards.sort(function (a, b) {
+
+        let aLive = $(a)
+            .find('.crawler-status-dot')
+            .hasClass('live-dot');
+
+        let bLive = $(b)
+            .find('.crawler-status-dot')
+            .hasClass('live-dot');
+
+        if (aLive && !bLive)
+            return -1;
+
+        if (!aLive && bLive)
+            return 1;
+
+        return 0;
+    });
+
+    $container.append($cards);
 }

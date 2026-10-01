@@ -12,6 +12,8 @@ namespace Domain.DTOs.Requests
         public SearchQuery query { get; set; }
 
         public Highlight highlight { get; set; }
+        public Dictionary<string, object> aggs { get; set; }
+
     }
     public class SearchQuery
     {
@@ -48,6 +50,8 @@ namespace Domain.DTOs.Requests
         [JsonProperty(
             NullValueHandling = NullValueHandling.Ignore)]
         public bool? fuzzy_transpositions { get; set; }
+        [JsonProperty("operator")]
+        public string Operator { get; set; }
     }
     public class Highlight
     {

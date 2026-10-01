@@ -47,9 +47,10 @@
     <header>
 
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3 custom-navbar">
+         @*    //custom-navbar *@
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Dashboard">
-                    <img src="~/images/logo.webp"
+                    <img src="~/images/logo.png"
                          alt="Logo"
                          width="100"
                          height="100"
@@ -113,16 +114,16 @@
                         <li class="nav-item d-flex align-items-center">
                             @if (User.Identity.IsAuthenticated)
                             {
-                                <span class="navbar-text text-white"> <h4 class="alert-heading">Welcome ,@dtoSession.RankName @dtoSession.Name!</h4> </span>
+                                <span class="navbar-text text-white"> <h4 class="alert-heading">Welcome @dtoSession.RankName @dtoSession.Name!</h4> </span>
                                 <input type="hidden" id="payloadaes" value="@dtoSession.AESKey" />
                                 <input type="hidden" id="spnUserName" value="@dtoSession.UserName" />
                             }
                         </li>
-                       @*  <li class="nav-item d-flex align-items-center">
-                            <button id="themeToggle" class="btn btn-sm btn-outline-light me-2" aria-pressed="false" title="Toggle theme">
+                        <li class="nav-item d-flex align-items-center">
+                            <button id="themeToggle" class="btn btn-sm btn-outline-light me-2 m-lg-2" aria-pressed="false" title="Toggle theme">
                                 <i class="fas fa-moon" aria-hidden="true"></i>
                             </button>
-                        </li> *@
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -24,10 +24,11 @@ $(document).ready(async function () {
         selectedFilter = $(this).attr('title');
 
         GetFilter(selectedFilter, SearchableIndex);
+         searchContent(true,true);
     });
 
     if ($('#searchInput').val() != "") {
-        searchContent();
+        searchContent(true);
     }
     // Set focus to #searchInput and move cursor to the end
     let input = document.getElementById('searchInput');
@@ -41,19 +42,22 @@ $(document).ready(async function () {
         if (event.key === 'Enter') {
             event.preventDefault();
             if ($('#searchInput').val() != "")
-                searchContent();
+                searchContent(true);
         }
     });
     $('#btnSearch').on('click', function () {
         let query = $('#searchInput').val();
         if ($('#searchInput').val() != "")
-            searchContent();
+            searchContent(true);
+        else {
+            window.location.href = "/Home/Dashboard";
+        }
     });
 
     
 });
 
-async function searchContent(reset = true) {
+async function searchContent(reset = true,IsFilter) {
 
    
     if (reset) { from = 0; document.getElementById('results').innerHTML = ""; }
@@ -106,6 +110,9 @@ async function searchContent(reset = true) {
             if (data1.Code == 200) {
                 const data = JSON.parse(data1.Data);
                 const hits = data.hits.hits || []; totalHits = data.hits.total.value || 0;
+
+                const aggregations = data.aggregations.indexes_used.buckets;
+
                 var now = new Date();
                
                 const Browsermemory = {
@@ -123,6 +130,9 @@ async function searchContent(reset = true) {
                     const elapsed = (endTime - startTime).toFixed(2);
                     $('#resultTime').html(`Search completed in ${elapsed} ms`);
                 }
+                aggregations.forEach(hit => {
+                    SearchableIndex.push(hit.key);
+                });
                 hits.forEach(hit => {
                  
                     const virtualPath = hit._source?.path?.virtual || '';
@@ -140,9 +150,13 @@ async function searchContent(reset = true) {
                     const maxScore = data.hits.max_score || 1;
                     const relevance = ((hit._score / maxScore) * 100).toFixed(0);
                     const indexName = hit._index;
+                    const table_rows = hit._source?.table_rows
+                
 
-                    SearchableIndex.push(indexName);
-                 
+                    const tableHtml = renderDynamicTables(table_rows, dataString);
+                    
+                      
+
                     // ========================================================
                     // GET HIGHLIGHTS FROM ALL SEARCH FIELDS
                     // ========================================================
@@ -190,7 +204,9 @@ async function searchContent(reset = true) {
                         ...tableValueHighlights,
                         // ...tableRawTextHighlights,
                         // ...tableRawHighlights,
-                        ...contentHighlights
+                         ...contentHighlights,
+                         ...headings_h1,
+                         
                     ];
 
                     let cleanPath = virtualPath.replace(/\\\\/g, '').replace('\\', '');
@@ -343,6 +359,7 @@ async function searchContent(reset = true) {
                 ${highlights}
             </ul>
         </div>
+        ${tableHtml}
     </div>
     `;
                         $('#results').append(html);
@@ -362,8 +379,7 @@ async function searchContent(reset = true) {
             }
            
         }).catch(console.error);
-
-    GetFilter(selectedFilter, SearchableIndex);
+   GetFilter(selectedFilter, SearchableIndex);
 }
 function getBaseUrl(input) {
     if (!input) return "";
@@ -504,13 +520,22 @@ async function GetFilter(active, SearchableIndex) {
                             // Using the .Url and .Abbr properties from your FilterItem model
                             listItemddl += `<li class="filter active" title="${urls[i].index}">${urls[i].index.replace("fs-","")}</li>`;
                         else
-                            listItemddl += `<li class="filter" title="${urls[i].index}">${urls[i].index.replace("fs-", "") }</li>`;
+                            listItemddl += `<li class="filter filtersWithSearch" title="${urls[i].index}">${urls[i].index.replace("fs-", "") }</li>`;
+                    }
+                }
+                urls = data.Data.filter(index => !SearchableIndex.includes(index.index));
+
+                for (let i = 0; i < urls.length; i++) {
+                    let displayLabel = urls[i].index;
+                    if (displayLabel != "") {
+                     
+                            listItemddl += `<li class="filter" title="${urls[i].index}">${urls[i].index.replace("fs-", "")}</li>`;
                     }
                 }
                 $(".filters").html(listItemddl);
-
-                // if ($('#searchInput').val() != "")
-                //     searchContent();
+               
+                
+                  
             }
         }
         else if (data.Code === 4) {
@@ -578,4 +603,191 @@ async function GetWebServerUrlMapping() {
             text: errormsg002
         });
     }
+}
+
+function renderDynamicTables(
+    table_rows,
+    tableValueHighlights
+) {
+    if (!Array.isArray(table_rows) ||
+        table_rows.length === 0) {
+        return "";
+    }
+
+    const groupedTables = {};
+
+    table_rows.forEach(row => {
+
+        const tableIndex =
+            row.table_index ?? 0;
+
+        if (!groupedTables[tableIndex]) {
+            groupedTables[tableIndex] = [];
+        }
+
+        groupedTables[tableIndex].push(row);
+    });
+
+    let finalHtml = "";
+
+    Object.keys(groupedTables).forEach(tableIndex => {
+
+        const rows =
+            groupedTables[tableIndex];
+
+        const headers = [];
+
+        // ==============================
+        // Dynamic headers
+        // ==============================
+        rows.forEach(row => {
+
+            if (!Array.isArray(row.columns))
+                return;
+
+            row.columns.forEach(
+                (col, index) => {
+
+                    const header =
+                        col.label ||
+                        col.name ||
+                        `Column ${index + 1}`;
+
+                    if (!headers.includes(header)) {
+                        headers.push(header);
+                    }
+                }
+            );
+        });
+
+        if (headers.length === 0)
+            return;
+
+        finalHtml += `
+            <div class="table-responsive mt-2">
+
+                <table class="table table-bordered table-sm">
+
+                    <thead>
+                        <tr>
+        `;
+
+        headers.forEach(header => {
+
+            finalHtml += `
+                <th>
+                    ${escapeHtml(header)}
+                </th>
+            `;
+        });
+
+        finalHtml += `
+                        </tr>
+                    </thead>
+
+                    <tbody>
+        `;
+
+        // ==============================
+        // Dynamic rows
+        // ==============================
+        rows.forEach(row => {
+
+            finalHtml += `<tr>`;
+
+            headers.forEach(header => {
+
+                let column = null;
+
+                if (Array.isArray(row.columns)) {
+
+                    column =
+                        row.columns.find(
+                            (col, index) => {
+
+                                const columnHeader =
+                                    col.label ||
+                                    col.name ||
+                                    `Column ${index + 1}`;
+
+                                return columnHeader === header;
+                            }
+                        );
+                }
+
+                const originalValue =
+                    column?.value ?? "";
+
+                // IMPORTANT
+                const displayValue =
+                    getHighlightedTableValue(
+                        originalValue,
+                        tableValueHighlights
+                    );
+
+                finalHtml += `
+                    <td>${displayValue}</td>
+                `;
+            });
+
+            finalHtml += `</tr>`;
+        });
+
+        finalHtml += `
+                    </tbody>
+                </table>
+
+            </div>
+        `;
+    });
+
+    return finalHtml;
+}
+function getHighlightedTableValue(originalValue, searchValue) {
+
+    if (!originalValue) {
+        return "";
+    }
+
+    if (!searchValue) {
+        return escapeHtml(originalValue);
+    }
+
+    const originalText = String(originalValue);
+    const searchText = String(searchValue).trim();
+
+    if (!searchText) {
+        return escapeHtml(originalText);
+    }
+
+    // Escape RegExp special characters
+    const escapedSearch = searchText.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        '\\$&'
+    );
+
+    const regex = new RegExp(
+        `(${escapedSearch})`,
+        'gi'
+    );
+
+    const escapedOriginal = escapeHtml(originalText);
+
+    return escapedOriginal.replace(
+        regex,
+        '<mark class="marks">$1</mark>'
+    );
+}
+function escapeHtml(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }

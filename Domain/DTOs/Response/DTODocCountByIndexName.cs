@@ -30,27 +30,62 @@ namespace Domain.DTOs.Response
         public DTONonOCRFiles Non_Ocr_Files { get; set; }
 
         public DTOFileExtensions File_Extensions { get; set; }
+
+        // Added Failed Files DTO
+        public DTOFailedFiles Failed_Files { get; set; }
     }
+
+
     // File Extension DTO
     public class DTOFileExtensions
     {
         public List<DTOFileExtensionBucket> Buckets { get; set; }
     }
+
     public class DTOFileExtensionBucket
     {
         public string Key { get; set; }
 
         public int Doc_Count { get; set; }
     }
+
+
+    // Failed Files DTO
+    public class DTOFailedFiles
+    {
+        public int Doc_Count { get; set; }
+
+        public DTOFailedReasonCount Failed_Reason_Count { get; set; }
+    }
+
+
+    // Failed Reason Count DTO
+    public class DTOFailedReasonCount
+    {
+        public List<DTOFailedReasonBucket> Buckets { get; set; }
+    }
+
+
+    // Failed Reason Bucket DTO
+    public class DTOFailedReasonBucket
+    {
+        public string Key { get; set; }
+
+        public int Doc_Count { get; set; }
+    }
+
+
     public class DTOTotalOriginalSize
     {
         public double Value { get; set; }
     }
 
+
     public class DTOOCRFiles
     {
         public int Doc_Count { get; set; }
     }
+
 
     public class DTONonOCRFiles
     {

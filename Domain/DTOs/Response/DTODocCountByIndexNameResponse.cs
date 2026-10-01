@@ -11,7 +11,7 @@ namespace Domain.DTOs.Response
 
         public int Ocr_Files { get; set; }
         public int Non_Ocr_Files { get; set; }
-
+        public int Total_failed_files{ get; set; }
         public List<DTOFileExtensionBucket> File_Extensions { get; set; }
     }
 }

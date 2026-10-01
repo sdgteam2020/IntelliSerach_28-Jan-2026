@@ -31,6 +31,8 @@ namespace Domain.DTOs.Response
         [JsonProperty("dataset.size")]
         public string DatasetSize { get; set; }
         public string message { get; set; }
+
+        public bool IsCrawlerInstall { get; set; }
     }
     public class ElasticUniqueFileResponse
     {

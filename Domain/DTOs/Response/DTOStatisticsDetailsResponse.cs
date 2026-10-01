@@ -47,5 +47,9 @@ namespace Domain.DTOs.Response
 
         [JsonProperty("scantime")]
         public DateTime ScanTime { get; set; }
+        [JsonProperty("unsupportedfile")]
+        public int unsupportedfile { get; set; }
+
+
     }
 }

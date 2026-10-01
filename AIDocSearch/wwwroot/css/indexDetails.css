@@ -14,7 +14,7 @@
     }
 
 .card-header-custom {
-    background: linear-gradient(135deg, #033d0e, #1960ff);
+    background: linear-gradient(135deg, #0076db, #2a95e1);
     color: white;
     padding: 2px;
     display: flex;
@@ -314,7 +314,7 @@
 .dashboard-container h1 {
     font-size: 28px;
     font-weight: 700;
-    color: #0f172a;
+    color: #0076db;
 }
 
 
@@ -428,6 +428,7 @@
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 15px;
+    color: #0076db;
 }
 
 
@@ -441,7 +442,7 @@
 
 
 .progress-bar {
-    background: linear-gradient( 90deg, #ff0000, #22c55e );
+    background: linear-gradient(90deg, #057bdf59, #0076db);
     border-radius: 20px;
 }
 
@@ -484,6 +485,7 @@
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 15px;
+    color: #0076db;
 }
 
 

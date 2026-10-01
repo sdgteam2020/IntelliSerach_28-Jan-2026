@@ -280,7 +280,7 @@ $(function () {
         let uuid = $(this).data('index');
         let indexName = $(this).data('index-name');
 
-        $(".Indexnameinmodal").html(indexName);
+        $(".Indexnameinmodal").html(indexName.replace('fs-', ''));
         openAssignModal(uuid);
         loadAssignedUsers(uuid);
         resetUserList()
@@ -326,6 +326,7 @@ $(function () {
         let uuid = $(this).data('uuid');
         $(".spanindexNameForDashboard").html(indexName)
         $(".spanuuidForDashboard").html(uuid)
+        $(".lbl_for_CrawlerDashboard").html("Crawler Statistics For " + indexName.replace('fs-', ''))
         // clear existing interval
         if (crawlerStatusInterval) {
             clearInterval(crawlerStatusInterval);
@@ -398,12 +399,15 @@ $(function () {
                     const Non_Ocr_Files = DTODocCountByIndexName.Non_Ocr_Files;
 
                     totalfilestoindexed = Ocr_Files + Non_Ocr_Files;
+
+
+                    const Totalunsupportedfile = DTOStatisticsHits.unsupportedfile + DTODocCountByIndexName.Total_failed_files;
                     let Percentage = 0;
 
                     if (TotalFiles > 0) {
 
                         Percentage = Math.round(
-                            ((Total / totalfilestoindexed) * 100) * 10
+                            (((totalfilestoindexed + Totalunsupportedfile) / TotalFiles) * 100) * 10
                         ) / 10;
 
                     }
@@ -415,7 +419,7 @@ $(function () {
 
                     animateCounter(
                         "indexedSearchable",
-                        Total
+                        totalfilestoindexed
                     );
 
 
@@ -433,17 +437,17 @@ $(function () {
 
                     animateCounter(
                         "failedProcess",
-                        TotalFiles - Total
+                        Totalunsupportedfile
                     );
 
 
                     // Progress animation
 
                     animateCounter(
-                        "indexProgress",
-                        Percentage,
-                        1000,
-                        "%"
+                        "indexunderProgress",
+                        TotalFiles - (totalfilestoindexed + Totalunsupportedfile),
+                        1000
+                   
                     );
 
 
@@ -465,7 +469,7 @@ $(function () {
                     // Progress text
 
                     $("#progressText").text(
-                        `${Total.toLocaleString()} of ${TotalFiles.toLocaleString()} files are searchable`
+                        `${TotalFiles.toLocaleString()} of ${(totalfilestoindexed + Totalunsupportedfile).toLocaleString()} files are searchable`
                     );
 
                     showCrawleExtensions(
@@ -533,7 +537,7 @@ $(function () {
             $(this).data('index-name')
         );
 
-        GetDocDetailsByIndexName(indexName, uuid, 3)
+        GetDocDetailsByIndexName(indexName, uuid, 4)
 
        
 
@@ -2122,7 +2126,7 @@ function ResetCrawlerDashboard() {
         .text("0");
 
 
-    $("#indexProgress")
+    $("#indexunderProgress")
         .text("0%");
 
 

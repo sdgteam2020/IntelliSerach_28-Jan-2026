@@ -10,20 +10,21 @@
 <link href="~/css/dashboard.css" rel="stylesheet" />
 
 <!-- Hero Section with Centered Search -->
+<div class="container mt-2">
 <div class="fut-hero">
     <div class="fut-hero-content">
         <!-- Logo -->
-        <img src="~/images/logo.webp"
+        <img src="~/images/logo.png"
              alt="Indian Army IntelliSearch Logo"
-             class="fut-logo" />
+             class="fut-logo " />
 
         <!-- Title -->
-        <h1 class="fut-title">
+        <h1 class="fut-title  d-none">
             Indian Army IntelliSearch
         </h1>
 
         <!-- Subtitle -->
-        <h2 class="fut-subtitle">
+        <h2 class="fut-subtitle d-none">
             Your Smart Document Exploration and Search Engine
         </h2>
 
@@ -48,18 +49,18 @@
                        aria-label="Search"
                        autofocus
                        autocomplete="off"
-                       pattern='(?:[A-Za-z0-9 ]+|"[A-Za-z0-9 ]+"|\([A-Za-z0-9 ]+\))'
-                       title='Only letters, numbers and spaces are allowed. Use "quotes" for exact phrase or (parentheses) for AI Similar Search.' />
-
+                      @*  pattern='(?:[A-Za-z0-9 ]+|"[A-Za-z0-9 ]+"|\([A-Za-z0-9 ]+\))?'
+                       title='Only letters, numbers and spaces are allowed. You may also use "quotes" or (parentheses). The field can be blank.' *@ />
                 <button id="searchBtn"
                         class="fut-search-btn"
                         type="submit">
                     <i class="fas fa-search" aria-hidden="true"></i> Search
                 </button>
+                <span class="msgerror alert alert-danger m-lg-1 d-none"></span>
             </div>
-
+            
             <div id="suggestions"></div>
-            <span class="msgerror alert alert-danger d-none"></span>
+           
         </form>
     </div>
 
@@ -79,12 +80,12 @@
                 <ul class="fut-card-list">
                     <li>
                         <i class="fas fa-file-alt"></i>
-                        Total Documents: <span id="totalDocuments">Loading...</span>
+                        Total Indexed Docs: <span id="totalDocuments">Loading...</span>
                     </li>
 
                     <li>
                         <i class="fas fa-database"></i>
-                        Total Scraped Web: <span id="totalScrapWeb">Loading...</span>
+                        Total Crawled Website: <span id="totalScrapWeb">Loading...</span>
                     </li>
                 </ul>
             </div>
@@ -100,7 +101,7 @@
                 </p>
                 <ul class="fut-card-list">
                     <li><i class="fas fa-clock"></i> Last search: <span class="spnlastsearchdate"></span></li>
-                    <li><i class="fas fa-search"></i> Recent Searches: <span class="spnRecentSearches"></span></li>
+                    <li><i class="fas fa-search"></i> Recent Search: <span class="spnRecentSearches"></span></li>
                 </ul>
             </div>
 
@@ -122,6 +123,7 @@
         </div>
     </div>
 
+</div>
 </div>
 <script src="~/devjs/dashboard.js"></script>
 

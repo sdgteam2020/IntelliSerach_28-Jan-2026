@@ -6,17 +6,41 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 
 namespace Infrastructure.Shared.Services
 {
     public class Search : ISearch
     {
-        public async Task<string> GetResponse(
-    DTOSerchRequest Request,
-    string Url,
-    string UserName,
-    string Password)
+        public async Task<string> GetResponse(DTOSerchRequest Request,  string Url, string UserName, string Password)
         {
+            var stopWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "a", "an", "the",
+    "is", "am", "are", "was", "were",
+    "be", "been", "being",
+    "has", "have", "had",
+    "do", "does", "did",
+    "of", "in", "on", "at", "to", "for",
+    "from", "with", "by",
+    "and", "or", "but"
+};
+
+            string originalQuery = Request.DataString?
+                .Trim() ?? string.Empty;
+
+            originalQuery = Regex.Replace(
+                originalQuery,
+                @"\s+",
+                " "
+            );
+
+            var words = originalQuery
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(x => !stopWords.Contains(x.Trim()))
+                .ToArray();
+
+            string keywordQuery = string.Join(" ", words);
             Request.Filter = Request.Filter == "All" ? "*" : Request.Filter;
 
             var filters = new List<object>();
@@ -42,6 +66,30 @@ namespace Infrastructure.Shared.Services
         "content^2"
     };
 
+            // ------------------------------------------------------------
+            // Prepare search text
+            // ------------------------------------------------------------
+            string searchText = Request.DataString?.Trim() ?? "";
+
+            bool isQuotedSearch =
+                searchText.Length >= 2 &&
+                searchText.StartsWith("\"") &&
+                searchText.EndsWith("\"");
+
+            bool isExactSearch =
+                Request.Type == 3 || isQuotedSearch;
+
+
+            // Remove surrounding quotes for exact search
+            if (isQuotedSearch)
+            {
+                searchText = searchText.Substring(
+                    1,
+                    searchText.Length - 2
+                ).Trim();
+            }
+
+
             // ============================================================
             // SEARCH TYPE
             //
@@ -50,137 +98,104 @@ namespace Infrastructure.Shared.Services
             // Type 3 = Exact/Phrase search
             // ============================================================
 
-            if (Request.Type == 3 ||
-    (!string.IsNullOrWhiteSpace(Request.DataString) &&
-    Request.DataString.StartsWith("\"") &&
-    Request.DataString.EndsWith("\"")))
+            if (isExactSearch)
             {
-                // Exact phrase only 
-                shouldQueries.Add(
-                    new MultiMatchWrapper
-                    {
-                        multi_match = new MultiMatchQuery
-                        {
-                            query = Request.DataString,
-                            type = "phrase",
-                            fields = searchFields,
-                            boost = 3
-                        }
-                    }
-                );
-            }
-            else
-            {
-                // --------------------------------------------------------
-                // Phrase match gets higher priority
-                // --------------------------------------------------------
-
-                shouldQueries.Add(
-                    new MultiMatchWrapper
-                    {
-                        multi_match = new MultiMatchQuery
-                        {
-                            query = Request.DataString,
-                            type = "phrase",
-                            fields = searchFields,
-                            boost = 2
-                        }
-                    }
-                );
-
-                // --------------------------------------------------------
-                // Normal / Fuzzy search
-                // --------------------------------------------------------
-
-                bool isFuzzy =
-     Request.Type == 2 ||
-     (
-         !string.IsNullOrWhiteSpace(Request.DataString) &&
-         Request.DataString.StartsWith("(") &&
-         Request.DataString.EndsWith(")")
-     );
-
-                if (Request.Type == 1 || isFuzzy)
+                if (!string.IsNullOrWhiteSpace(searchText))
                 {
-                    string searchText = Request.DataString;
-
-                    // Remove surrounding ( )
-                    if (
-                        !string.IsNullOrWhiteSpace(searchText) &&
-                        searchText.StartsWith("(") &&
-                        searchText.EndsWith(")")
-                    )
-                    {
-                        searchText = searchText.Substring(1, searchText.Length - 2);
-                    }
-
                     shouldQueries.Add(
                         new MultiMatchWrapper
                         {
                             multi_match = new MultiMatchQuery
                             {
                                 query = searchText,
-                                type = "best_fields",
+                                type = "phrase",
                                 fields = searchFields,
+                                boost = 5
+                               
 
-                                fuzziness = isFuzzy
-                                    ? "AUTO"
-                                    : "0",
 
-                                fuzzy_transpositions = isFuzzy
+
                             }
                         }
                     );
                 }
             }
-
-            // ============================================================
-            // FILTER
-            // ============================================================
-
-            if (Request.Filter == "*!")
+            else
             {
-                // Keep your existing special case
-
-                filters.Add(
-                    new
-                    {
-                        @bool = new
+                // --------------------------------------------------------
+                // 1. Original phrase gets higher priority
+                // --------------------------------------------------------
+                if (!string.IsNullOrWhiteSpace(originalQuery))
+                {
+                    shouldQueries.Add(
+                        new MultiMatchWrapper
                         {
-                            should = new List<object>
+                            multi_match = new MultiMatchQuery
                             {
-                        new
-                        {
-                            wildcard = new Dictionary<string, string>
-                            {
-                                {
-                                    "path.real",
-                                    $"*\\\\{Request.Filter}\\\\*"
-                                }
+                                query = originalQuery,      // ORIGINAL QUERY
+                                type = "phrase",
+                                fields = searchFields,
+                                boost = 10
                             }
                         }
-                            },
+                    );
+                }
 
-                            minimum_should_match = 1
-                        }
+                // --------------------------------------------------------
+                // 2. Normal / Fuzzy keyword search
+                // --------------------------------------------------------
+                bool isFuzzy =
+                    Request.Type == 2 ||
+                    (
+                        !string.IsNullOrWhiteSpace(Request.DataString) &&
+                        Request.DataString.StartsWith("(") &&
+                        Request.DataString.EndsWith(")")
+                    );
+
+                if (Request.Type == 1 || isFuzzy)
+                {
+                    string searchText1 = keywordQuery;   // IMPORTANT: keywordQuery here
+
+                    // Remove surrounding ( ) if fuzzy search syntax is used
+                    if (
+                        !string.IsNullOrWhiteSpace(searchText1) &&
+                        searchText1.StartsWith("(") &&
+                        searchText1.EndsWith(")")
+                    )
+                    {
+                        searchText1 =
+                            searchText1.Substring(
+                                1,
+                                searchText1.Length - 2
+                            );
                     }
-                );
+
+                    if (!string.IsNullOrWhiteSpace(searchText1))
+                    {
+                        shouldQueries.Add(
+                            new MultiMatchWrapper
+                            {
+                                multi_match = new MultiMatchQuery
+                                {
+                                    query = searchText1,       // keywordQuery goes here
+                                    type = "best_fields",
+                                    fields = searchFields,
+
+                                    Operator = "and",
+
+                                    fuzziness = isFuzzy
+                                        ? "AUTO"
+                                        : "0",
+
+                                    fuzzy_transpositions = isFuzzy
+                                }
+                            }
+                        );
+                    }
+                }
             }
-            else if (Request.Filter == "*")
-            {
-                // IMPORTANT:
-                // No _index filter is required for All.
-                //
-                // Do NOT use:
-                //
-                // terms : { "_index" : ["*"] }
-                //
-                // because terms query performs exact matching.
-                //
-                // Calling /_search without index filter already searches
-                // all available indexes accessible through this URL.
-            }
-            else if (!string.IsNullOrWhiteSpace(Request.Filter))
+
+            if (!string.IsNullOrWhiteSpace(Request.Filter))
             {
                 // ========================================================
                 // Specific selected source
@@ -289,6 +304,25 @@ namespace Infrastructure.Shared.Services
                         minimum_should_match = 1
                     }
                 },
+                // ========================================================
+                // INDEX COUNT / INDEX LIST AGGREGATION
+                // ========================================================
+
+                aggs = new Dictionary<string, object>
+    {
+        {
+            "indexes_used",
+            new
+            {
+                terms = new
+                {
+                    field = "_index",
+                    size = 1000
+                },
+            }
+        }
+    },
+
 
                 // ========================================================
                 // HIGHLIGHT ALL SEARCHABLE WEB CRAWLER FIELDS
@@ -324,6 +358,8 @@ namespace Infrastructure.Shared.Services
                         number_of_fragments = 3
                     }
                 },
+               
+
 
                 {
                     "meta_description",
@@ -344,42 +380,49 @@ namespace Infrastructure.Shared.Services
                         boundary_scanner= "sentence"
                     }
                 },
+                {
+                "table_rows.columns.value",
+                new HighlightField
+                {
+                    fragment_size = 300,
+                    number_of_fragments = 3
+                }
+            },
+                {
+                    "table_rows.raw_text",
+                    new HighlightField
+                    {
+                        fragment_size = 150,
+                        number_of_fragments = 3
+                    }
+                },
 
-                //{
-                //    "table_rows.raw_text",
-                //    new HighlightField
-                //    {
-                //        fragment_size = 150,
-                //        number_of_fragments = 3
-                //    }
-                //},
+                {
+                    "table_rows.raw",
+                    new HighlightField
+                    {
+                        fragment_size = 150,
+                        number_of_fragments = 3
+                    }
+                },
 
-                //{
-                //    "table_rows.raw",
-                //    new HighlightField
-                //    {
-                //        fragment_size = 150,
-                //        number_of_fragments = 3
-                //    }
-                //},
+                {
+                    "table_rows.columns.label",
+                    new HighlightField
+                    {
+                        fragment_size = 150,
+                        number_of_fragments = 3
+                    }
+                },
 
-                //{
-                //    "table_rows.columns.label",
-                //    new HighlightField
-                //    {
-                //        fragment_size = 150,
-                //        number_of_fragments = 3
-                //    }
-                //},
-
-                //{
-                //    "table_rows.columns.name",
-                //    new HighlightField
-                //    {
-                //        fragment_size = 150,
-                //        number_of_fragments = 3
-                //    }
-                //},
+                {
+                    "table_rows.columns.name",
+                    new HighlightField
+                    {
+                        fragment_size = 150,
+                        number_of_fragments = 3
+                    }
+                },
 
                 //{
                 //    "table_rows.columns.value",
@@ -643,7 +686,10 @@ namespace Infrastructure.Shared.Services
                 );
 
                 if(bucket!=null)
-                index.DocsCount = Convert.ToInt32(bucket.unique_files.doc_count+bucket.url_count.doc_count);
+                {
+                    index.DocsCount = Convert.ToInt32(bucket.unique_files.doc_count + bucket.url_count.doc_count);
+                    index.IsCrawlerInstall = bucket.unique_files.doc_count > 0;
+                }
             }
 
 
@@ -651,111 +697,160 @@ namespace Infrastructure.Shared.Services
         }
 
         public async Task<List<FileSource>> GetDocDetailsByIndexName(
-       string baseUrl,
-       string indexName, int OcrType,
-       string userName,
-       string password)
+        string baseUrl,
+        string indexName,
+        int OcrType,
+        string userName,
+        string password)
         {
             ServicePointManager.ServerCertificateValidationCallback +=
                 (sender, cert, chain, sslPolicyErrors) => true;
 
             using var client = CreateHttpClient(userName, password);
-        
+
+            // =========================================================
+            // COMMON FILTERS
+            // =========================================================
             var filters = new List<object>
-{
-    new
     {
-        term = new Dictionary<string, object>
+        new
         {
-            { "chunk.enabled", false }
-        }
-    },
-    new
-    {
-        term = new Dictionary<string, object>
-        {
-            { "crawler.is_deleted", false }
-        }
-    }
-};
-
-
-            // Add OCR filter only when true/false is passed
-            if (OcrType==1 || OcrType==2)
+            term = new Dictionary<string, object>
             {
+                { "chunk.enabled", false }
+            }
+        },
+        new
+        {
+            term = new Dictionary<string, object>
+            {
+                { "crawler.is_deleted", false }
+            }
+        }
+    };
+
+            // =========================================================
+            // OCR FILTER
+            // =========================================================
+            if (OcrType == 1 || OcrType == 2)
+            {
+                // OcrType 1 = OCR true
+                // OcrType 2 = OCR false
                 filters.Add(
                     new
                     {
                         term = new Dictionary<string, object>
                         {
-                { "crawler.ocr_used", OcrType == 1 }
+                    { "crawler.ocr_used", OcrType == 1 }
+                        }
+                    }
+                );
+
+                // For OCR/non-OCR file records,
+                // URL should NOT exist
+                filters.Add(
+                    new
+                    {
+                        @bool = new
+                        {
+                            must_not = new object[]
+                            {
+                        new
+                        {
+                            exists = new
+                            {
+                                field = "url"
+                            }
+                        }
+                            }
                         }
                     }
                 );
             }
 
+            // =========================================================
+            // BUILD SHOULD LIST
+            // =========================================================
+            var shouldQueries = new List<object>();
 
-            var query = new
-            {
-                _source = new[]
-                {
-        "file.FileName",
-        "file.Extension",
-        "file.filesize",
-        "path.real",
-        "path.virtual",
-        "url",
-        "crawler.ocr_used"
-    },
-
-                query = new
-                {
-                    @bool = new
-                    {
-                        should = new object[]
-                        {
+            // Normal file/OCR filter condition
+            shouldQueries.Add(
                 new
                 {
                     @bool = new
                     {
                         filter = filters
                     }
-                },
-
-                new
-                {
-                    exists = new Dictionary<string, object>
-                    {
-                        { "field", "url" }
-                    }
                 }
-                        },
+            );
+
+            // =========================================================
+            // ONLY OcrType == 4
+            // URL must exist
+            // =========================================================
+            if (OcrType == 4)
+            {
+                shouldQueries.Add(
+                    new
+                    {
+                        exists = new Dictionary<string, object>
+                        {
+                    { "field", "url" }
+                        }
+                    }
+                );
+            }
+
+            // =========================================================
+            // QUERY
+            // =========================================================
+            var query = new
+            {
+                _source = new[]
+                {
+            "file.FileName",
+            "file.Extension",
+            "file.filesize",
+            "path.real",
+            "path.virtual",
+            "url",
+            "crawler.ocr_used"
+        },
+
+                query = new
+                {
+                    @bool = new
+                    {
+                        should = shouldQueries,
 
                         minimum_should_match = 1,
 
                         must_not = new object[]
                         {
-                new
-                {
-                    term = new Dictionary<string, object>
+                    new
                     {
-                        { "crawler.index_status", "failed" }
+                        term = new Dictionary<string, object>
+                        {
+                            { "crawler.index_status", "failed" }
+                        }
                     }
-                }
                         }
                     }
                 },
 
                 size = 5000
             };
+
             var content = new StringContent(
                 JsonConvert.SerializeObject(query),
                 Encoding.UTF8,
-                "application/json");
+                "application/json"
+            );
 
             var response = await client.PostAsync(
                 $"{baseUrl}/{indexName}/_search",
-                content);
+                content
+            );
 
             var json = await response.Content.ReadAsStringAsync();
 
@@ -770,7 +865,6 @@ namespace Infrastructure.Shared.Services
                 .ToList()
                 ?? new List<FileSource>();
         }
-
         public async Task<DTODocCountByIndexNameResponse> GetDocCountByIndexName(string baseUrl,string indexName,string userName,string password)
         {
 
@@ -808,28 +902,6 @@ namespace Infrastructure.Shared.Services
                 }
             },
 
-                        must_not = new object[]
-            {
-                new
-                {
-                    term = new Dictionary<string, object>
-                    {
-                        { "crawler.index_status", "failed" }
-                    }
-                }
-            },
-
-                        should = new object[]
-            {
-                new
-                {
-                    exists = new Dictionary<string, object>
-                    {
-                        { "field", "url" }
-                    }
-                }
-            },
-
                         minimum_should_match = 0
                     }
                 },
@@ -859,10 +931,30 @@ namespace Infrastructure.Shared.Services
                     {
                         filter = new
                         {
+                            @bool = new
+                            {
+                                must = new object[]
+                    {
+                        new
+                        {
                             term = new Dictionary<string, object>
-                {
-                    { "crawler.ocr_used", false }
-                }
+                            {
+                                { "crawler.ocr_used", false }
+                            }
+                        }
+                    },
+
+                                must_not = new object[]
+                    {
+                        new
+                        {
+                            term = new Dictionary<string, object>
+                            {
+                                { "crawler.index_status", "failed" }
+                            }
+                        }
+                    }
+                            }
                         }
                     },
 
@@ -872,6 +964,29 @@ namespace Infrastructure.Shared.Services
                         {
                             field = "file.extension",
                             size = 100
+                        }
+                    },
+
+                    failed_files = new
+                    {
+                        filter = new
+                        {
+                            exists = new Dictionary<string, object>
+                {
+                    { "field", "meta.failed_reason" }
+                }
+                        },
+
+                        aggs = new
+                        {
+                            failed_reason_count = new
+                            {
+                                terms = new
+                                {
+                                    field = "meta.failed_reason.keyword",
+                                    size = 100
+                                }
+                            }
                         }
                     }
                 }
@@ -900,6 +1015,8 @@ namespace Infrastructure.Shared.Services
             dTODocCountByIndexNameResponse.Ocr_Files=result.Aggregations.Ocr_Files.Doc_Count;
             dTODocCountByIndexNameResponse.Non_Ocr_Files=result.Aggregations.Non_Ocr_Files.Doc_Count;
             dTODocCountByIndexNameResponse.File_Extensions = result.Aggregations.File_Extensions.Buckets;
+            dTODocCountByIndexNameResponse.Total_failed_files = result.Aggregations.Failed_Files.Doc_Count;
+
             return dTODocCountByIndexNameResponse;
         }
         public async Task<List<DTOStatisticsHit>> GetstatisticsByIndexName(string baseUrl,string indexName,string userName, string password)

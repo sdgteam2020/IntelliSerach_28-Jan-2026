@@ -120,7 +120,7 @@ let statusPollingTimer = null;
                         Swal.fire({
                             position: "top-end",
                             icon: "error",
-                            title: data.Message + "\n " + data.Data,
+                            title: data.Message,
                            
                             confirmButtonText: "OK",
                             showConfirmButton: true
