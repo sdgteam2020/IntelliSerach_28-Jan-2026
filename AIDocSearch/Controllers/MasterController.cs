@@ -382,6 +382,7 @@ namespace AIDocSearch.Controllers
                 }
                 else
                 {
+
                     // 🔹 INSERT
                     data = new WebScraperSetting
                     {
@@ -399,8 +400,12 @@ namespace AIDocSearch.Controllers
                 
                     WebScraperSetting ret = null;
                     if(data.Id==0)
-                        ret=await _webScraperSetting.AddWithReturn(data);
-                    else if (data.Id > 0)
+                {
+                    ModelState.AddModelError(string.Empty, "You do not have permission to save new records.");
+                    //  ret = await _webScraperSetting.AddWithReturn(data);
+                }
+                    else 
+                    if (data.Id > 0)
                         ret = await _webScraperSetting.UpdateWithReturn(data);
 
                     if (ret != null && ret.Id > 0)
@@ -410,12 +415,13 @@ namespace AIDocSearch.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, ret.max_pages.ToString() ?? "Record Not Save.");
+                    TempData["SuccessMessage"] = null;
+                    ModelState.AddModelError(string.Empty, ret.max_pages.ToString() ?? "Record Not Save.");
                         return View(data);
                     }
                 
             }
-
+            TempData["SuccessMessage"] = null;
             return View(Request);
         }
         [HttpPost]

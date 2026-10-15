@@ -32,6 +32,8 @@ namespace Domain.DTOs.Response
         public string DatasetSize { get; set; }
         public string message { get; set; }
 
+
+
         public bool IsCrawlerInstall { get; set; }
     }
     public class ElasticUniqueFileResponse
@@ -61,6 +63,16 @@ namespace Domain.DTOs.Response
         public UrlCount url_count { get; set; }
 
         public UniqueFiles unique_files { get; set; }
+
+        public DeletedDocuments deleted_documents { get; set; }
+    }
+
+
+
+    public class DeletedDocuments
+    {
+
+        public long doc_count { get; set; }
     }
 
 

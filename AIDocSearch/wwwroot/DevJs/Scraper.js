@@ -1,19 +1,14 @@
 ﻿let currentCrawlJobId = null;
+let crawlStatusTimer = null;
 $(document).ready(function () {
-
+    
     $(document).ajaxStart(function () {
+        $(".loadertext").html("Loading...")
         $("#loading").hide();
     }).ajaxStop(function () {
+        $(".loadertext").html("Loading...")
         $("#loading").hide();
     });
-// ==========================================
-// Status Button Click
-// ==========================================
-
-
-let statusPollingTimer = null;
-
-
 
     $("#ScraperForm").on("submit", async function (e) {
         // $(".pdfviewcontainer").addClass("d-none");
@@ -57,13 +52,13 @@ let statusPollingTimer = null;
 
         
         Swal.fire({
-            title: "Do you want to Scrap?",
+            title: "Do you want to Crawler?",
             text: "You won't be able to revert this!",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, Scrap it!"
+            confirmButtonText: "Yes, Crawler it!"
         }).then(async (result) => {
             if (result.isConfirmed) {
                
@@ -130,7 +125,7 @@ let statusPollingTimer = null;
                         Swal.fire({
                             position: "top-end",
                             icon: "error",
-                            title: data.Message,
+                            title: data.Data,
                            
                             confirmButtonText: "OK",
                             showConfirmButton: true
@@ -242,7 +237,7 @@ function BindWebScraping(Data) {
             Swal.fire({
                 position: "top-end",
                 icon: "success",
-                title: "Scraping started",
+                title: "Crawlering started",
                 text: Data.Message || "New Scrapy crawl started.",
                 showConfirmButton: false,
                 timer: 3500
@@ -257,8 +252,8 @@ function BindWebScraping(Data) {
             Swal.fire({
                 position: "top-end",
                 icon: "success",
-                title: "Scraping completed",
-                text: Data.Message || "Scraping completed successfully.",
+                title: "Crawlering completed",
+                text: Data.Message || "Crawlering completed successfully.",
                 showConfirmButton: false,
                 timer: 3500
             });
@@ -272,8 +267,8 @@ function BindWebScraping(Data) {
             Swal.fire({
                 position: "top-end",
                 icon: "error",
-                title: "Scraping failed",
-                text: Data.Message || "Scraping failed.",
+                title: "Crawlering failed",
+                text: Data.Message || "Crawlering failed.",
                 showConfirmButton: true
             });
 
@@ -286,7 +281,7 @@ function BindWebScraping(Data) {
 }
 
 const SCRAPY_API_BASE =
-    "https://192.168.10.208/fastapi-scrapy-crawler";
+    "https://192.168.10.207/fastapi-scrapy-crawler";
 
 function GetFullStatusUrl(statusUrl) {
 
@@ -363,7 +358,7 @@ function getStatusBadge(status) {
             return `
     <span class="badge bg-primary" >
         <i class="fa fa-spinner fa-spin me-1"></i>
-Scraping
+Crawlering
                 </span >
     `;
 
@@ -399,7 +394,7 @@ Cancelled
         default:
 
             return `
-    < span class="badge bg-secondary" >
+    <span class="badge bg-secondary">
         ${ status }
                 </span >
     `;
@@ -441,7 +436,7 @@ No
 }
 
 
-let crawlStatusTimer = null;
+
 
 function StartCrawlStatusPolling(statusUrl) {
 
@@ -783,7 +778,7 @@ function LoadPdfLinks(jobId) {
 
     $.ajax({
 
-        url: "https://192.168.10.208/fastapi-scrapy-crawler/api/v1/pdf/list-by-job",
+        url: "https://192.168.10.207/fastapi-scrapy-crawler/api/v1/pdf/list-by-job",
 
         type: "POST",
 
@@ -1023,7 +1018,7 @@ function ShowPdfListPopup(response) {
 
         title: `
             <i class="fa fa-file-pdf text-danger me-2"></i>
-            Scraped PDFs
+            Crawled PDFs
         `,
 
         html: html,
@@ -1119,9 +1114,22 @@ function ShowPdfListPopup(response) {
             $("#btn_download_all_pdfs")
                 .off("click")
                 .on("click", function () {
+                    // Swal.fire({
+                    //     title: "Do you want to Download Crawled Pdf?",
+                    //     text: "You won't be able to revert this!",
+                    //     icon: "warning",
+                    //     showCancelButton: true,
+                    //     confirmButtonColor: "#3085d6",
+                    //     cancelButtonColor: "#d33",
+                    //     confirmButtonText: "Yes, Download it!"
+                    // }).then(async (result) => {
+                    //     if (result.isConfirmed) {
 
+
+                    //     }
+                    // });
+                   
                     DownloadAllPdfs(response.job_id);
-
                 });
 
         },
@@ -1192,15 +1200,22 @@ function DownloadAllPdfs(jobId) {
             icon: "warning",
             title: "Job ID not available"
         });
-
+        $("#loading").hide();
         return;
     }
+    $(document).ajaxStart(function () {
+        $(".loadertext").html("Downloading...")
+        $("#loading").show();
+    }).ajaxStop(function () {
+        $(".loadertext").html("Loading...")
+        $("#loading").hide();
+    });
 
-
-
+    $("#loading").show();
+    $(".loadertext").html("Downloading...")
     $.ajax({
 
-        url: "https://192.168.10.208/fastapi-scrapy-crawler/api/v1/pdf/download-by-job",
+        url: "https://192.168.10.207/fastapi-scrapy-crawler/api/v1/pdf/download-by-job",
 
         type: "POST",
 
@@ -1222,7 +1237,7 @@ function DownloadAllPdfs(jobId) {
 
             overwrite_existing: false,
 
-            max_pdf_size_mb: 1,
+            max_pdf_size_mb: 50,
 
             replace_if_size_changed: true
 
@@ -1234,7 +1249,7 @@ function DownloadAllPdfs(jobId) {
                 "PDF Download Response:",
                 response
             );
-
+            $("#loading").hide();
             Swal.fire({
 
                 icon:
@@ -1290,7 +1305,7 @@ function DownloadAllPdfs(jobId) {
         },
 
         error: function (xhr) {
-
+            $("#loading").hide();
             console.error(
                 "PDF Download API Error:",
                 xhr.status,
@@ -1386,4 +1401,3 @@ function escapeAttribute(value) {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
 }
-

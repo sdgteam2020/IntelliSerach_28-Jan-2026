@@ -79,10 +79,7 @@ html.light-theme .fut-search-input::placeholder {
     opacity: 0.85;
 }
 
-/* Loader appearance for light theme: make GIF/icon visible on light background */
-html.light-theme .loader {
-    background: rgba(255,255,255,0.9) !important;
-}
+
 
 html.light-theme .loader-container img {
     /* If the loader GIF is light (white), invert it to be visible on light background */
@@ -564,18 +561,18 @@ html.light-theme .footer.bg-white {
     -webkit-overflow-scrolling: touch;
 }
 
-.filters .filter {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.5rem 0.9rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.03);
-    /*color: var(--fut-text-secondary);*/
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    transition: var(--fut-transition-standard);
-}
+    .filters .filter {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.03);
+        /*color: var(--fut-text-secondary);*/
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid rgb(35 54 251) !important;
+        transition: var(--fut-transition-standard);
+    }
 
 .filters .filter:hover {
     background: rgba(255, 255, 255, 0.05);

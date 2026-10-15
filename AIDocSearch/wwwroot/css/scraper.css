@@ -1,0 +1,195 @@
+﻿#crawlErrorsModal .errors-modal {
+    border: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .25);
+}
+
+#crawlErrorsModal .errors-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(120deg, #083d77, #1264a3);
+    color: #fff;
+    padding: 20px 24px;
+}
+
+    #crawlErrorsModal .errors-header small {
+        display: block;
+        margin-top: 5px;
+        color: #dbeafe;
+    }
+
+#crawlErrorsModal .modal-body {
+    background: #f5f7fb;
+    padding: 24px;
+}
+
+#crawlErrorsModal .errors-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 18px;
+    margin-bottom: 20px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+#crawlErrorsModal .errors-label {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+#crawlErrorsModal .errors-job {
+    color: #334155;
+    overflow-wrap: anywhere;
+}
+
+#crawlErrorsModal .errors-total {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 10px 20px;
+    background: #fff1f2;
+    color: #b91c1c;
+    border-radius: 10px;
+}
+
+    #crawlErrorsModal .errors-total span {
+        display: block;
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    #crawlErrorsModal .errors-total small {
+        display: block;
+    }
+
+#crawlErrorsModal .errors-toolbar {
+    display: flex;
+    align-items: end;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+#crawlErrorsModal .errors-search {
+    flex: 1;
+}
+
+#crawlErrorsModal .errors-toolbar label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+#crawlErrorsModal .error-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-left: 5px solid #2a77e5;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+}
+
+#crawlErrorsModal .error-card-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+    #crawlErrorsModal .error-card-heading h6 {
+        margin: 0;
+        color: #9f2118;
+        font-weight: 700;
+    }
+
+#crawlErrorsModal .error-reason {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+#crawlErrorsModal .error-card-content {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+}
+
+#crawlErrorsModal .error-field {
+    margin-bottom: 12px;
+}
+
+    #crawlErrorsModal .error-field strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #334155;
+        font-size: 13px;
+    }
+
+#crawlErrorsModal .error-url {
+    color: #075985;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+#crawlErrorsModal .error-json {
+    background: #0f172a;
+    color: #bae6fd;
+    padding: 14px;
+    border-radius: 9px;
+    margin: 0;
+    max-height: 240px;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+}
+
+#crawlErrorsModal .errors-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    padding: 16px 24px;
+}
+
+#crawlErrorsModal #errorPageInfo {
+    color: #64748b;
+    font-size: 13px;
+}
+
+#crawlErrorsModal #errorPagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+@media (max-width: 576px) {
+    #crawlErrorsModal .modal-body {
+        padding: 14px;
+    }
+
+    #crawlErrorsModal .errors-toolbar,
+    #crawlErrorsModal .errors-summary {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    #crawlErrorsModal .errors-footer {
+        justify-content: center;
+    }
+}

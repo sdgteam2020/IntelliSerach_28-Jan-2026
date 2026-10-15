@@ -85,14 +85,19 @@
                         <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
                             <div class="modal-content">
 
-                                <div class="modal-header">
+                                <div class="modal-header d-flex align-items-center">
 
-                                    <h5 class="modal-title Indexnameinmodal">Files</h5>
-                                    <button type="button"
-                                            class="btn-close"
-                                            data-bs-dismiss="modal">
-                                        <i class="fa-solid fa-x text-white"></i>
-                                    </button>
+                                    <h5 class="modal-title Indexnameinmodal mb-0">Files</h5>
+                                    <div class="ms-auto d-flex align-items-center gap-3">
+                                        <h5 class="right mb-0"><span class="ocr-badge text-extraction filesViewType">Text Extraction</span></h5>
+
+                                        <button type="button"
+                                                class="btn-close"
+                                                data-bs-dismiss="modal"
+                                                aria-label="Close">
+                                            <i class="fa-solid fa-x text-white"></i>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="modal-body">
@@ -147,7 +152,7 @@
 
                                                 <span class="running "
                                                       id="crawlerStatusText">
-                                                    Checking1 crawler...
+                                                    Indexer crawler...
                                                 </span>
 
 
@@ -156,7 +161,16 @@
                                                 </span>
 
                                             </div>
-
+                                            <div class="status-right ">
+                                                <button type="button"
+                                                        class="refresh-btn"
+                                                        data-index=""
+                                                        data-uuid=""
+                                                        id="refreshStatisticsbyIndexName">
+                                                    <span class="refresh-icon">↻</span>
+                                                    Refresh
+                                                </button>
+                                            </div>
                                         </div>
 
                         </div>
@@ -345,9 +359,9 @@
                         <div class="row align-items-center">
 
 
-                        <div class="col-md-3">
+                        <div class="col-md-3 d-none">
 
-                        <div class="progress-text"
+                        <div class="progress-text d-none"
                         id="progressText">
 
                         0 of 0 files searchable
@@ -358,7 +372,7 @@
 
 
 
-                        <div class="col-md-7">
+                        <div class="col-md-10">
 
 
                         <div class="progress">

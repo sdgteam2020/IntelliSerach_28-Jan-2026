@@ -41,14 +41,19 @@ $(document).ready(async function () {
     document.getElementById('searchInput').addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
             event.preventDefault();
-            if ($('#searchInput').val() != "")
+            if ($('#searchInput').val() != "") {
+                SearchableIndex = [];
                 searchContent(true);
+            }
         }
     });
     $('#btnSearch').on('click', function () {
         let query = $('#searchInput').val();
         if ($('#searchInput').val() != "")
+        {
+            SearchableIndex = [];
             searchContent(true);
+        }
         else {
             window.location.href = "/Home/Dashboard";
         }
@@ -60,9 +65,9 @@ $(document).ready(async function () {
 async function searchContent(reset = true,IsFilter) {
 
    
-    if (reset) { from = 0; document.getElementById('results').innerHTML = ""; }
+     if (reset) { from = 0; document.getElementById('results').innerHTML = ""; }
     $("#loading").show();
-    SearchableIndex = [];
+    
     const startTime = performance.now(); // Start timing
     const token = $('input[name="__RequestVerificationToken"]').val();
 
@@ -109,8 +114,9 @@ async function searchContent(reset = true,IsFilter) {
             $(".msgerror").html("");
             if (data1.Code == 200) {
                 const data = JSON.parse(data1.Data);
-                const hits = data.hits.hits || []; totalHits = data.hits.total.value || 0;
-
+                const hits = data.hits.hits || [];
+                // totalHits = data.hits.total.value || 0;
+                totalHits = data.aggregations?.unique_results?.value ?? 0;
                 const aggregations = data.aggregations.indexes_used.buckets;
 
                 var now = new Date();
@@ -137,14 +143,21 @@ async function searchContent(reset = true,IsFilter) {
                  
                     const virtualPath = hit._source?.path?.virtual || '';
                     const realPath = hit._source?.path?.real || '';
-                    let highlights = hit.highlight?.content || [];
+                     let highlights = hit.highlight?.content || [];
+                    // let highlights = [
+                    //     ...(hit.highlight?.content || []),
+                    //     ...(hit.highlight?.['table_rows.columns.value'] || []),
+                    //     ...(hit.highlight?.['table_rows.raw'] || []),
+                    //     ...(hit.highlight?.['table_rows.raw_text'] || [])
+                    // ];
                     // const content = hit._source?.content?.join(" ... ") || hit._source?.content || "";
                   
                     const score = hit._score ?? 0;
                     const canonical_url = hit._source?.canonical_url || '';
                     const h1 = hit._source?.h1 || '';
                     const job_id = hit._source?.job_id || '';
-                    const headings_h1 = hit._source?.headings || '';
+                    // const headings_h1 = hit._source?.headings || '';
+                    const headings_h1 = hit.highlight?.headings || hit._source?.headings || '';
                     const url = hit._source?.url || '';
                     const title = hit._source?.title || '';
                     const maxScore = data.hits.max_score || 1;
@@ -154,8 +167,9 @@ async function searchContent(reset = true,IsFilter) {
                 
 
                     const tableHtml = renderDynamicTables(table_rows, dataString);
-                    
-                      
+                   
+                   
+              
 
                     // ========================================================
                     // GET HIGHLIGHTS FROM ALL SEARCH FIELDS
@@ -195,20 +209,26 @@ async function searchContent(reset = true,IsFilter) {
                     // COMBINE ALL HIGHLIGHTS
                     // ========================================================
 
-                     highlights = [
-                        ...titleHighlights,
-                        ...headingHighlights,
-                        ...metaDescriptionHighlights,
-                        ...tableLabelHighlights,
-                        ...tableNameHighlights,
-                        ...tableValueHighlights,
-                        // ...tableRawTextHighlights,
-                        // ...tableRawHighlights,
-                         ...contentHighlights,
-                         ...headings_h1,
+                    highlights = [
+                        ...headings_h1,//p-1
+                        ...highlights,
+                      
+                        ...titleHighlights,//p-1
+                       ...headingHighlights,//p-1
+                        ...metaDescriptionHighlights, //p-1
+                        ...tableLabelHighlights, // p-2
+                        //  ...tableNameHighlights,// p-2
+                        //...tableValueHighlights,// p-2
+                        ...tableRawTextHighlights,
+                        // ...tableRawHighlights,// p-2
+                        // ...contentHighlights, //p-1
+                         
                          
                     ];
-
+                    const displayTitle =
+                        Array.isArray(titleHighlights)
+                            ? titleHighlights.find(item => typeof item === "string" && item.trim()) || title
+                            : title;
                     let cleanPath = virtualPath.replace(/\\\\/g, '').replace('\\', '');
                     //${ highlights.map(h => `${h} `).join(' ') }
                     if (job_id == undefined || job_id=="") {
@@ -321,8 +341,8 @@ async function searchContent(reset = true,IsFilter) {
             </div>
             <div class="result-right">
                 <div class="result-score">
-                    <div class="score-label me-2">${indexName.replace("fs-","")}</div>
-                    <span class="score-pill d-none">Score ${relevance}</span>
+                    <div class="score-label me-2">${indexName.replace("fs-", "")}</div>
+                    <span class="score-pill d-none">Score: ${score} MaxScore:${maxScore}  Score ${relevance}</span>
                    
                 </div>
             </div>
@@ -330,25 +350,27 @@ async function searchContent(reset = true,IsFilter) {
 
         <div class="result-snippet">
             <ul>
-                ${highlights}
-            </ul>
+                ${highlights}  ............
+            </ul> 
         </div>
     </div>
     `;
                         $('#results').append(html);
+                       
+
                     } else {
 
                         let html = `
     <div class="google-result">
         <div class="result-header">
             <div class="result-left">
-                <a href="${url}" target="_blank" class="result-title"> <i class="fa fa-globe me-2"></i> ${url}</a>
+                <a href="${url}" target="_blank" class="result-title" title="${url}"> <i class="fa fa-globe me-2"></i> ${new URL(url.trim()).origin} (${displayTitle})</a>
               
             </div>
             <div class="result-right">
                 <div class="result-score">
                      <div class="score-label me-2">${indexName.replace("fs-", "")}</div>
-                    <span class="score-pill d-none">Score ${relevance}</span>
+                    <span class="score-pill d-none">Score: ${score} MaxScore:${maxScore}  Score ${relevance}</span>
                    
                 </div>
             </div>
@@ -356,7 +378,7 @@ async function searchContent(reset = true,IsFilter) {
 
         <div class="result-snippet">
             <ul>
-                ${highlights}
+                 ${highlights}   ............
             </ul>
         </div>
         ${tableHtml}
@@ -366,7 +388,7 @@ async function searchContent(reset = true,IsFilter) {
                     }
 
 
-                   
+                    
                     renderPagination();
                     $("#loading").hide();
                 });
@@ -604,22 +626,15 @@ async function GetWebServerUrlMapping() {
         });
     }
 }
-
-function renderDynamicTables(
-    table_rows,
-    tableValueHighlights
-) {
-    if (!Array.isArray(table_rows) ||
-        table_rows.length === 0) {
+function renderDynamicTables(table_rows, tableValueHighlights) {
+    if (!Array.isArray(table_rows) || table_rows.length === 0) {
         return "";
     }
 
     const groupedTables = {};
 
     table_rows.forEach(row => {
-
-        const tableIndex =
-            row.table_index ?? 0;
+        const tableIndex = row.table_index ?? 0;
 
         if (!groupedTables[tableIndex]) {
             groupedTables[tableIndex] = [];
@@ -631,117 +646,90 @@ function renderDynamicTables(
     let finalHtml = "";
 
     Object.keys(groupedTables).forEach(tableIndex => {
-
-        const rows =
-            groupedTables[tableIndex];
-
+        const rows = groupedTables[tableIndex];
         const headers = [];
 
-        // ==============================
-        // Dynamic headers
-        // ==============================
         rows.forEach(row => {
+            if (!Array.isArray(row.columns)) return;
 
-            if (!Array.isArray(row.columns))
-                return;
+            row.columns.forEach((col, index) => {
+                const header =
+                    col.label ||
+                    col.name ||
+                    `Column ${index + 1}`;
 
-            row.columns.forEach(
-                (col, index) => {
-
-                    const header =
-                        col.label ||
-                        col.name ||
-                        `Column ${index + 1}`;
-
-                    if (!headers.includes(header)) {
-                        headers.push(header);
-                    }
+                if (!headers.includes(header)) {
+                    headers.push(header);
                 }
-            );
+            });
         });
 
-        if (headers.length === 0)
-            return;
+        if (headers.length === 0) return;
+
+        // Keep only rows that contain a value matching the highlights.
+        const matchingRows = rows.filter(row => {
+            if (!Array.isArray(row.columns)) return false;
+
+            return row.columns.some(col => {
+                const value = col?.value ?? "";
+                const highlightedValue =
+                    getHighlightedTableValue(value, tableValueHighlights);
+
+                return highlightedValue !== escapeHtml(String(value));
+            });
+        });
+
+        // If no row in this table matches, do not render this table.
+        if (matchingRows.length === 0) return;
 
         finalHtml += `
             <div class="table-responsive mt-2">
-
                 <table class="table table-bordered table-sm">
-
                     <thead>
                         <tr>
-        `;
-
-        headers.forEach(header => {
-
-            finalHtml += `
-                <th>
-                    ${escapeHtml(header)}
-                </th>
-            `;
-        });
-
-        finalHtml += `
+                            ${headers.map(header => `
+                                <th>${escapeHtml(header)}</th>
+                            `).join("")}
                         </tr>
                     </thead>
-
                     <tbody>
         `;
 
-        // ==============================
-        // Dynamic rows
-        // ==============================
-        rows.forEach(row => {
-
-            finalHtml += `<tr>`;
+        matchingRows.forEach(row => {
+            finalHtml += "<tr>";
 
             headers.forEach(header => {
+                const column = Array.isArray(row.columns)
+                    ? row.columns.find((col, index) => {
+                        const columnHeader =
+                            col.label ||
+                            col.name ||
+                            `Column ${index + 1}`;
 
-                let column = null;
+                        return columnHeader === header;
+                    })
+                    : null;
 
-                if (Array.isArray(row.columns)) {
+                const originalValue = column?.value ?? "";
+                const displayValue = getHighlightedTableValue(
+                    originalValue,
+                    tableValueHighlights
+                );
 
-                    column =
-                        row.columns.find(
-                            (col, index) => {
-
-                                const columnHeader =
-                                    col.label ||
-                                    col.name ||
-                                    `Column ${index + 1}`;
-
-                                return columnHeader === header;
-                            }
-                        );
-                }
-
-                const originalValue =
-                    column?.value ?? "";
-
-                // IMPORTANT
-                const displayValue =
-                    getHighlightedTableValue(
-                        originalValue,
-                        tableValueHighlights
-                    );
-
-                finalHtml += `
-                    <td>${displayValue}</td>
-                `;
+                finalHtml += `<td>${displayValue}</td>`;
             });
 
-            finalHtml += `</tr>`;
+            finalHtml += "</tr>";
         });
 
         finalHtml += `
                     </tbody>
                 </table>
-
             </div>
         `;
     });
 
-    return finalHtml;
+    return finalHtml || "";
 }
 function getHighlightedTableValue(originalValue, searchValue) {
 
@@ -790,4 +778,66 @@ function escapeHtml(value) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+const STOP_WORDS = new Set([
+    "a", "an", "the",
+    "is", "am", "are", "was", "were",
+    "be", "been", "being",
+    "has", "have", "had",
+    "do", "does", "did",
+    "of", "in", "on", "at", "to", "for",
+    "from", "with", "by",
+    "and", "or", "but"
+]);
+
+function escapeRegex(str) {
+    return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+// word + common plurals (rank/ranks, army/armies)
+function wordPattern(word) {
+    const escaped = escapeRegex(word);
+    if (/y$/i.test(word)) {
+        return escaped.slice(0, -1) + '(?:y|ies)';
+    }
+    return escaped + '(?:s|es)?';
+}
+
+function completeHighlighting(text, searchQuery) {
+    if (!text) return '';
+
+    if (Array.isArray(text)) {
+        return text.map(item => completeHighlighting(item, searchQuery)).join('');
+    }
+
+    // Remove existing <mark> tags to avoid double-wrapping
+    const cleanText = String(text).replace(/<\/?mark[^>]*>/gi, '');
+
+    if (!searchQuery || typeof searchQuery !== 'string' || !searchQuery.trim()) {
+        return `<li>${cleanText}</li>`;
+    }
+
+    const rawQuery = searchQuery.replace(/^["(]+|[")]+$/g, '').trim();
+    const words = rawQuery.split(/\s+/).filter(Boolean);
+
+    // Keywords = non-stop words; stop words = only those present in the query
+    const keywords = [...new Set(words.filter(w => !STOP_WORDS.has(w.toLowerCase())))];
+    const stops = [...new Set(words.filter(w => STOP_WORDS.has(w.toLowerCase())))];
+
+    if (keywords.length === 0) return `<li>${cleanText}</li>`;
+
+    const K = '(?:' + keywords.map(wordPattern).join('|') + ')';
+    const S = stops.length
+        ? '(?:' + stops.map(s => escapeRegex(s)).join('|') + ')'
+        : null;
+
+    // keyword, then repeatedly: (spaces [stopword spaces]* keyword)
+    // [ \t]+ (not \s+) so a match never spans a line break
+    const gap = S ? `[ \\t]+(?:${S}[ \\t]+)*` : '[ \\t]+';
+    const regex = new RegExp(`\\b${K}(?:${gap}${K})*\\b`, 'gi');
+
+    const highlighted = cleanText.replace(regex, m => `<mark class="marks">${m}</mark>`);
+
+    return `${highlighted}`;
 }

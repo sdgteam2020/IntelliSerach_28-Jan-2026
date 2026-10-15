@@ -60,7 +60,7 @@ namespace AIDocSearch.Controllers
             ViewBag.hdns = salt;
             await _authService.SignOutAsync();
 
-            var model = new DTOLoginRequest { UserName = "kapoor" };
+            var model = new DTOLoginRequest { UserName = "admin" };
             return View(model);
         }
 

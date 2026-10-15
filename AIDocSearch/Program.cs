@@ -138,7 +138,7 @@ builder.Services.AddHttpContextAccessor();
 // Session cookie hardened
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(20);
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
     options.Cookie.Name = ".WebAnalytics.Session";
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;

@@ -32,6 +32,7 @@ namespace Domain.DTOs.Response
         public PathData Path { get; set; }
 
         public string url { get; set; }
+        public string title { get; set; }
         public crawler crawler { get; set; }
 
     }

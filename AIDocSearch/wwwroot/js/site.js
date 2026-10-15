@@ -32,7 +32,7 @@ $(".navbar-nav a.nav-link").each(function () {
 });
 async function getSalt() {
     const token = $('input[name="__RequestVerificationToken"]').val();
-    const response = await fetch('/Account/GetSalt', {
+    const response = await fetch('/IntelliSearch/Account/GetSalt', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -425,3 +425,4 @@ function getFileIcon(extension) {
             return "fa-solid fa-file text-secondary";
     }
 }
+

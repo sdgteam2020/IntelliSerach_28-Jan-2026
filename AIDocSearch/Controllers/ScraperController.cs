@@ -70,7 +70,23 @@ namespace AIDocSearch.Controllers
             var Data = JsonSerializer.Deserialize<DTOScraperRequest>(json);
             if (Data == null)
                 return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, "Invalid payload data", ""));
-            return await Scrapering(Data);
+            ModelState.Clear();
+            if (TryValidateModel(Data))
+            {
+                return await Scrapering(Data);
+
+            }
+            else
+            {
+                var error = ModelState.Where(x => x.Value?.Errors?.Count > 0)
+                                              .SelectMany(x => x.Value!.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return Json(new DTOGenericResponse<object>(ConnKeyConstants.IncorrectData, ConnKeyConstants.IncorrectDataMessage, error));
+            }
+
+
 
         }
         [HttpPost]
@@ -118,7 +134,7 @@ namespace AIDocSearch.Controllers
                 }
                 else
                 {
-                    return Json(new DTOGenericResponse<object>(ConnKeyConstants.InternalServerError, ConnKeyConstants.InternalServerErrorMessage, ""));
+                    return Json(new DTOGenericResponse<object>(ConnKeyConstants.InternalServerError, ConnKeyConstants.InternalServerErrorMessage, ConnKeyConstants.InternalServerErrorMessage));
                 }
             }
             else

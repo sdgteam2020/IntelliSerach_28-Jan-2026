@@ -11,7 +11,7 @@ namespace AIDocSearch.Helpers
     {
         public static byte[] AddPdfWatermark(byte[] pdfBytes, string watermarkText)
         {
-            string ipAddress = "192.168.10.40";
+            //string ipAddress = "192.168.10.40";
 
             string dateTime =
                 DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
@@ -19,7 +19,7 @@ namespace AIDocSearch.Helpers
 
             string[] lines =
             {
-        ipAddress,
+        watermarkText,
         dateTime
     };
 

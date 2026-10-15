@@ -39,7 +39,7 @@ function loadDocWebCount() {
                         responses[1]?.Hits?.Total?.Value ?? 0;
                 }
 
-                $('#totalDocuments').text(documentCount);
+                $('#totalDocuments').text(documentCount+"+");
                 $('#totalScrapWeb').text(scrapWebCount);
             }
             else {

@@ -48,7 +48,7 @@ namespace AIDocSearch.Controllers
                 return Ok(new
                 {
                     Code = 400,
-                    Message = "Crawler not connected"
+                    Message = "Indexer not connected"
                 });
             }
             else
@@ -56,7 +56,7 @@ namespace AIDocSearch.Controllers
                 return Ok(new
                 {
                     Code = 200,
-                    Message = "Crawler connected"
+                    Message = "Indexer connected"
                 });
             }
 

@@ -42,7 +42,7 @@ $(function () {
             <input type="text"
                    id="indexSearch"
                    class="form-control"
-                   placeholder="Search Index..." />
+                   placeholder="Search..." />
         </div>
     </div>
 </div>
@@ -58,7 +58,7 @@ $(function () {
             <div class="card-header">
                 <strong>
                     <i class="fa-solid fa-server me-2"></i>
-                    Crawler Installed
+                    Indexer Application
                 </strong>
             </div>
 
@@ -95,7 +95,7 @@ $(function () {
                     data-index-name="${(item.index || '').replace('fs-', '')}">
 
                     <i class="fa-solid fa-chart-column"></i>
-                    Crawler Stats
+                    Indexer Stats
                 </button>
             `;
 
@@ -138,7 +138,11 @@ $(function () {
                                     </div>
                                 </div>
 
-                                <div class="metric-item_Storage">
+                                <div class="metric-item_Storage btn-fileview-index-delete"
+                                     role="button"
+                                     data-index="${item.index || ''}"
+                                     data-uuid="${item.uuid || ''}"
+                                     data-index-name="${(item.index || '').replace('fs-', '')}">
                                     <div class="metric-value text-danger">
                                         ${getVal(item, 'DocsDeleted', 'docs.deleted') || 0}
                                     </div>
@@ -183,6 +187,8 @@ $(function () {
                 </div>
             `);
                 });
+        } else {
+            html.push(`<div class="metric-value text-danger text-center">No Indexer  Found</div>`);
         }
 
         html.push(`
@@ -198,7 +204,7 @@ $(function () {
             <div class="card-header">
                 <strong>
                     <i class="fa-solid fa-globe me-2"></i>
-                    Website Scraper Only
+                    WebSite Crawler
                 </strong>
             </div>
 
@@ -291,6 +297,8 @@ $(function () {
                 </div>
             `);
                 });
+        } else {
+            html.push(`<div class="metric-value text-danger text-center">No Website Found</div>`);
         }
 
         html.push(`
@@ -475,7 +483,7 @@ function updateCrawlerStatus(
         //console.log($indexingstatistics)
        // $indexingstatistics.addClass("d-none");
         $text
-            .text('Crawler Not Connected')
+            .text('Indexer Not Connected')
             .removeClass(
                 'text-success text-secondary'
             )
@@ -502,11 +510,11 @@ function startCrawlerStatusMonitoring() {
     if (crawlerStatusTimer !== null)
         return;
 
-    crawlerStatusTimer = setInterval(function () {
-        $("#loading").hide();
-        refreshAllCrawlerStatus();
-        $("#loading").hide();
-    }, 5000);
+    // crawlerStatusTimer = setInterval(function () {
+    //     $("#loading").hide();
+    //     refreshAllCrawlerStatus();
+    //     $("#loading").hide();
+    // }, 5000);
 }
 function sortCrawlerCards() {
 

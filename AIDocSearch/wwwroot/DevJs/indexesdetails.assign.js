@@ -318,7 +318,13 @@ $(function () {
     // ======================================================
     // OPEN indexing statistics MODAL
     // ======================================================
+
     let crawlerStatusInterval = null;
+    $(document).on('click', '#refreshStatisticsbyIndexName', function () {
+        let indexName = $(this).attr('data-index');
+        let uuid = $(this).attr('data-uuid');
+        GetstatisticsByIndexName(indexName, uuid);
+    });
     $(document).on('click', '.btn-indexingstatistics-index', function () {
 
         ResetCrawlerDashboard();
@@ -326,7 +332,7 @@ $(function () {
         let uuid = $(this).data('uuid');
         $(".spanindexNameForDashboard").html(indexName)
         $(".spanuuidForDashboard").html(uuid)
-        $(".lbl_for_CrawlerDashboard").html("Crawler Statistics For " + indexName.replace('fs-', ''))
+        $(".lbl_for_CrawlerDashboard").html("Indexer Statistics For " + indexName.replace('fs-', ''))
         // clear existing interval
         if (crawlerStatusInterval) {
             clearInterval(crawlerStatusInterval);
@@ -358,6 +364,78 @@ $(function () {
             bootstrap.Modal.getOrCreateInstance(
                 modalElement
             );
+
+        $('#refreshStatisticsbyIndexName').attr('data-index', indexName);
+        $('#refreshStatisticsbyIndexName').attr('data-uuid', uuid);
+        GetstatisticsByIndexName(indexName, uuid);
+
+       
+
+        modal.show();
+    });
+
+    // ======================================================
+    // OPEN FILE LIST MODAL
+    // ======================================================
+
+    $(document).on('click', '#AllDocDetailsByIndexName', function () {
+        const indexedSearchable =
+            Number($("#indexedSearchable").text().replace(/,/g, "").trim());
+        if (indexedSearchable > 0) {
+            GetDocDetailsByIndexName($(".spanindexNameForDashboard").html(), $(".spanuuidForDashboard").html(), 3)
+
+            $(".filesViewType").html("Indexed Searchable");
+        }
+     
+    })
+
+    $(document).on('click', '#OCRDocDetailsByIndexName', function () {
+
+        const indexedOcr_Files =
+            Number($("#indexedOcr_Files").text().replace(/,/g, "").trim());
+        if (indexedOcr_Files > 0) {
+            GetDocDetailsByIndexName($(".spanindexNameForDashboard").html(), $(".spanuuidForDashboard").html(), 1)
+            $(".filesViewType").html("OCR Enabled");
+        }
+
+    })
+
+    $(document).on('click', '#NotOCRDocDetailsByIndexName', function () {
+        const indexedNotOcr_Files =
+            Number($("#indexedNotOcr_Files").text().replace(/,/g, "").trim());
+
+        if (indexedNotOcr_Files > 0) {
+            GetDocDetailsByIndexName($(".spanindexNameForDashboard").html(), $(".spanuuidForDashboard").html(), 2)
+            $(".filesViewType").html("Text Extraction");
+        }
+
+    })
+    
+    $(document).on('click', '.btn-fileview-index-delete', function () {
+        let indexName = $(this).data('index');
+        let uuid = $(this).data('uuid');
+
+        $(".Indexnameinmodal").html(
+            $(this).data('index-name')
+        );
+        $(".filesViewType").html("Deleted Indexes");
+        GetDocDetailsByIndexName(indexName, uuid, 5)
+    });
+    $(document).on('click', '.btn-fileview-index', function () {
+
+        let indexName = $(this).data('index');
+        let uuid = $(this).data('uuid');
+
+        $(".Indexnameinmodal").html(
+            $(this).data('index-name')
+        );
+
+        GetDocDetailsByIndexName(indexName, uuid, 4)
+        $(".filesViewType").html("Active Indexes");
+       
+
+    });
+    function GetstatisticsByIndexName(indexName, uuid) {
         $.ajax({
 
             url: '/IntelliSearch/Index/GetstatisticsByIndexName',
@@ -391,7 +469,7 @@ $(function () {
                     const ScanTime = DTOStatisticsHits.scantime
                     const Total = DTODocCountByIndexName.Total
                     const allowedExtensionSet = DTOStatisticsHits.allowedExtensionSet;
-                    const TotalFiles = DTOStatisticsHits.totalfile
+                    let TotalFiles = DTOStatisticsHits.totalfile
                     const File_Extensions = DTODocCountByIndexName.File_Extensions;
                     // Percentage = (Total / TotalFiles) * 100
 
@@ -402,6 +480,11 @@ $(function () {
 
 
                     const Totalunsupportedfile = DTOStatisticsHits.unsupportedfile + DTODocCountByIndexName.Total_failed_files;
+                    let underprocess = TotalFiles - (totalfilestoindexed + Totalunsupportedfile)
+                    // if (underprocess < 0) {
+                    //     TotalFiles = TotalFiles - underprocess;
+                    //     underprocess = 0;
+                    // }
                     let Percentage = 0;
 
                     if (TotalFiles > 0) {
@@ -445,9 +528,9 @@ $(function () {
 
                     animateCounter(
                         "indexunderProgress",
-                        TotalFiles - (totalfilestoindexed + Totalunsupportedfile),
+                        underprocess,
                         1000
-                   
+
                     );
 
 
@@ -478,11 +561,11 @@ $(function () {
                     showAllowedExtensions(
                         allowedExtensionSet
                     );
-                  
-                    $("#lastSync").text("Last synchronized: " + timeAgo(ScanTime) + " (" + formatDateTime(ScanTime)+")");
-                    
+
+                    $("#lastSync").text("Last synchronized: " + timeAgo(ScanTime) + " (" + formatDateTime(ScanTime) + ")");
+
                 }
-               // $("#indexNameModalTitle").text(indexName);
+                // $("#indexNameModalTitle").text(indexName);
             },
 
 
@@ -500,48 +583,7 @@ $(function () {
             }
 
         });
-
-        modal.show();
-    });
-
-    // ======================================================
-    // OPEN FILE LIST MODAL
-    // ======================================================
-
-    $(document).on('click', '#AllDocDetailsByIndexName', function () {
-
-        if ($("#indexedSearchable").html()>0)
-        GetDocDetailsByIndexName($(".spanindexNameForDashboard").html(), $(".spanuuidForDashboard").html(), 3)
-     
-    })
-
-    $(document).on('click', '#OCRDocDetailsByIndexName', function () {
-
-        if ($("#indexedOcr_Files").html() > 0)
-        GetDocDetailsByIndexName($(".spanindexNameForDashboard").html(), $(".spanuuidForDashboard").html(), 1)
-
-    })
-
-    $(document).on('click', '#NotOCRDocDetailsByIndexName', function () {
-
-        if ($("#indexedNotOcr_Files").html() > 0)
-        GetDocDetailsByIndexName($(".spanindexNameForDashboard").html(), $(".spanuuidForDashboard").html(), 2)
-
-    })
-    $(document).on('click', '.btn-fileview-index', function () {
-
-        let indexName = $(this).data('index');
-        let uuid = $(this).data('uuid');
-
-        $(".Indexnameinmodal").html(
-            $(this).data('index-name')
-        );
-
-        GetDocDetailsByIndexName(indexName, uuid, 4)
-
-       
-
-    });
+    }
     function GetDocDetailsByIndexName(indexName, uuid,OcrType) {
         $.ajax({
 
@@ -705,7 +747,7 @@ $(function () {
                         const fileInfo =
                             prepareFileInfo(
                                 item,
-                                indexName
+                                indexName, OcrType
                             );
                         let Ocrused = item.crawler == null
                             ? `<span></span>`
@@ -743,7 +785,7 @@ $(function () {
                                             <h6 class="mb-1 file-name text-truncate">
 
                                                 ${fileInfo.actionHtml}
-
+                                               
                                             </h6>
 
 
@@ -804,7 +846,7 @@ $(function () {
                         </th>
 
                         <th class="file-col-name">
-                            File Name
+                            File / WebSite 
                         </th>
                         <th class="file-col-name">
                            Orignal File Size
@@ -833,8 +875,21 @@ $(function () {
 
                         const fileInfo = prepareFileInfo(
                             item,
-                            indexName
+                            indexName, OcrType
                         );
+
+                        let shortFileName = fileInfo.fileName;
+
+
+                        if (fileInfo.fileName.length > 30) {
+
+                            shortFileName =
+                                fileInfo.fileName.substring(
+                                    0,
+                                    30
+                                ) + '...';
+                        }
+
 
                         let Ocrused = item.crawler == null
                             ? `<span>-</span>`
@@ -869,7 +924,7 @@ $(function () {
                 <span title="${fileInfo.fileName}"
                       class="file-table-name">
 
-                    ${fileInfo.fileName}
+                    ${shortFileName}
 
                 </span>
 
@@ -1092,7 +1147,7 @@ $(function () {
 // PREPARE FILE INFORMATION
 // ======================================================
 
-function prepareFileInfo(item, indexName) {
+function prepareFileInfo(item, indexName, OcrType) {
 
     let extension = '';
     let path = '';
@@ -1148,7 +1203,7 @@ function prepareFileInfo(item, indexName) {
 
         path = item.url;
 
-        fileName = item.url;
+        fileName = item.title;
     }
 
 
@@ -1337,12 +1392,23 @@ function prepareFileInfo(item, indexName) {
                target="_blank"
                rel="noopener noreferrer"
                class="text-decoration-none"
-               title="${fileName}">
+               title="${item.url}">
 
                 <i class="${actionIcon} me-1"></i>
 
                 ${shortFileName}
+             
+            </a>
+            <br> 
+          <a href="${path}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="text-decoration-none"
+               title="${item.url}">
 
+             
+                ${item.url}
+             
             </a>
         `;
 
@@ -1355,14 +1421,15 @@ function prepareFileInfo(item, indexName) {
                title="Open Website">
 
                 <i class="${actionIcon}"></i>
-
+                 
             </a>
+
         `;
     }
 
     else {
-
-        actionHtml = `
+        if (OcrType != 5) {
+            actionHtml = `
             <span class="text-decoration-none GetCrawlerId"
                   role="button"
                   title="${fileName}"
@@ -1377,12 +1444,12 @@ function prepareFileInfo(item, indexName) {
         `;
 
 
-        actionIconHtml = `
+            actionIconHtml = `
             <button type="button"
                     class="btn btn-sm btn-outline-primary GetCrawlerId"
                     title="${extension === 'pdf'
-                ? 'View File'
-                : 'Download File'}"
+                    ? 'View File'
+                    : 'Download File'}"
                     data-CrawlerId="${indexName}"
                     data-FileName="${path}">
 
@@ -1390,6 +1457,21 @@ function prepareFileInfo(item, indexName) {
 
             </button>
         `;
+        }
+
+        else {
+            actionHtml = `
+            <span class="text-decoration-none"
+                  >
+
+               <i class="fa-solid fa-eye-slash text-danger" ></i>
+
+                ${shortFileName}
+
+            </span>
+        `;
+            actionIconHtml = `<i class="fa-solid fa-eye-slash  text-danger"></i>`;
+        }
     }
 
 
@@ -2089,7 +2171,7 @@ function ResetCrawlerDashboard() {
     // ===============================
 
     $("#crawlerStatusText")
-        .text("Checking crawler...")
+        .text("Checking Indexer...")
         .removeClass("text-success text-danger");
 
 

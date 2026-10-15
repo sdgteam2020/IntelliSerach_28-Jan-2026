@@ -63,7 +63,7 @@ namespace AIDocSearch.Controllers
 
             var data = await _searchService.IndexesDetails(Url, UserName, Password);
            
-            if ((string)_currentUserService.RoleName =="Users")
+            if ((string)_currentUserService.RoleName =="User")
             {
                 var userIndexes = await _userAccount.GetAllIndexUserWise(_currentUserService.UserId);
                 var filteredData = data
@@ -180,11 +180,12 @@ namespace AIDocSearch.Controllers
 
                         Path = new PathData(),
 
-                        url = item.url
+                        url = item.url,
+                        title= item.title
                     };
 
 
-                    if (item.Path != null)
+                    if (item.Path != null && item.Path.VirtualPath!=null)
                     {
                         fileData.Path.Real =
                             _AESEncrytDecry.EncryptAES(

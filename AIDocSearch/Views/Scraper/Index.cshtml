@@ -1,6 +1,6 @@
 ﻿@model Domain.DTOs.Requests.DTOScraperRequest
 @{
-    ViewData["Title"] = "Scraper";
+    ViewData["Title"] = "Crawler";
 }
 <link asp-href-include="~/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
 <link asp-href-include="~/datatables/responsive.bootstrap4.min.css" rel="stylesheet" />
@@ -24,13 +24,14 @@
 <script asp-src-include="~/js/datatables/buttons.html5.min.js"></script> <!-- All HTML5 export buttons -->
 <script asp-src-include="~/js/datatables/buttons.print.min.js"></script> <!-- Adds a "Print" button to DataTables toolbar for print preview and printing -->
 <script asp-src-include="~/js/datatables/datatables-call.js"></script>
+<link href="~/css/scraper.css" rel="stylesheet" />
 <div class="container mt-1">
    
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h4>Scraper</h4>
+                    <h4>Crawler</h4>
                 </div>
                 <div class="card-body">
                      <form id="ScraperForm" class=" align-items-center gap-3">
@@ -46,7 +47,7 @@
                         </div>
 
                         <div class="col-md-4">
-                                    <input asp-for="Url" class="form-control" value="https://192.168.10.40/" required />
+                                    <input asp-for="Url" class="form-control"  required />
                             <span asp-validation-for="Url" class="text-danger"></span>
                         </div>
 
@@ -55,13 +56,13 @@
                         </div>
 
                         <div class="col-md-2">
-                            <input asp-for="Abbreviation" class="form-control" required value="mou" />
+                            <input asp-for="Abbreviation" class="form-control" required  />
                             <span asp-validation-for="Abbreviation" class="text-danger"></span>
                         </div>
 
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary w-100" id="btnsave">
-                                Go Scrap
+                             Go Crawler
                             </button>
                         </div>
                     </div>
@@ -85,10 +86,10 @@
         <div>
             <h5 class="mb-0">
                 <i class="fa fa-globe me-2"></i>
-                Web Scraping Jobs
+                                        Web Crawlering Jobs
             </h5>
             <small class="text-muted">
-                Scrapy crawl job information
+                                        Crawler crawl job information
             </small>
         </div>
 
@@ -145,7 +146,7 @@
                                             </small>
 
                                             <div class="fw-semibold text-break" id="job_id">
-                                                -
+                                              -
                                             </div>
                                         </div>
                                     </div>
@@ -267,7 +268,7 @@
                                             </small> *@
 
                                             <button type="button" id="btn_view_pdfs" class="btn btn-outline-danger w-100 d-none" style="display:none;"> 
-                                                <i class="fa fa-file-pdf me-1"></i>View All Scraped PDFs
+                                                <i class="fa fa-file-pdf me-1"></i>View All Crawled PDFs
                                             </button>
                                            
                                                 @*  <a id="status_url"
@@ -320,7 +321,7 @@
 
                                         <div class="row g-2 text-center">
 
-                                            <div class="col-4">
+                                            <div class="col-4 d-none">
                                                 <div class="border rounded p-2">
                                                     <small class="text-muted d-block">
                                                         Pages
@@ -358,8 +359,8 @@
                                         <div class="mt-3">
                                             <strong>Errors:</strong>
                                             <span id="popup_errors"
-                                                  class="badge bg-secondary">
-                                                0
+                                              class="badge bg-secondary" role="button">
+                                               0
                                             </span>
                                         </div>
 
@@ -396,5 +397,68 @@
             </div>
         </div>
     </div>
+<div class="modal fade" id="crawlErrorsModal" tabindex="-1"
+     aria-labelledby="crawlErrorsTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content errors-modal">
+            <div class="modal-header errors-header">
+                <div>
+                    <h5 class="modal-title" id="crawlErrorsTitle">
+                        Crawl Error Records
+                    </h5>
+                    <small>Review URLs and crawl failure details</small>
+                </div>
+
+                <button type="button" id="closeCrawlErrors"
+                        class="btn btn-light btn-sm" aria-label="Close">
+                    Close
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="errors-summary">
+                    <div>
+                        <span class="errors-label">JOB ID</span>
+                        <span id="errorJobId" class="errors-job"></span>
+                    </div>
+                    <div class="errors-total">
+                        <span id="errorRecordCount">0</span>
+                        <small>Total Errors</small>
+                    </div>
+                </div>
+
+                <div class="errors-toolbar">
+                    <div class="errors-search">
+                        <label for="errorSearch">Search errors</label>
+                        <input type="search" id="errorSearch"
+                               class="form-control"
+                               placeholder="Search URL, reason or details">
+                    </div>
+
+                    <div>
+                        <label for="errorPageSize">Records per page</label>
+                        <select id="errorPageSize" class="form-control">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="errorStatus" role="status"
+                     aria-live="polite" class="mb-3"></div>
+
+                <div id="crawlErrorsBody"></div>
+            </div>
+
+            <div class="modal-footer errors-footer">
+                <span id="errorPageInfo" aria-live="polite"></span>
+                <nav id="errorPagination" aria-label="Error record pages"></nav>
+            </div>
+        </div>
+    </div>
 </div>
+
 <script src="~/devjs/scraper.js"></script>
+<script src="~/devjs/scraper.error.js"></script>

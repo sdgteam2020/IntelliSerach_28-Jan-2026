@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 
 namespace Domain.DTOs.Requests
@@ -13,7 +14,19 @@ namespace Domain.DTOs.Requests
 
         public Highlight highlight { get; set; }
         public Dictionary<string, object> aggs { get; set; }
+        public bool track_total_hits { get; set; } = true;
+        public SourceFilter _source { get; set; }
+        public Collapse collapse { get; set; }
 
+    }
+    public class Collapse
+    {
+        public string field { get; set; }
+    }
+    public class SourceFilter
+    {
+        public List<string> includes { get; set; }
+        public List<string> excludes { get; set; }
     }
     public class SearchQuery
     {
@@ -21,11 +34,10 @@ namespace Domain.DTOs.Requests
     }
     public class SearchBoolQuery
     {
-        public List<object> should { get; set; }
-
-        public List<object> filter { get; set; }
-
-        public int minimum_should_match { get; set; }
+        public List<object>? must { get; set; }
+        public List<object>? should { get; set; }
+        public List<object>? filter { get; set; }
+        public int? minimum_should_match { get; set; }
     }
     public class MultiMatchWrapper
     {
@@ -60,6 +72,11 @@ namespace Domain.DTOs.Requests
         public string[] post_tags { get; set; }
 
         public Dictionary<string, HighlightField> fields { get; set; }
+
+        public bool require_field_match { get; set; }
+
+        // Added to allow custom queries for highlighting all query terms (including stop words)
+        public object highlight_query { get; set; }
     }
     public class HighlightField
     {
@@ -71,7 +88,8 @@ namespace Domain.DTOs.Requests
         public string? type { get; set; }
         public string? boundary_scanner { get; set; }
     }
- 
+
+
 
     //public class DTOSearchQueryRequest
     //{
