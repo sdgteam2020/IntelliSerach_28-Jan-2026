@@ -18,11 +18,13 @@ using iText.Kernel.Pdf.Canvas;
 using iText.Kernel.Pdf.Extgstate;
 using iText.Kernel.Pdf.Xobject;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Ocsp;
 using System.Net;
 using System.Security.Claims;
+using static iText.Kernel.Pdf.Colorspace.PdfSpecialCs;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AIDocSearch.Controllers
@@ -37,17 +39,19 @@ namespace AIDocSearch.Controllers
         private readonly IDateTimeService _dateTimeService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IUpload _iUpload;
+        private readonly IIndexer _iIndexer;
 
-        public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IWebScraperSetting webScraperSetting, IWebServer webServer, IAESEncrytDecry aESEncrytDecry, IDateTimeService dateTimeService, Application.Interfaces.ICurrentUserService currentUserService, IUpload upload)
+        public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IWebScraperSetting webScraperSetting, IWebServer webServer, IAESEncrytDecry aESEncrytDecry, IDateTimeService dateTimeService, Application.Interfaces.ICurrentUserService currentUserService, IUpload upload, IIndexer iIndexer)
         {
             this.unitOfWork = unitOfWork;
             _env = env;
             _webScraperSetting = webScraperSetting;
             _webServer = webServer;
             _AESEncrytDecry = aESEncrytDecry;
-            _dateTimeService= dateTimeService;
+            _dateTimeService = dateTimeService;
             _currentUserService = currentUserService;
             _iUpload = upload;
+            _iIndexer = iIndexer;
         }
 
         #region Master Table
@@ -555,6 +559,119 @@ namespace AIDocSearch.Controllers
 
             return Json(await _webServer.GetAllActive(Convert.ToInt32(_currentUserService.UserId)));
         }
+        #endregion
+
+        #region Add Indexer
+        [Authorize]
+        public async Task<IActionResult> AddIndexer()
+        {
+                       
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([FromBody] DTOIndexesRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    message = "Please correct the validation errors.",
+                    errors = ModelState
+                        .Where(x => x.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            x => x.Key,
+                            x => x.Value!.Errors.Select(e => e.ErrorMessage))
+                });
+            }
+
+            var name = request.Index_Name.Trim();
+            var ipAddress = request.IpAddress.Trim();
+
+            var activeRecords = await _iIndexer.GetActiveIndexes();
+
+            if (activeRecords.Any(x =>
+                (x.Index_Name.Equals(name, StringComparison.OrdinalIgnoreCase) ||
+                x.IpAddress.Equals(ipAddress, StringComparison.OrdinalIgnoreCase)) && x.Id!= request.Id))
+            {
+                return Conflict(new
+                {
+                    message = "An index with this name or IP address already exists."
+                });
+            }
+
+            var userId = _currentUserService.UserId ?? 0;
+            var now = DateTime.UtcNow;
+
+            var entity = new MIndexes
+            {
+                Id = request.Id,
+                Index_Name = name,
+                IpAddress = ipAddress,
+                Key = Guid.NewGuid().ToString(),
+                IsActive = true,
+                IsDeleted = false
+            };
+
+            if (entity.Id == 0)
+            {
+                entity.CreatedOn = now;
+                entity.CreatedBy = userId;
+            }
+
+            entity.UpdatedOn = now;
+            entity.UpdatedBy = userId;
+
+
+            var created = await _iIndexer.Addindexes(entity);
+
+            return Ok(new
+            {
+                message = "Index added successfully.",
+                id = created.Id
+            });
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetActiveIndexById([FromBody] DTOIndexesRequest request)
+        {
+            var item = await _iIndexer.GetActiveIndexById(request.Id);
+
+            if (item == null)
+                return NotFound(new { message = "Index record was not found." });
+
+            // Do not return the secret Key to the browser.
+            return Json(new
+            {
+                item.Id,
+                item.Index_Name,
+                item.IpAddress,
+                item.CreatedOn,
+                item.IsActive
+            });
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetActiveIndexes()
+        {
+            return Json(await _iIndexer.GetActiveIndexes());
+                
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = _currentUserService.UserId ?? 0;
+            var deleted = await _iIndexer.SoftDeleteIndex(
+                id,userId);
+
+            if (!deleted)
+                return NotFound(new { message = "Index record was not found." });
+
+            return Ok(new { message = "Index deleted successfully." });
+        }
+
         #endregion
     }
 }

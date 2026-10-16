@@ -20,7 +20,7 @@ namespace Infrastructure
             services.AddScoped<IWebScraperSetting, WebScraperSettingRepository>();
             services.AddScoped<IindexUserMapping, IndexUserMapping>();
             services.AddScoped<IUserRepository, UserRepository>();
-
+            services.AddScoped<IIndexer, IndexerRepository>();
 
         }
     }

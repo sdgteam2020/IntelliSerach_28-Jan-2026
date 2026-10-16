@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "Manage Indexes";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Add / Edit Index</h4>
+            <button type="button" id="btnNew" class="btn btn-outline-secondary">
+                New
+            </button>
+        </div>
+
+        <div class="card-body">
+            <div id="messageBox" class="alert d-none" role="alert"></div>
+
+            <form id="indexForm">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" id="Id" value="0" />
+
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label for="Index_Name" class="form-label">Index Name</label>
+                        <input type="text"
+                               id="Index_Name"
+                               class="form-control"
+                               maxlength="50"
+                               required />
+                        <small class="text-danger" id="indexNameError"></small>
+                    </div>
+
+                    <div class="col-md-5 mb-3">
+                        <label for="IpAddress" class="form-label">IP Address</label>
+                        <input type="text"
+                               id="IpAddress"
+                               class="form-control"
+                               maxlength="50"
+                               placeholder="192.168.1.10"
+                               required />
+                        <small class="text-danger" id="ipAddressError"></small>
+                    </div>
+
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        <button type="submit" id="btnSave" class="btn btn-primary w-100">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header">
+            <h4 class="mb-0">Index Records</h4>
+        </div>
+
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Index Name</th>
+                        <th>IP Address</th>
+                        <th>Indexer Key</th>
+                        
+                        <th>Created On</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="indexesTableBody">
+                    <tr>
+                        <td colspan="6" class="text-center">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/devjs/indexes.js" asp-append-version="true"></script>
+    
+}
