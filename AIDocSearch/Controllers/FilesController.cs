@@ -1,25 +1,34 @@
 ﻿using AIDocSearch.Helpers;
 using AIDocSearch.Hubs;
 using AIDocSearch.Services;
+using Application.Interfaces;
+using Application.Interfaces.Repository;
 using Domain.DTOs.Requests;
 using Domain.DTOs.Response;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AIDocSearch.Controllers
 {
+    [Authorize] // Require authentication for all actions in this controller
     public class FilesController : Controller
     {
         private readonly ConnectionManager _cm;
         private readonly IHubContext<CrawlerHub> _hub;
         private readonly ILogger<CentralFileServerController> _log;
+        private readonly ICurrentUserService _currentUserService;
 
-        public FilesController(ConnectionManager cm, IHubContext<CrawlerHub> hub, ILogger<CentralFileServerController> log)
+        private readonly IUserAccount _userAccount;
+        public FilesController(ConnectionManager cm, IHubContext<CrawlerHub> hub, ILogger<CentralFileServerController> log, ICurrentUserService currentUserService, IUserAccount userAccount)
         {
             _cm = cm;
             _hub = hub;
             _log = log;
+            _currentUserService = currentUserService;
+            _userAccount = userAccount;
         }
         [HttpPost]
         public async Task<IActionResult> GetAllConnections()
@@ -27,18 +36,51 @@ namespace AIDocSearch.Controllers
             var connections = _cm.GetAllConnections();
             if (connections.Count == 0)
                 return BadRequest();
-            return Ok(connections);
+
+            if ((string)_currentUserService.RoleName == "User")
+            {
+                var userIndexes = await _userAccount.GetAllIndexUserWise(_currentUserService.UserId);
+
+                var allowedIndexNames = userIndexes
+                    .Select(x => x.IndexName)
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                var filteredConnections = connections
+                    .Where(connection => allowedIndexNames.Contains(connection.Key))
+                    .ToDictionary(connection => connection.Key, connection => connection.Value);
+
+                return Ok(filteredConnections);
+            }
+            else
+                return Ok(connections);
+
+
+
         }
-        [HttpGet]
-        public IActionResult GetCrawlerStatus(string crawlerId)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetCrawlerStatusLive([FromBody] string crawlerId)
         {
+            if (string.IsNullOrWhiteSpace(crawlerId))
+                return BadRequest(new { message = "Crawler ID is required." });
+
+            if ((string)_currentUserService.RoleName == "User")
+            {
+                var userIndexes = await _userAccount.GetAllIndexUserWise(_currentUserService.UserId);
+
+                var isAllowed = userIndexes.Any(x =>
+                    string.Equals(x.IndexName, crawlerId, StringComparison.OrdinalIgnoreCase));
+
+                if (!isAllowed)
+                    return Forbid();
+
+                // Check connection only after confirming the user has access.
+            }
+
             bool connected = _cm.TryGetConnectionId(crawlerId, out _);
 
-            return Json(new
-            {
-                crawlerId = crawlerId,
-                connected = connected
-            });
+            return Json(new { crawlerId, connected });
         }
         [HttpPost]
         public async Task<IActionResult> GetCrawlerStatus([FromBody] DTOFilesFromCrawlerRequest data)

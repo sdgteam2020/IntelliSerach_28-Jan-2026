@@ -9,7 +9,7 @@ const fileRecordsPerPage = 10;
 
 $(function () {
 
-    function openAssignModal(uuid) {
+    function openAssignModal(uuid, indexName) {
         selectedUsers.clear(); // ✅
         uncheckeduser.clear(); // ✅
         let modalEl = document.getElementById('assignModal');
@@ -163,6 +163,7 @@ $(function () {
         $modal.off('click.assign').on('click.assign', '#assignSave', function () {
             const params = {
                 IndexId: uuid,
+                indexName: "fs-"+indexName,
                 UserIds: Array.from(selectedUsers),
                 AllSelected: $("#assignSelectAll").is(':checked')
             };
@@ -281,7 +282,7 @@ $(function () {
         let indexName = $(this).data('index-name');
 
         $(".Indexnameinmodal").html(indexName.replace('fs-', ''));
-        openAssignModal(uuid);
+        openAssignModal(uuid, indexName);
         loadAssignedUsers(uuid);
         resetUserList()
 
@@ -344,11 +345,11 @@ $(function () {
 
 
         // call every 10 seconds
-        crawlerStatusInterval = setInterval(function () {
+        // crawlerStatusInterval = setInterval(function () {
 
-            GetCrawlerStatus(indexName);
+        //     GetCrawlerStatus(indexName);
 
-        }, 10000);
+        // }, 10000);
 
 
         $(".Indexnameinmodal").html(

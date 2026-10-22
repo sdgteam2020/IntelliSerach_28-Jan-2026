@@ -8,11 +8,12 @@ namespace Application.Interfaces
 {
     public interface ISearch
     {
-        Task<string> GetResponse(DTOSerchRequest Request, string Url, string UserName, string Password);
-        Task<List<DTOIndexesDetailsResponse>> IndexesDetails(string Url, string UserName, string Password);
-        Task<List<FileSource>> GetDocDetailsByIndexName(string Url, string indexName, int OcrType, string UserName, string Password);
-        Task<DTODocCountByIndexNameResponse> GetDocCountByIndexName(string Url, string indexName, string UserName, string Password);
-        Task<List<DTOStatisticsHit>> GetstatisticsByIndexName(string Url, string indexName, string UserName, string Password);
-        Task<DTOGetDoc_WebCountResponse> GetCountDoc_Web(string baseUrl, string userName, string password);
+        Task<string> GetResponse(DTOSerchRequest Request, string Url, string encodedKey);
+        Task<List<DTOIndexesDetailsResponse>> IndexesDetails(string Url, string encodedKey);
+        Task<List<FileSource>> GetDocDetailsByIndexName(string Url, string indexName, int OcrType, string encodedKey);
+        Task<DTODocCountByIndexNameResponse> GetDocCountByIndexName(string Url, string indexName, string encodedKey);
+        Task<List<DTOStatisticsHit>> GetstatisticsByIndexName(string Url, string indexName, string encodedKey);
+       // Task<DTOGetDoc_WebCountResponse> GetCountDoc_Web(string baseUrl, string userName, string password);
+        Task<DTOGetDoc_WebCountResponse> GetCountDoc_Web(string baseUrl, string encodedKey);
     }
 }

@@ -14,7 +14,7 @@ namespace Application.Interfaces.Repository
         Task<List<DTOUserDataResponse>> GetActiveUsers();
         Task<DTODataTablesResponse<DTOUserDataResponse>> GetActive_ForIndex_Mapping_Users(DTODataTablesRequest request,string IndexId);
         Task<string> GetIndexWiseAssginUsers(string IndexId,int UserId);
-        Task<string[]> GetAllIndexUserWise(int? UserId);
+        Task<List<DTOIndexUserGetByUserIdResponse>> GetAllIndexUserWise(int? UserId);
 
 
     }

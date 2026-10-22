@@ -8,5 +8,6 @@
         public string UserName { get; set; } = string.Empty;
         public string RankName { get; set; } = string.Empty;
         public string AESKey { get; set; } = string.Empty;
+        public string encodedKey { get; set; } = string.Empty;
     }
 }

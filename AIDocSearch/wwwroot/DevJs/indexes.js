@@ -6,7 +6,8 @@
         list:  "GetActiveIndexes",
         get:   "GetActiveIndexById",
         create: "Create",
-        delete: "Delete"
+        delete: "Delete",
+        ActiveAndDeActive: "ActiveAndDeActive"
     };
 
     function getValue(object, propertyName) {
@@ -76,7 +77,11 @@
                             <td>${escapeHtml(ipAddress)}</td>
                             <td>${escapeHtml(key)}</td>
                             <td>${escapeHtml(formatDateTime(createdOn))}</td>
-                            <td>${isActive ? "Yes" : "No"}</td>
+                           <td>
+                                <span class="badge ${isActive ? "bg-success" : "bg-warning text-black"}">
+                                    ${isActive ? "Active" : "Deactivate"}
+                                </span>
+                            </td>
                             <td>
                                 <button type="button"
                                         class="btn btn-sm btn-warning btn-edit"
@@ -88,6 +93,11 @@
                                         data-id="${escapeHtml(id)}">
                                     Delete
                                 </button>
+                               <button type="button"
+                                class="btn btn-sm ${isActive ? "btn-warning" : "btn-success"} btn-updatestaus"
+                                data-id="${escapeHtml(id)}">
+                            ${isActive ? "Deactivate" : "Activate"}
+                        </button>
                             </td>
                         </tr>`;
 
@@ -233,6 +243,43 @@
                         title: "Error",
                         text: xhr.responseJSON?.message ||
                             "Could not delete this index."
+                    });
+                });
+        });
+    });
+    $("#indexesTableBody").on("click", ".btn-updatestaus", function () {
+        const id = $(this).data("id");
+        const action = $(this).text().trim(); // "Activate" or "Deactivate"
+        const isActivating = action === "Activate";
+
+        Swal.fire({
+            title: `${action} index?`,
+            text: isActivating
+                ? "This index will be activated."
+                : "This index will be deactivated.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: `Yes, ${action}`,
+            cancelButtonText: "Cancel",
+            confirmButtonColor: isActivating ? "#198754" : "#d33"
+        }).then(function (result) {
+            if (!result.isConfirmed) return;
+
+            postJson(`${urls.ActiveAndDeActive}?id=${encodeURIComponent(id)}`)
+                .done(function (response) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Status updated",
+                        text: response.message
+                    });
+
+                    loadIndexes();
+                })
+                .fail(function (xhr) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: xhr.responseJSON?.message || "Could not update this index."
                     });
                 });
         });

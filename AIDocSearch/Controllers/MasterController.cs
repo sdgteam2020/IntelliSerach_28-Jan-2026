@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Ocsp;
+using Org.BouncyCastle.Utilities.Net;
 using System.Net;
 using System.Security.Claims;
 using static iText.Kernel.Pdf.Colorspace.PdfSpecialCs;
@@ -29,6 +30,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AIDocSearch.Controllers
 {
+    [Authorize]
     public class MasterController : Controller
     {
         private readonly IUnitOfWork unitOfWork;
@@ -55,9 +57,9 @@ namespace AIDocSearch.Controllers
         }
 
         #region Master Table
-
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> GetAllMMaster(DTOMasterRequest Data)
         {
             try
@@ -76,7 +78,7 @@ namespace AIDocSearch.Controllers
         #endregion Master Table
 
         [HttpGet]
-
+        [Authorize(Roles = "Admin")]
         #region watermarks
         public IActionResult WatermarkPdfWithFolder(string fileName, string? folderPath)
         {
@@ -344,7 +346,7 @@ namespace AIDocSearch.Controllers
         }
         #endregion
         #region Add WebScraperSetting
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddWebScraperSetting()
         {
             var allData = await _webScraperSetting.GetAll();
@@ -354,6 +356,7 @@ namespace AIDocSearch.Controllers
             return View();
         }
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddWebScraperSetting(DTOWebScraperSettingRequest Request)
         {
@@ -430,6 +433,7 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetWebScraperSetting()
         {
             return Json(await _webScraperSetting.GetAll());
@@ -438,7 +442,7 @@ namespace AIDocSearch.Controllers
 
 
         #region Add Server
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddWebServer()
         {
           
@@ -448,6 +452,7 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddWebServer(string EncryptedData)
         {
             DTOAddWebServerRequest Request = await _AESEncrytDecry.DecryptAESWithDTO<DTOAddWebServerRequest>(EncryptedData, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
@@ -548,12 +553,14 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteWebServer([FromBody]  DTOCommon Data)
         {
             return Json(await _webServer.SoftDeleteWebServer(Data.Id,(int)_currentUserService.UserId));
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllWebServer()
         {
 
@@ -562,7 +569,8 @@ namespace AIDocSearch.Controllers
         #endregion
 
         #region Add Indexer
-        [Authorize]
+       
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddIndexer()
         {
                        
@@ -570,6 +578,7 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] DTOIndexesRequest request)
         {
             if (!ModelState.IsValid)
@@ -602,26 +611,35 @@ namespace AIDocSearch.Controllers
 
             var userId = _currentUserService.UserId ?? 0;
             var now = DateTime.UtcNow;
+            
+            if (request.Id>0)
+            {
+                var Updateentity = await _iIndexer.GetById(request.Id);
+                Updateentity.Index_Name = name;
+                Updateentity.IpAddress = ipAddress;
+                Updateentity.UpdatedOn = now;
+                Updateentity.UpdatedBy = userId;
+                var updated = await _iIndexer.Addindexes(Updateentity);
 
-            var entity = new MIndexes
+                return Ok(new
+                {
+                    message = "Index Updated successfully.",
+                    id = updated.Id
+                });
+            }
+           var entity = new MIndexes
             {
                 Id = request.Id,
                 Index_Name = name,
                 IpAddress = ipAddress,
                 Key = Guid.NewGuid().ToString(),
                 IsActive = true,
-                IsDeleted = false
-            };
+                IsDeleted = false,
+                CreatedOn = now,
+                UpdatedBy=userId,
+                CreatedBy = userId,
 
-            if (entity.Id == 0)
-            {
-                entity.CreatedOn = now;
-                entity.CreatedBy = userId;
-            }
-
-            entity.UpdatedOn = now;
-            entity.UpdatedBy = userId;
-
+           };
 
             var created = await _iIndexer.Addindexes(entity);
 
@@ -630,9 +648,14 @@ namespace AIDocSearch.Controllers
                 message = "Index added successfully.",
                 id = created.Id
             });
+
+
+
+
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetActiveIndexById([FromBody] DTOIndexesRequest request)
         {
             var item = await _iIndexer.GetActiveIndexById(request.Id);
@@ -652,6 +675,7 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetActiveIndexes()
         {
             return Json(await _iIndexer.GetActiveIndexes());
@@ -660,6 +684,7 @@ namespace AIDocSearch.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var userId = _currentUserService.UserId ?? 0;
@@ -671,7 +696,19 @@ namespace AIDocSearch.Controllers
 
             return Ok(new { message = "Index deleted successfully." });
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ActiveAndDeActive(int id)
+        {
+            var userId = _currentUserService.UserId ?? 0;
+            var updated = await _iIndexer.ActiveAndDeActiveIndex(id, userId);
 
+            if (!updated)
+                return NotFound(new { message = "Index record was not found." });
+
+            return Ok(new { message = "Index status updated successfully." });
+        }
         #endregion
     }
 }

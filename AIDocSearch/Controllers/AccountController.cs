@@ -31,8 +31,10 @@ namespace AIDocSearch.Controllers
         private readonly ISessionService _sessionService;
         private readonly IAESEncrytDecry _AESEncrytDecry;
         private readonly IUserRepository _iUserRepository;
+        private readonly IElasticAuthApi elasticAuthApi;
+        private readonly IConfiguration _configuration;
 
-        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserAccount _account, IRank rank, IEncryptionService encryptionService, IAuthService authService, IRegisterService registerService, ISessionService sessionService, IAESEncrytDecry aESEncrytDecry, IUserRepository iUserRepository)
+        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserAccount _account, IRank rank, IEncryptionService encryptionService, IAuthService authService, IRegisterService registerService, ISessionService sessionService, IAESEncrytDecry aESEncrytDecry, IUserRepository iUserRepository, IElasticAuthApi elasticAuthApi, IConfiguration configuration)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
@@ -46,6 +48,8 @@ namespace AIDocSearch.Controllers
             _sessionService = sessionService;
             _AESEncrytDecry = aESEncrytDecry;
             _iUserRepository = iUserRepository;
+            this.elasticAuthApi = elasticAuthApi;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -151,7 +155,41 @@ namespace AIDocSearch.Controllers
                         // Fallback to a safe default
                         ret = new Domain.Entities.MRank { RankAbbreviation = "N/A" };
                     }
+                    DTOElasticApiKeyRequest elkRequest = new()
+                    {
+                        Name = "postman-admin-key",
+                        Expiration = "1d",
+                        RoleDescriptors = new Dictionary<string, ApiKeyRoleDescriptor>
+                        {
+                            ["postman_admin"] = new ApiKeyRoleDescriptor
+                            {
+                                Cluster = new List<string> { "all" },
 
+                                Indices = new List<ApiKeyIndexPermission>
+            {
+                new()
+                {
+                    Names = new List<string> { "*" },
+                    Privileges = new List<string> { "all" }
+                }
+            },
+
+                                Applications = new List<ApiKeyApplicationPermission>
+            {
+                new()
+                {
+                    Application = "*",
+                    Privileges = new List<string> { "*" },
+                    Resources = new List<string> { "*" }
+                }
+            },
+
+                                RunAs = new List<string> { "*" }
+                            }
+                        }
+                    };
+                    string baseUrl = _configuration["UrlData:BaseUrl"] ?? string.Empty;
+                    DTOElasticApiKeyResponse ElasticApiResponse = await elasticAuthApi.LoginElastic(elkRequest, baseUrl,"elastic","elastic");
 
                     var dTOSession = new DTOSession
                     {
@@ -160,7 +198,9 @@ namespace AIDocSearch.Controllers
                         UserName = selectedUser.UserName,
                         Name = selectedUser.Name,
                         RankName = ret.RankAbbreviation,
-                        AESKey = _AESEncrytDecry.GenerateKey()
+                        AESKey = _AESEncrytDecry.GenerateKey(),
+                        encodedKey = ElasticApiResponse.Encoded
+
 
                     };
                     _sessionService.SetUserSession(HttpContext, dTOSession);

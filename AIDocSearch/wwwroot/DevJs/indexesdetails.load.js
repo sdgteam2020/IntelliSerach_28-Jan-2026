@@ -342,7 +342,7 @@ $(function () {
             success: function (resp) {
                 if (resp && resp.success) {
 
-                    
+                   
                     renderTable(resp.data, resp.type);
                 } else {
                     $('#tableContainer').html('<div class="text-danger">Failed to load data.</div>');
@@ -393,7 +393,7 @@ $(function () {
         }
     }
     load();
-    GetWebServerUrlMapping();
+    //GetWebServerUrlMapping();
     GetAllCrawlerStatus();
 });
 function refreshAllCrawlerStatus() {
@@ -407,29 +407,22 @@ function refreshAllCrawlerStatus() {
 
         if (!crawlerId)
             return;
-
+       
         $.ajax({
-            url: '/IntelliSearch/Files/GetCrawlerStatus',
-            type: 'GET',
-
-            data: {
-                crawlerId: crawlerId
+            url: '/IntelliSearch/Files/GetCrawlerStatusLive',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            headers: {
+                'RequestVerificationToken':
+                    $('input[name="__RequestVerificationToken"]').val()
             },
-
+            data: JSON.stringify(crawlerId),
             success: function (response) {
-
-                updateCrawlerStatus(
-                    crawlerId,
-                    response.connected
-                );
+                updateCrawlerStatus(crawlerId, response.connected);
             },
-
             error: function () {
-
-                updateCrawlerStatus(
-                    crawlerId,
-                    false
-                );
+                updateCrawlerStatus(crawlerId, false);
             }
         });
     });

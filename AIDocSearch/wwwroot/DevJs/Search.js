@@ -6,7 +6,7 @@ let SearchableIndex = [];
 $(document).ready(async function () {
 
     GetFilter(0, SearchableIndex);
-    GetWebServerUrlMapping();
+    //GetWebServerUrlMapping();
 
     $(document).on('click', '.filter', function () {
 

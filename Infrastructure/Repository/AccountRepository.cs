@@ -94,6 +94,7 @@ namespace Infrastructure.Repository
             .Where(x => x.Id != 1 && x.Active)
             .OrderByDescending(x => x.Id)
     join rank in _context.MRank on u.RankId equals rank.RankId
+    join role in _context.UserRoles.Where(x=>x.RoleId==2) on u.Id equals role.UserId
     join map in _context.TrnIndexUserMapping
             .Where(x => x.IndexId == IndexId)
         on u.Id equals map.UserId into maps
@@ -158,16 +159,22 @@ namespace Infrastructure.Repository
           .ToListAsync();
         }
 
-        public async Task<string[]> GetAllIndexUserWise(int? UserId)
+        public async Task<List<DTOIndexUserGetByUserIdResponse>> GetAllIndexUserWise(int? userId)
         {
             return await (
-         from u in _context.Users.Where(x => x.Id != 1 && x.Active && x.Id == UserId)
-         join map in _context.TrnIndexUserMapping
-             on u.Id equals map.UserId
-         select map.IndexId
-     ).Distinct().ToArrayAsync();
+                from user in _context.Users
+                where user.Id != 1 && user.Active && user.Id == userId
+                join mapping in _context.TrnIndexUserMapping
+                    on user.Id equals mapping.UserId
+                select new DTOIndexUserGetByUserIdResponse
+                {
+                    IndexId = mapping.IndexId,
+                    IndexName = mapping.IndexName
+                })
+                .Distinct()
+                .ToListAsync();
         }
 
-        
+
     }
 }

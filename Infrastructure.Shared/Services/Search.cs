@@ -4,6 +4,7 @@ using Domain.DTOs.Response;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Security.AccessControl;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -12,8 +13,25 @@ namespace Infrastructure.Shared.Services
 {
     public class Search : ISearch
     {
-        public async Task<string> GetResponse(DTOSerchRequest Request,  string Url, string UserName, string Password)
+        private readonly HttpClient _httpClient;
+
+        public Search(HttpClient httpClient)
         {
+            _httpClient = httpClient;
+        }
+        public async Task<string> GetResponse(DTOSerchRequest Request,  string Url, string encodedKey)
+        {
+
+            if (string.IsNullOrWhiteSpace(Url) ||
+       !Uri.TryCreate(Url, UriKind.Absolute, out var searchUri))
+            {
+                throw new ArgumentException("A valid Elasticsearch URL is required.", nameof(Url));
+            }
+
+            if (string.IsNullOrWhiteSpace(encodedKey))
+                throw new ArgumentException("An encoded API key is required.", nameof(encodedKey));
+
+
             if (!string.IsNullOrWhiteSpace(Request.DataString.Trim()) &&
                          Request.DataString.Trim().StartsWith("(") &&
                          Request.DataString.Trim().EndsWith(")"))
@@ -343,46 +361,31 @@ namespace Infrastructure.Shared.Services
             // ============================================================
 
             string jsonBody = JsonConvert.SerializeObject(
-                dto,
-                Formatting.None,
-                new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore
-                }
-            );
+          dto,
+          Formatting.None,
+          new JsonSerializerSettings
+          {
+              NullValueHandling = NullValueHandling.Ignore
+          });
 
-            // ============================================================
-            // ELASTICSEARCH REQUEST
-            // ============================================================
-
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => true;
-
-            using var client = CreateHttpClient(
-                UserName,
-                Password
-            );
-
-            using var content = new StringContent(
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, searchUri);
+            httpRequest.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("ApiKey", encodedKey);
+            httpRequest.Content = new StringContent(
                 jsonBody,
                 Encoding.UTF8,
-                "application/json"
-            );
+                "application/json");
 
-            var response = await client.PostAsync(
-                Url,
-                content
-            );
+            using var response = await _httpClient.SendAsync(httpRequest);
+            string responseString = await response.Content.ReadAsStringAsync();
 
-            var responseString =
-                await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
-                return responseString;
+                throw new HttpRequestException(
+                    $"Elasticsearch search failed ({(int)response.StatusCode}): {responseString}");
             }
 
-            return "Not Found";
+            return responseString;
         }
         private static string RemoveStopWords(string text)
         {
@@ -401,79 +404,39 @@ namespace Infrastructure.Shared.Services
                 text.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                     .Where(word => !stopWords.Contains(word)));
         }
-        private static HttpClient CreateHttpClient(string username, string password)
+
+        public async Task<List<DTOIndexesDetailsResponse>> IndexesDetails(string Url, string encodedKey)
         {
-            var handler = new HttpClientHandler
+            if (!Uri.TryCreate(Url, UriKind.Absolute, out var indicesUri))
+                throw new ArgumentException("A valid Elasticsearch URL is required.", nameof(Url));
+
+            if (string.IsNullOrWhiteSpace(encodedKey))
+                throw new ArgumentException("An encoded API key is required.", nameof(encodedKey));
+
+            using var indicesRequest = new HttpRequestMessage(HttpMethod.Get, indicesUri);
+            indicesRequest.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("ApiKey", encodedKey);
+
+            using var indicesResponse = await _httpClient.SendAsync(indicesRequest);
+            var indicesJson = await indicesResponse.Content.ReadAsStringAsync();
+
+            if (!indicesResponse.IsSuccessStatusCode)
             {
-                ServerCertificateCustomValidationCallback = (sender, cert, chain, errors) => true // For localhost/testing
-            };
+                throw new HttpRequestException(
+                    $"Could not retrieve Elasticsearch indices ({(int)indicesResponse.StatusCode}): {indicesJson}");
+            }
 
-            var client = new HttpClient(handler);
+            var indexesDetails = JsonConvert.DeserializeObject<List<DTOIndexesDetailsResponse>>(indicesJson)
+                ?? new List<DTOIndexesDetailsResponse>();
 
-            var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
-
-            return client;
-        }
-
-        //public async Task<List<DTOIndexesDetailsResponse>> IndexesDetails(string Url, string UserName, string Password)
-        //{
-        //    ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
-
-        //    using var client = CreateHttpClient(UserName, Password);
-
-        //    var response = await client.GetAsync(Url);
-        //    var responseString = await response.Content.ReadAsStringAsync();
-
-        //    if (!response.IsSuccessStatusCode)
-        //        return new List<DTOIndexesDetailsResponse>();
-
-        //    // Debug check
-        //    if (!responseString.Trim().StartsWith("["))
-        //        throw new Exception("Elasticsearch did not return JSON: " + responseString);
-
-        //    var indexesDetailsResponses =
-        //        JsonConvert.DeserializeObject<List<DTOIndexesDetailsResponse>>(responseString);
-        //    var userIndices = indexesDetailsResponses
-        //                    .Where(i => !i.index.StartsWith("."))
-        //                    .ToList();
-
-        //    return userIndices ?? new List<DTOIndexesDetailsResponse>();
-        //}
-        public async Task<List<DTOIndexesDetailsResponse>> IndexesDetails(
-    string Url,
-    string UserName,
-    string Password)
-        {
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => true;
-
-            using var client = CreateHttpClient(UserName, Password);
-
-            // 1. Get Index Details
-            var response = await client.GetAsync(Url);
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-                return new List<DTOIndexesDetailsResponse>();
-
-            if (!responseString.Trim().StartsWith("["))
-                throw new Exception("Elasticsearch did not return JSON: " + responseString);
-
-
-            var indexesDetailsResponses =
-                JsonConvert.DeserializeObject<List<DTOIndexesDetailsResponse>>(responseString);
-
-
-            var userIndices = indexesDetailsResponses
-                .Where(i => !i.index.StartsWith("."))
+            var userIndices = indexesDetails
+                .Where(i => i != null &&
+                            !string.IsNullOrWhiteSpace(i.index) &&
+                            !i.index.StartsWith(".", StringComparison.Ordinal))
                 .ToList();
 
-            var uri = new Uri(Url);
-
-            string baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
-            // 2. Get Unique Files Count (ignore chunks)
-            var searchUrl = baseUrl + "/*,-*_folder/_search";
+            var baseUri = new Uri(indicesUri.GetLeftPart(UriPartial.Authority));
+            var searchUri = new Uri(baseUri, "/*,-*_folder/_search");
 
 
             var query = new
@@ -577,22 +540,24 @@ namespace Infrastructure.Shared.Services
                     }
                 }
             };
-            var jsonQuery = JsonConvert.SerializeObject(query);
+            using var searchRequest = new HttpRequestMessage(HttpMethod.Post, searchUri);
+            searchRequest.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("ApiKey", encodedKey);
+            searchRequest.Content = new StringContent(
+                JsonConvert.SerializeObject(query),
+                Encoding.UTF8,
+                "application/json");
 
-            var searchResponse = await client.PostAsync(
-                searchUrl,
-                new StringContent(jsonQuery, Encoding.UTF8, "application/json")
-            );
+            using var searchResponse = await _httpClient.SendAsync(searchRequest);
+            var searchJson = await searchResponse.Content.ReadAsStringAsync();
 
+            if (!searchResponse.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException(
+                    $"Elasticsearch index aggregation failed ({(int)searchResponse.StatusCode}): {searchJson}");
+            }
 
-            var searchString = await searchResponse.Content.ReadAsStringAsync();
-
-
-            var searchResult =
-                JsonConvert.DeserializeObject<ElasticUniqueFileResponse>(searchString);
-
-
-
+            var searchResult = JsonConvert.DeserializeObject<ElasticUniqueFileResponse>(searchJson);
             // 3. Merge Unique File Count
             foreach (var index in userIndices)
             {
@@ -608,7 +573,7 @@ namespace Infrastructure.Shared.Services
                     $"Index: {index.index}, Found: {bucket != null}"
                 );
 
-                if(bucket!=null)
+                if (bucket != null)
                 {
                     index.DocsCount = Convert.ToInt32(bucket.unique_files.doc_count + bucket.url_count.doc_count);
                     index.IsCrawlerInstall = bucket.unique_files.doc_count > 0;
@@ -616,21 +581,27 @@ namespace Infrastructure.Shared.Services
                 }
             }
 
-
             return userIndices ?? new List<DTOIndexesDetailsResponse>();
         }
 
-        public async Task<List<FileSource>> GetDocDetailsByIndexName(
-        string baseUrl,
-        string indexName,
-        int OcrType,
-        string userName,
-        string password)
+        public async Task<List<FileSource>> GetDocDetailsByIndexName(string baseUrl,string indexName,int OcrType, string encodedKey)
         {
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => true;
+            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri))
+                throw new ArgumentException(
+                    "A valid Elasticsearch base URL is required.",
+                    nameof(baseUrl));
 
-            using var client = CreateHttpClient(userName, password);
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Index name is required.", nameof(indexName));
+
+            if (string.IsNullOrWhiteSpace(encodedKey))
+                throw new ArgumentException("An encoded API key is required.", nameof(encodedKey));
+
+            if (OcrType < 1 || OcrType > 5)
+                throw new ArgumentOutOfRangeException(
+                    nameof(OcrType),
+                    "OCR type must be between 1 and 5.");
+
 
             // =========================================================
             // COMMON FILTERS
@@ -782,39 +753,49 @@ namespace Infrastructure.Shared.Services
                 size = 10000
             };
 
-            var content = new StringContent(
+            var requestUri = new Uri(
+        baseUri,
+        $"/{Uri.EscapeDataString(indexName)}/_search");
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("ApiKey", encodedKey);
+            request.Content = new StringContent(
                 JsonConvert.SerializeObject(query),
                 Encoding.UTF8,
-                "application/json"
-            );
+                "application/json");
 
-            var response = await client.PostAsync(
-                $"{baseUrl}/{indexName}/_search",
-                content
-            );
-
+            using var response = await _httpClient.SendAsync(request);
             var json = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception(json);
+            {
+                throw new HttpRequestException(
+                    $"Elasticsearch search failed ({(int)response.StatusCode}): {json}");
+            }
 
-            var result =
-                JsonConvert.DeserializeObject<ElasticsearchSearchResponse>(json);
+            var result = JsonConvert.DeserializeObject<ElasticsearchSearchResponse>(json);
 
             return result?.Hits?.Hitss?
-                .Select(x => x.Source)
+                .Where(hit => hit?.Source != null)
+                .Select(hit => hit.Source)
                 .ToList()
                 ?? new List<FileSource>();
         }
-        public async Task<DTODocCountByIndexNameResponse> GetDocCountByIndexName(string baseUrl,string indexName,string userName,string password)
+        public async Task<DTODocCountByIndexNameResponse> GetDocCountByIndexName(string baseUrl,string indexName, string encodedKey)
         {
 
-            DTODocCountByIndexNameResponse dTODocCountByIndexNameResponse = new DTODocCountByIndexNameResponse();
+            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri))
+                throw new ArgumentException(
+                    "A valid Elasticsearch base URL is required.",
+                    nameof(baseUrl));
 
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => true;
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Index name is required.", nameof(indexName));
 
-            using var client = CreateHttpClient(userName, password);
+            if (string.IsNullOrWhiteSpace(encodedKey))
+                throw new ArgumentException("An encoded API key is required.", nameof(encodedKey));
+
             var query = new
             {
                 size = 0,
@@ -932,115 +913,129 @@ namespace Infrastructure.Shared.Services
                     }
                 }
             };
-            var content = new StringContent(
+            var escapedIndexName = Uri.EscapeDataString(indexName);
+            var requestUri = new Uri(
+                baseUri,
+                $"/{escapedIndexName}/_search");
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("ApiKey", encodedKey);
+            request.Content = new StringContent(
                 JsonConvert.SerializeObject(query),
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await client.PostAsync(
-                $"{baseUrl}/{indexName}/_search",
-                content);
-
+            using var response = await _httpClient.SendAsync(request);
             var json = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception(json);
+            {
+                throw new HttpRequestException(
+                    $"Elasticsearch document-count request failed " +
+                    $"({(int)response.StatusCode}): {json}");
+            }
 
-            var result =
-                JsonConvert.DeserializeObject<DTODocCountByIndexName>(json);
-            if(result==null)
-                return dTODocCountByIndexNameResponse;
+            var result = JsonConvert.DeserializeObject<DTODocCountByIndexName>(json);
+            if (result == null)
+                return new DTODocCountByIndexNameResponse();
+            return new DTODocCountByIndexNameResponse
+            {
 
-            dTODocCountByIndexNameResponse.Total = result.Hits.Total.Value;
-            dTODocCountByIndexNameResponse.Size = result.Aggregations.Total_Original_Size.Value;
-            dTODocCountByIndexNameResponse.Ocr_Files=result.Aggregations.Ocr_Files.Doc_Count;
-            dTODocCountByIndexNameResponse.Non_Ocr_Files=result.Aggregations.Non_Ocr_Files.Doc_Count;
-            dTODocCountByIndexNameResponse.File_Extensions = result.Aggregations.File_Extensions.Buckets;
-            dTODocCountByIndexNameResponse.Total_failed_files = result.Aggregations.Failed_Files.Doc_Count;
-
-            return dTODocCountByIndexNameResponse;
+            Total = result.Hits.Total.Value,
+            Size = result.Aggregations.Total_Original_Size.Value,
+            Ocr_Files=result.Aggregations.Ocr_Files.Doc_Count,
+            Non_Ocr_Files=result.Aggregations.Non_Ocr_Files.Doc_Count,
+            File_Extensions = result.Aggregations.File_Extensions.Buckets,
+            Total_failed_files = result.Aggregations.Failed_Files.Doc_Count,
+            };
+           
         }
-        public async Task<List<DTOStatisticsHit>> GetstatisticsByIndexName(string baseUrl,string indexName,string userName, string password)
+        public async Task<List<DTOStatisticsHit>> GetstatisticsByIndexName(string baseUrl,string indexName,string encodedKey)
         {
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => true;
+            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri))
+                throw new ArgumentException(
+                    "A valid Elasticsearch base URL is required.",
+                    nameof(baseUrl));
 
-            using var client = CreateHttpClient(userName, password);
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Index name is required.", nameof(indexName));
+
+            if (string.IsNullOrWhiteSpace(encodedKey))
+                throw new ArgumentException("An encoded API key is required.", nameof(encodedKey));
+
             var query = new
             {
                 query = new
                 {
                     term = new Dictionary<string, object>
-            {
-                {
-                    "indexName.keyword",
-                    indexName
-                }
-            }
+                    {
+                        ["indexName.keyword"] = indexName
                     }
-                };
-            var content = new StringContent(
-                JsonConvert.SerializeObject(query),
-                Encoding.UTF8,
-                "application/json");
+                }
+            };
 
-            var response = await client.PostAsync(
-                $"{baseUrl}/indexingstatistics/_search",
-                content);
+            using var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                new Uri(baseUri, "/indexingstatistics/_search"))
+            {
+                Content = new StringContent(
+                    JsonConvert.SerializeObject(query),
+                    Encoding.UTF8,
+                    "application/json")
+            };
 
+            request.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("ApiKey", encodedKey);
+
+            using var response = await _httpClient.SendAsync(request);
             var json = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception(json);
+            {
+                throw new HttpRequestException(
+                    $"Elasticsearch search failed ({(int)response.StatusCode}): {json}");
+            }
 
-            var result =
-                JsonConvert.DeserializeObject<DTOStatisticsDetailsResponse>(json);
-            if (result == null)
-                return null;
+            var result = JsonConvert.DeserializeObject<DTOStatisticsDetailsResponse>(json);
 
-            return result.Hits.Hits;
+            return result?.Hits?.Hits ?? new List<DTOStatisticsHit>();
         }
-        public async Task<DTOGetDoc_WebCountResponse> GetCountDoc_Web(
-      string baseUrl,
-      string userName,
-      string password)
+        public async Task<DTOGetDoc_WebCountResponse> GetCountDoc_Web(string baseUrl,string encodedKey)
         {
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => true;
+            if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri))
+                throw new ArgumentException("A valid Elasticsearch base URL is required.", nameof(baseUrl));
 
-            using var client = CreateHttpClient(userName, password);
+            if (string.IsNullOrWhiteSpace(encodedKey))
+                throw new ArgumentException("An encoded API key is required.", nameof(encodedKey));
 
-            // _msearch requires NDJSON format.
-            // Every header/query must be on a separate line.
-            // Final newline is also required.
+         
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("ApiKey", encodedKey);
+
             string requestBody =
                 "{\"index\":\"fs-*\"}\n" +
                 "{\"size\":0,\"query\":{\"bool\":{\"filter\":[{\"bool\":{\"should\":[{\"bool\":{\"filter\":[{\"term\":{\"chunk.enabled\":false}},{\"term\":{\"crawler.is_deleted\":false}}]}},{\"exists\":{\"field\":\"url\"}}],\"minimum_should_match\":1}}],\"must_not\":[{\"term\":{\"crawler.index_status\":\"failed\"}}]}}}\n" +
                 "{\"index\":\"crawler_registry_scrapy\"}\n" +
                 "{\"size\":0,\"query\":{\"exists\":{\"field\":\"normalized_url\"}}}\n";
 
-            using var content = new StringContent(
-                requestBody,
-                Encoding.UTF8,
-                "application/x-ndjson");
+            using var content = new StringContent(requestBody, Encoding.UTF8, "application/x-ndjson");
 
-            var response = await client.PostAsync(
-                $"{baseUrl.TrimEnd('/')}/_msearch",
+            var response = await _httpClient.PostAsync(
+                new Uri(baseUri, "/_msearch"),
                 content);
 
             var json = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception(
+                throw new HttpRequestException(
                     $"Elasticsearch error {(int)response.StatusCode}: {json}");
 
-            var result =
-                JsonConvert.DeserializeObject<DTOGetDoc_WebCountResponse>(json);
-
-            return result ?? new DTOGetDoc_WebCountResponse
-            {
-                Responses = new List<SearchResponseDto>()
-            };
+            return JsonConvert.DeserializeObject<DTOGetDoc_WebCountResponse>(json)
+                ?? new DTOGetDoc_WebCountResponse
+                {
+                    Responses = new List<SearchResponseDto>()
+                };
         }
 
     }

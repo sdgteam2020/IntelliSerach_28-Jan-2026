@@ -55,9 +55,24 @@ namespace Infrastructure.Repository
             return _context.MIndexes
                 .AsNoTracking()
                 .Where(x => !x.IsDeleted)
-                .OrderByDescending(x => x.Id)
+                .OrderByDescending(x => x.UpdatedOn)
                 .ToListAsync();
         }
 
+        public async Task<bool> ActiveAndDeActiveIndex(int id, int? updatedBy)
+        {
+            var entity = await _context.MIndexes
+                .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+
+            if (entity == null)
+                return false;
+
+            entity.IsActive = !entity.IsActive;
+            entity.UpdatedOn = DateTime.UtcNow;
+            entity.UpdatedBy = updatedBy;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

@@ -58,17 +58,19 @@ namespace AIDocSearch.Controllers
         public async Task<IActionResult> GetIndexesDetails()
         {
             string Url = _configuration["UrlData:indicesUrl"] ?? string.Empty;
-            string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
-            string Password = _configuration["UrlData:Password"] ?? string.Empty;
-
-            var data = await _searchService.IndexesDetails(Url, UserName, Password);
+            string encodedKey = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").encodedKey;
+            var data = await _searchService.IndexesDetails(Url, encodedKey);
            
             if ((string)_currentUserService.RoleName =="User")
             {
                 var userIndexes = await _userAccount.GetAllIndexUserWise(_currentUserService.UserId);
+                var allowedIndexIds = userIndexes
+     .Select(x => x.IndexId)
+     .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
                 var filteredData = data
-                  .Where(i => userIndexes.Contains(i.uuid))
-                  .ToList();
+                    .Where(i => allowedIndexIds.Contains(i.uuid))
+                    .ToList();
                 return Json(new { success = true, data = filteredData,type = (string)_currentUserService.RoleName });
             }
             else
@@ -79,8 +81,7 @@ namespace AIDocSearch.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> SearchUsers([FromForm] DTODataTablesRequest request,
-    [FromForm] string uuid)
+        public async Task<IActionResult> SearchUsers([FromForm] DTODataTablesRequest request, [FromForm] string uuid)
         {
             // Basic datatables-like request mapping
             //var request = new DTODataTablesRequest
@@ -130,6 +131,7 @@ namespace AIDocSearch.Controllers
             {
                 var map = new TrnIndexUserMapping
                 {
+                    IndexName=request.indexName,
                     IndexId = request.IndexId,
                     UserId = uid,
                    
@@ -155,15 +157,29 @@ namespace AIDocSearch.Controllers
                 return Json(new { success = false });
 
             int CurrentUserId = (int)_currentUserService.UserId;
-           
-            bool ret= await _indexUserMapping.CheckUserIndexingExists(CurrentUserId, uuid, (string)_currentUserService.RoleName);
+
+            if ((string)_currentUserService.RoleName == "User")
+            {
+                var userIndexes = await _userAccount.GetAllIndexUserWise(_currentUserService.UserId);
+
+                var isAllowed = userIndexes.Any(x =>
+                    string.Equals(x.IndexName, indexName, StringComparison.OrdinalIgnoreCase));
+
+                if (!isAllowed)
+                    return Forbid();
+
+                // Check connection only after confirming the user has access.
+            }
+
+
+
+            bool ret = await _indexUserMapping.CheckUserIndexingExists(CurrentUserId, uuid, (string)_currentUserService.RoleName);
             if(ret)
             {
                 string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
-                string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
-                string Password = _configuration["UrlData:Password"] ?? string.Empty;
+                string encodedKey = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").encodedKey;
 
-                var retindex = await _searchService.GetDocDetailsByIndexName(Url, indexName, OcrType, UserName, Password);
+                var retindex = await _searchService.GetDocDetailsByIndexName(Url, indexName, OcrType,encodedKey);
 
                 List<FileSource> data = new();
 
@@ -226,12 +242,11 @@ namespace AIDocSearch.Controllers
             if (ret)
             {
                 string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
-                string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
-                string Password = _configuration["UrlData:Password"] ?? string.Empty;
+                string encodedKey = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").encodedKey;
 
-                var retindex = await _searchService.GetDocCountByIndexName(Url, indexName, UserName, Password);
+                var retindex = await _searchService.GetDocCountByIndexName(Url, indexName, encodedKey);
                     
-                var retstatistics = await _searchService.GetstatisticsByIndexName(Url, indexName, UserName, Password);
+                var retstatistics = await _searchService.GetstatisticsByIndexName(Url, indexName, encodedKey);
 
                 var data = new DTODocCountByIndexNameWithStatisticResponse
                 {

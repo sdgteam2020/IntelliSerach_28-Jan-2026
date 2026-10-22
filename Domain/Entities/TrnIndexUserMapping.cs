@@ -16,6 +16,8 @@ namespace Domain.Entities
         [Required]
         public required string IndexId { get; set; }
         [Required]
+        public required string IndexName { get; set; }
+        [Required]
         public int UserId { get; set; }
 
         [ForeignKey(nameof(UserId))]

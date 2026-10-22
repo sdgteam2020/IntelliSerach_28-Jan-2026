@@ -12,5 +12,6 @@ namespace Application.Interfaces.Repository
         Task<bool> SoftDeleteIndex(int id, int? updatedBy);
         Task<MIndexes?> GetActiveIndexById(int id);
         Task<List<MIndexes>> GetActiveIndexes();
+        Task<bool> ActiveAndDeActiveIndex(int id, int? updatedBy);
     }
 }
