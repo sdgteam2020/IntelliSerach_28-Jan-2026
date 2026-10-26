@@ -18,9 +18,7 @@
 <script asp-src-include="~/js/datatables/responsive.bootstrap4.min.js"></script> <!-- DataTables Responsive extension and specifically integrates Responsive behavior with Bootstrap 4 styling. -->
 <script asp-src-include="~/js/datatables/dataTables.buttons.min.js"></script> <!-- It adds the foundational functionality needed to add custom buttons (like Export, Print, or custom actions) to a DataTable.-->
 <script asp-src-include="~/js/datatables/buttons.bootstrap4.min.js"></script> <!-- Export buttons (like Copy, CSV, Excel, PDF, Print) to match Bootstrap 4 design and layout. -->
-@* <script asp-src-include="~/js/datatables/jszip.min.js"></script> *@ <!-- for Excel export -->
-@* <script asp-src-include="~/js/datatables/pdfmake.min.js"></script> *@ <!-- for PDF export -->
-@* <script asp-src-include="~/js/datatables/vfs_fonts.js"></script> *@ <!-- required by pdfmake -->
+
 <script asp-src-include="~/js/datatables/buttons.html5.min.js"></script> <!-- All HTML5 export buttons -->
 <script asp-src-include="~/js/datatables/buttons.print.min.js"></script> <!-- Adds a "Print" button to DataTables toolbar for print preview and printing -->
 <script asp-src-include="~/js/datatables/datatables-call.js"></script>
@@ -47,7 +45,7 @@
                         </div>
 
                         <div class="col-md-4">
-                                    <input asp-for="Url" class="form-control"  required />
+                                    <input asp-for="Url" class="form-control" value="https://192.168.10.40" required />
                             <span asp-validation-for="Url" class="text-danger"></span>
                         </div>
 
@@ -56,7 +54,7 @@
                         </div>
 
                         <div class="col-md-2">
-                            <input asp-for="Abbreviation" class="form-control" required  />
+                                    <input asp-for="Abbreviation" class="form-control" value="mou_1" required />
                             <span asp-validation-for="Abbreviation" class="text-danger"></span>
                         </div>
 
@@ -267,35 +265,11 @@
                                                 Actions
                                             </small> *@
 
-                                            <button type="button" id="btn_view_pdfs" class="btn btn-outline-danger w-100 d-none" style="display:none;"> 
+                                            <button type="button" id="btn_view_pdfs" class="btn btn-outline-danger w-100 d-none" > 
                                                 <i class="fa fa-file-pdf me-1"></i>View All Crawled PDFs
                                             </button>
                                            
-                                                @*  <a id="status_url"
-                                                   href="javascript:void(0);"
-                                                   class="btn btn-sm btn-outline-primary">
-                                                    <i class="fa fa-info-circle me-1"></i>
-                                                    Status
-                                                </a>
-                                                
-
-
-                                               <a id="logs_url"
-                                                   href="#"
-                                                   target="_blank"
-                                                   class="btn btn-sm btn-outline-secondary">
-                                                    <i class="fa fa-file-text me-1"></i>
-                                                    Logs
-                                                </a>
-
-                                                <a id="config_url"
-                                                   href="#"
-                                                   target="_blank"
-                                                   class="btn btn-sm btn-outline-dark">
-                                                    <i class="fa fa-cog me-1"></i>
-                                                    Config
-                                                </a>
- *@
+                               
                                             </div>
                                         </div>
                                     </div>

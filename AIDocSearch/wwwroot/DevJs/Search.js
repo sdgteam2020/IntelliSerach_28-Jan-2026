@@ -256,39 +256,39 @@ async function searchContent(reset = true,IsFilter) {
 
                         const normalizedPath = realPath.replace(/\\/g, "/");
 
-                        let icon = 'fa-solid fa-file';
+                        let Icon_for_Download_Url = 'fa-solid fa-file';
                         let iconClass = 'text-secondary';
 
                         switch (extension) {
                             case 'web':
-                                icon = 'fa fa-globe me-2';
+                                Icon_for_Download_Url = 'fa fa-globe me-2';
                                 iconClass = 'text-danger';
                                 break;
                             case 'pdf':
-                                icon = 'fa-solid fa-file-pdf';
+                                Icon_for_Download_Url = 'fa-solid fa-file-pdf';
                                 iconClass = 'text-danger';
                                 break;
 
                             case 'doc':
                             case 'docx':
-                                icon = 'fa-solid fa-file-word';
+                                Icon_for_Download_Url = 'fa-solid fa-file-word';
                                 iconClass = 'text-primary';
                                 break;
 
                             case 'xls':
                             case 'xlsx':
-                                icon = 'fa-solid fa-file-excel';
+                                Icon_for_Download_Url = 'fa-solid fa-file-excel';
                                 iconClass = 'text-success';
                                 break;
 
                             case 'ppt':
                             case 'pptx':
-                                icon = 'fa-solid fa-file-powerpoint';
+                                Icon_for_Download_Url = 'fa-solid fa-file-powerpoint';
                                 iconClass = 'text-warning';
                                 break;
 
                             case 'txt':
-                                icon = 'fa-solid fa-file-lines';
+                                Icon_for_Download_Url = 'fa-solid fa-file-lines';
                                 iconClass = 'text-dark';
                                 break;
 
@@ -298,25 +298,25 @@ async function searchContent(reset = true,IsFilter) {
                             case 'gif':
                             case 'bmp':
                             case 'webp':
-                                icon = 'fa-solid fa-file-image';
+                                Icon_for_Download_Url = 'fa-solid fa-file-image';
                                 iconClass = 'text-info';
                                 break;
 
                             case 'zip':
                             case 'rar':
                             case '7z':
-                                icon = 'fa-solid fa-file-zipper';
+                                Icon_for_Download_Url = 'fa-solid fa-file-zipper';
                                 iconClass = 'text-warning';
                                 break;
                         }
                         const isPdf = extension === 'pdf';
-                        let Icon_for_Download_Url = "";
-                        if (extension == "web")
-                            Icon_for_Download_Url = "fa fa-external-link";
-                        else if (isPdf)
-                            Icon_for_Download_Url = "fa-solid fa-eye";
-                        else
-                            Icon_for_Download_Url = "fa-solid fa-download";
+                        //let Icon_for_Download_Url = "";
+                        // if (extension == "web")
+                        //     Icon_for_Download_Url = "fa fa-external-link";
+                        // else if (isPdf)
+                        //     Icon_for_Download_Url = "fa-solid fa-eye";
+                        // else
+                        //     Icon_for_Download_Url = "fa-solid fa-download";
 
 
 
@@ -333,7 +333,7 @@ async function searchContent(reset = true,IsFilter) {
                                title="${fileName}"
                                data-CrawlerId="${indexName}"
                                data-FileName="${Mainurl}">
-                                <i class="${Icon_for_Download_Url} me-1"></i>
+                                <i class="${Icon_for_Download_Url} ${iconClass} me-1"></i>
                                 ${Mainurl.length > 20 ? Mainurl.substring(0,100) + '...' : Mainurl}
 
                             </span>
@@ -341,7 +341,7 @@ async function searchContent(reset = true,IsFilter) {
             </div>
             <div class="result-right">
                 <div class="result-score">
-                    <div class="score-label me-2">${indexName.replace("fs-", "")}</div>
+                    <div class="score-label me-2 badge badge-pill badge-success">${indexName.replace("fs-", "")}</div>
                     <span class="score-pill d-none">Score: ${score} MaxScore:${maxScore}  Score ${relevance}</span>
                    
                 </div>
@@ -369,7 +369,7 @@ async function searchContent(reset = true,IsFilter) {
             </div>
             <div class="result-right">
                 <div class="result-score">
-                     <div class="score-label me-2">${indexName.replace("fs-", "")}</div>
+                     <div class="score-label me-2 badge badge-pill badge-success">${indexName.replace("fs-", "")}</div>
                     <span class="score-pill d-none">Score: ${score} MaxScore:${maxScore}  Score ${relevance}</span>
                    
                 </div>

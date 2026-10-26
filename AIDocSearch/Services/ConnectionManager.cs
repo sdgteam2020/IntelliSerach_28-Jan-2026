@@ -37,6 +37,14 @@ namespace AIDocSearch.Services
         {
             return _crawlers;
         }
+        public void RemoveBycrawlerId(string crawlerId)
+        {
+            var kv = _crawlers.FirstOrDefault(p => p.Key == crawlerId);
+            if (!string.IsNullOrEmpty(kv.Key))
+            {
+                _crawlers.TryRemove(kv.Key, out _);
+            }
+        }
         public void RemoveByConnectionId(string connectionId)
         {
             var kv = _crawlers.FirstOrDefault(p => p.Value == connectionId);

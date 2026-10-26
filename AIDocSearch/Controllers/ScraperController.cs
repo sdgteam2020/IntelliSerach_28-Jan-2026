@@ -1,8 +1,13 @@
-﻿using Application.Interfaces;
+﻿using AIDocSearch.Helpers;
+using AIDocSearch.Interfaces;
+using Application.Interfaces;
 using Application.Interfaces.Repository;
+using Domain.CommonModel;
 using Domain.Constants;
 using Domain.DTOs.Requests;
+using Domain.DTOs.Requests.API;
 using Domain.DTOs.Response;
+using Domain.DTOs.Response.API;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,18 +18,20 @@ using System.Text.Json;
 
 namespace AIDocSearch.Controllers
 {
-    [Authorize] // Require authentication for all actions in this controller
+    [Authorize(Roles = "Admin")]// Require authentication for all actions in this controller
     public class ScraperController : Controller
     {
         private readonly IAPI _aPI; private readonly IConfiguration _configuration;
         private readonly IWebServer _webServer;
         private readonly IWebScraperSetting _webScraperSetting;
-        public ScraperController(IAPI aPI, IConfiguration configuration, IWebServer webServer, IWebScraperSetting webScraperSetting)
+        private readonly ISessionService _sessionService;
+        public ScraperController(IAPI aPI, IConfiguration configuration, IWebServer webServer, IWebScraperSetting webScraperSetting, ISessionService sessionService)
         {
             _aPI = aPI;
             _configuration = configuration;
             _webServer = webServer;
             _webScraperSetting = webScraperSetting;
+            _sessionService=sessionService;
         }
 
         public IActionResult Index()
@@ -99,39 +106,28 @@ namespace AIDocSearch.Controllers
             {
                 WebScraperSetting ScraperSetting = await _webScraperSetting.GetById(1);
                 DTOAPILoginRequest dTOAPILoginRequest = new DTOAPILoginRequest();
-                dTOAPILoginRequest.username = "admin";
-                dTOAPILoginRequest.password = "Admin@123";
+                dTOAPILoginRequest.client_id = "test-app";
+                dTOAPILoginRequest.client_secret = "PitG8Ug9sD49mOhGTJhQ6BfbPgH8DVQB9XumP2mXRrDICtvyVVuVJfIu3h8keA_j";
                 string APILoginURL = _configuration["UrlData:APILoginURL"] ?? string.Empty;
-               // var ret = await _aPI.Getauthentication(dTOAPILoginRequest, APILoginURL);
-                if (Data.IsPdf)
-                {
-                    DTOScraperDataRequest dTOScraperDataRequest = new DTOScraperDataRequest();
-                   // dTOScraperDataRequest.CSRFToken = ret.CSRFToken;
-                    dTOScraperDataRequest.session_key = "Admin@123";
-                    dTOScraperDataRequest.url = Data.Url;
-                    dTOScraperDataRequest.max_pdfs = ScraperSetting.max_pdfs;
-                    dTOScraperDataRequest.Abbreviation = Data.Abbreviation;
-
-                    string APIcrawlURL = _configuration["UrlData:APIcrawlURL"] ?? string.Empty;
-                    var ret1 = await _aPI.GetData(dTOScraperDataRequest, APIcrawlURL);
-                    if (ret1.data == null)
-                        return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ret1.message, ret1.message));
-                    return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.ScraperingMessage, ret1));
-                }
-                else if (!Data.IsPdf)
+                var ret = await _aPI.Getauthentication(dTOAPILoginRequest, APILoginURL);
+                if (ret.Status && !string.IsNullOrEmpty(ret.access_token))
                 {
                     DTOWebScraperDataRequest dTOWebScraperDataRequest = new DTOWebScraperDataRequest();
                     //dTOWebScraperDataRequest.CSRFToken = ret.CSRFToken;
-                    dTOWebScraperDataRequest.session_key = "Admin@123";
+                    dTOWebScraperDataRequest.session_key = ret.access_token;
                     dTOWebScraperDataRequest.url = Data.Url;
                     dTOWebScraperDataRequest.max_pages = ScraperSetting.max_pages;
                     dTOWebScraperDataRequest.Abbreviation = Data.Abbreviation;
                     string APIcrawlseoURL = _configuration["UrlData:APIcrawlseoURL"] ?? string.Empty;
+                    DTOSessionForAPI dTOSessionForAPI = new DTOSessionForAPI();
+                    dTOSessionForAPI.access_token = ret.access_token;
+                    _sessionService.SetAPITokenSession(HttpContext, dTOSessionForAPI);
                     var ret1 = await _aPI.GetData(dTOWebScraperDataRequest, APIcrawlseoURL);
                     if (ret1 == null || ret1.Code == 400)
                         return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ret1.Message, ret1.Message));
                     return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.ScraperingMessage, ret1));
                 }
+                
                 else
                 {
                     return Json(new DTOGenericResponse<object>(ConnKeyConstants.InternalServerError, ConnKeyConstants.InternalServerErrorMessage, ConnKeyConstants.InternalServerErrorMessage));
@@ -147,8 +143,113 @@ namespace AIDocSearch.Controllers
                 return Json(new DTOGenericResponse<object>(ConnKeyConstants.IncorrectData, ConnKeyConstants.IncorrectDataMessage, error));
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckCrawlStatus(string Job_Id)
+        {
+            if (string.IsNullOrWhiteSpace(Job_Id))
+                return BadRequest("Job ID is required.");
 
+            var apiSession =
+                SessionHeplers.GetObject<DTOSessionForAPI>(HttpContext.Session, "API");
 
+            if (apiSession == null || string.IsNullOrWhiteSpace(apiSession.access_token))
+                return Unauthorized("API session is missing or expired. Please authenticate again.");
+
+            var statusUrl = _configuration["UrlData:APICrawlStatus"];
+
+            if (string.IsNullOrWhiteSpace(statusUrl))
+                return StatusCode(500, "Crawl status URL is not configured.");
+
+            var result = await _aPI.GetCrawlerCrawlStatus(
+                Job_Id,
+                apiSession.access_token,
+                statusUrl);
+           
+             return Ok(result);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckCrawlErros(string Job_Id)
+        {
+            if (string.IsNullOrWhiteSpace(Job_Id))
+                return BadRequest("Job ID is required.");
+
+            var apiSession =
+                SessionHeplers.GetObject<DTOSessionForAPI>(HttpContext.Session, "API");
+
+            if (apiSession == null || string.IsNullOrWhiteSpace(apiSession.access_token))
+                return Unauthorized("API session is missing or expired. Please authenticate again.");
+
+            var statusUrl = _configuration["UrlData:APICrawlErros"];
+
+            if (string.IsNullOrWhiteSpace(statusUrl))
+                return StatusCode(500, "Crawl status URL is not configured.");
+
+            var result = await _aPI.GetCrawlerCrawlErros(
+                Job_Id,
+                apiSession.access_token,
+                statusUrl);
+
+            return Ok(result);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckCrawlPdf(string Job_Id)
+        {
+            if (string.IsNullOrWhiteSpace(Job_Id))
+                return BadRequest("Job ID is required.");
+
+            var apiSession =
+                SessionHeplers.GetObject<DTOSessionForAPI>(HttpContext.Session, "API");
+
+            if (apiSession == null || string.IsNullOrWhiteSpace(apiSession.access_token))
+                return Unauthorized("API session is missing or expired. Please authenticate again.");
+
+            var statusUrl = _configuration["UrlData:APICrawlPdf"];
+
+            if (string.IsNullOrWhiteSpace(statusUrl))
+                return StatusCode(500, "Crawl status URL is not configured.");
+
+            var result = await _aPI.GetCrawlerPdf(
+                Job_Id,
+                apiSession.access_token,
+                statusUrl);
+
+            return Ok(result);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckCrawlDownloadPdf(string Job_Id)
+        {
+            if (string.IsNullOrWhiteSpace(Job_Id))
+                return BadRequest("Job ID is required.");
+
+            var apiSession =
+                SessionHeplers.GetObject<DTOSessionForAPI>(HttpContext.Session, "API");
+
+            if (apiSession == null || string.IsNullOrWhiteSpace(apiSession.access_token))
+                return Unauthorized("API session is missing or expired. Please authenticate again.");
+
+            var statusUrl = _configuration["UrlData:APICrawlDownloadPdf"];
+
+            if (string.IsNullOrWhiteSpace(statusUrl))
+                return StatusCode(500, "Crawl status URL is not configured.");
+
+            DTOCrawlPdfDownloadRequest dTOCrawlPdfDownloadRequest = new DTOCrawlPdfDownloadRequest();
+            dTOCrawlPdfDownloadRequest.job_id = Job_Id;
+            dTOCrawlPdfDownloadRequest.Token = apiSession.access_token;
+            dTOCrawlPdfDownloadRequest.Url = statusUrl;
+            dTOCrawlPdfDownloadRequest.verify_ssl= false;
+            dTOCrawlPdfDownloadRequest.max_files=1000;
+            dTOCrawlPdfDownloadRequest.overwrite_existing= false;
+            dTOCrawlPdfDownloadRequest.max_pdf_size_mb = 50;
+            dTOCrawlPdfDownloadRequest.replace_if_size_changed = true;
+
+            var result = await _aPI.GetCrawlerDownloadPdf(dTOCrawlPdfDownloadRequest);
+
+            return Ok(result);
+        }
         #region Add Server
 
         public async Task<IActionResult> AddWebServer()
@@ -246,6 +347,10 @@ namespace AIDocSearch.Controllers
         {
             return Json(await _webServer.GetAll());
         }
+
+
+
+
         #endregion
     }
 

@@ -63,8 +63,7 @@ async function ShowError() {
         return;
     }
 
-    const errorsApi =
-        "https://192.168.10.207/fastapi-scrapy-crawler/api/v1/scrapy-crawler/crawl/errors/";
+  
 
     const jobId = $("#job_id").text().trim();
     if (jobId=="-") {
@@ -98,24 +97,37 @@ async function ShowError() {
     $("#errorStatus").text("Loading error records...");
 
     try {
-        const data = await $.ajax({
-            url: errorsApi + encodeURIComponent(jobId),
-            type: "GET",
+        $.ajax({
+
+            url: "/IntelliSearch/Scraper/CheckCrawlErros",
+            type: "POST",
             dataType: "json",
-            timeout: 30000,
+            data: { Job_Id: $("#job_id").html() }, // Set jobId to the value you want to check
             headers: {
-                Accept: "application/json"
+                Accept: "application/json",
+                RequestVerificationToken:
+                    $('input[name="__RequestVerificationToken"]').val()
+            },
+
+            success: function (data) {
+
+                console.log("Status API Success");
+                console.log("Response:", data);
+
+
+                if (!data || !Array.isArray(data.pages)) {
+                    throw new Error("The API returned an unexpected response.");
+                }
+
+                crawlErrorRecords = data.pages;
+                $("#errorRecordCount").text(data.count ?? data.pages.length);
+
+                renderErrorRecords();
             }
-        });
 
-        if (!data || !Array.isArray(data.pages)) {
-            throw new Error("The API returned an unexpected response.");
-        }
+            });
 
-        crawlErrorRecords = data.pages;
-        $("#errorRecordCount").text(data.count ?? data.pages.length);
-
-        renderErrorRecords();
+       
     } catch (error) {
         let message = "Unable to load error records.";
 

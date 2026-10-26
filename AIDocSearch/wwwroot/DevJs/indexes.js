@@ -69,7 +69,11 @@
                     const key = getValue(item, "Key");
                     const createdOn = getValue(item, "CreatedOn");
                     const isActive = getValue(item, "IsActive");
-
+                    // <button type="button"
+                    //     class="btn btn-sm btn-warning btn-edit"
+                    //     data-id="${escapeHtml(id)}">
+                    //     Edit
+                    // </button>
                     const row = `
                         <tr>
                             <td>${escapeHtml(count++)}</td>
@@ -83,11 +87,7 @@
                                 </span>
                             </td>
                             <td>
-                                <button type="button"
-                                        class="btn btn-sm btn-warning btn-edit"
-                                        data-id="${escapeHtml(id)}">
-                                    Edit
-                                </button>
+                               
                                 <button type="button"
                                         class="btn btn-sm btn-danger btn-delete"
                                         data-id="${escapeHtml(id)}">

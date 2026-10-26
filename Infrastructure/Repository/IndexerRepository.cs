@@ -1,11 +1,13 @@
 ﻿using Application.Interfaces.GenericRepository;
 using Application.Interfaces.Repository;
+using Domain.DTOs.Requests;
 using Domain.Entities;
 using Infrastructure.Repository.GenericRepository;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Infrastructure.Repository
 {
@@ -73,6 +75,26 @@ namespace Infrastructure.Repository
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<bool> IsRegisterCrawler(DTORegisterCrawler Data)
+        {
+            if (Data == null ||
+       string.IsNullOrWhiteSpace(Data.CrawlerId) ||
+       string.IsNullOrWhiteSpace(Data.IndexerKey) ||
+       string.IsNullOrWhiteSpace(Data.SystemIp))
+            {
+                return false;
+            }
+            var crawlerId = Data.CrawlerId.Trim();
+
+            crawlerId = crawlerId.Replace("fs-", "");
+
+            bool ret= await _context.MIndexes.AnyAsync(i =>
+                i.Index_Name.ToLower() == crawlerId.ToLower() &&
+                i.Key.ToLower() == Data.IndexerKey.ToLower() &&
+                i.IpAddress == Data.SystemIp && i.IsActive==true);
+            return ret;
         }
     }
 }

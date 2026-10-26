@@ -36,5 +36,10 @@ namespace AIDocSearch.Services
         {
             httpContext.Session.Clear();
         }
+
+        public void SetAPITokenSession(HttpContext httpContext, DTOSessionForAPI session)
+        {
+            SessionHeplers.SetObject(httpContext.Session, "API", session);
+        }
     }
 }

@@ -4,7 +4,8 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Application.Interfaces.Repository;
 using Application.Interfaces;
-
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.Exceptions;
 namespace Infrastructure.Shared.Services
 {
     public class Upload : IUpload
@@ -81,12 +82,53 @@ namespace Infrastructure.Shared.Services
                 return false;
             }
         }
+        private static async Task<string?> ValidatePdfAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return "The uploaded file is empty.";
 
-        public async Task<DTOGenericResponse<object>> UploadFileAsync(
-     IFormFile file,
-     string uploadPath,
-     int userId,
-     string userName)
+            // Check the PDF header. A .pdf extension or MIME type alone isn't proof.
+            byte[] header = new byte[5];
+
+            await using (var stream = file.OpenReadStream())
+            {
+                int bytesRead = await stream.ReadAsync(header.AsMemory(0, header.Length));
+
+                if (bytesRead < 5 ||
+                    !header.AsSpan().SequenceEqual("%PDF-"u8))
+                {
+                    return "The file is not a valid PDF.";
+                }
+            }
+
+            try
+            {
+                await using var stream = file.OpenReadStream();
+                using var document = PdfDocument.Open(stream);
+
+                if (document.NumberOfPages == 0)
+                    return "The PDF contains no pages.";
+
+                // Reject PDFs with no extractable text on any page.
+                // Image-only/scanned PDFs will also be rejected by this check.
+                bool containsText = document.GetPages()
+                    .Any(page => !string.IsNullOrWhiteSpace(page.Text));
+
+                if (!containsText)
+                    return "The PDF is blank or contains no extractable text.";
+
+                return null; // Valid for the checks above.
+            }
+            catch (PdfDocumentEncryptedException)
+            {
+                return "Password-protected PDFs are not allowed.";
+            }
+            catch (Exception)
+            {
+                return "The PDF is damaged, invalid, or cannot be opened.";
+            }
+        }
+        public async Task<DTOGenericResponse<object>> UploadFileAsync( IFormFile file,string uploadPath,int userId,string userName)
         {
             if (file == null)
             {
@@ -113,6 +155,13 @@ namespace Infrastructure.Shared.Services
                     ConnKeyConstants.BadRequest,
                     "File size must be less than 5 MB.",
                     false);
+            }
+            string? validationError = await ValidatePdfAsync(file);
+
+            if (validationError != null)
+            {
+                return new DTOGenericResponse<object>(
+                    ConnKeyConstants.BadRequest, validationError, false);
             }
 
             string originalName = Path.GetFileNameWithoutExtension(file.FileName);

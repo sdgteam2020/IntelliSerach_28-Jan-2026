@@ -11,8 +11,7 @@ $(document).ready(function () {
     });
 
     $("#ScraperForm").on("submit", async function (e) {
-        // $(".pdfviewcontainer").addClass("d-none");
-        // $(".webviewcontainer").addClass("d-none");
+    
         $("#websiteUrl").text("");
         $("#downloadCount").text("");
         /*$("#downloadDir").text(scraper.download_directory);*/
@@ -215,10 +214,8 @@ function BindWebScraping(Data) {
         getBooleanBadge(Data.PurgeApplied)
     );
     // Set status URL on button
-    if (Data.StatusUrl) {
-        setStatusUrl(
-            GetFullStatusUrl(Data.StatusUrl)
-        );
+    if (Data.StartUrl) {
+        setStatusUrl(Data.StartUrl);
     }
     // ===== Action URLs =====
 
@@ -280,24 +277,6 @@ function BindWebScraping(Data) {
     $("#loading").hide();
 }
 
-const SCRAPY_API_BASE =
-    "https://192.168.10.207/fastapi-scrapy-crawler";
-
-function GetFullStatusUrl(statusUrl) {
-
-    if (!statusUrl) {
-        return null;
-    }
-
-    // Already absolute
-    if (statusUrl.startsWith("http://") ||
-        statusUrl.startsWith("https://")) {
-
-        return statusUrl;
-    }
-
-    return SCRAPY_API_BASE + statusUrl;
-}
 
 
 // ==========================================
@@ -318,13 +297,15 @@ function setStatusUrl(url) {
     $("#status_url")
         .attr("data-status-url", url)
         .removeClass("disabled");
-
+    // setTimeout(function () {
+    //     CheckCrawlStatus();
+    // }, 2000); // 10000 ms = 10 seconds
     statusPollingTimer = setInterval(function () {
 
         const status = $("#crawl_status").text().trim().toLowerCase();
 
         if (status !== "completed") {
-            CheckCrawlStatus(url);
+            CheckCrawlStatus();
         } else {
 
             // Show PDF button
@@ -438,23 +419,23 @@ No
 
 
 
-function StartCrawlStatusPolling(statusUrl) {
+// function StartCrawlStatusPolling(statusUrl) {
 
-    StopCrawlStatusPolling();
+//     StopCrawlStatusPolling();
 
-    // Open popup
-    ShowCrawlStatusPopup();
+//     // Open popup
+//     ShowCrawlStatusPopup();
 
-    // Check immediately
-    CheckCrawlStatus(statusUrl);
+//     // Check immediately
+//     CheckCrawlStatus();
 
-    // Check every 3 seconds
-    crawlStatusTimer = setInterval(function () {
+//     // Check every 3 seconds
+//     // crawlStatusTimer = setInterval(function () {
 
-        CheckCrawlStatus(statusUrl);
+//     //     CheckCrawlStatus(statusUrl);
 
-    }, 3000);
-}
+//     // }, 3000);
+// }
 
 
 function StopCrawlStatusPolling() {
@@ -468,38 +449,31 @@ function StopCrawlStatusPolling() {
 }
 
 
-function CheckCrawlStatus(statusUrl) {
-
-    console.log("========== CHECK CRAWL STATUS ==========");
-    console.log("Status URL:", statusUrl);
- 
-    if (!statusUrl) {
-
-        console.error("Status URL is empty.");
-
-        $("#popup_message").text(
-            "Status URL is not available."
-        );
-
-        return;
-    }
+function CheckCrawlStatus() {
+    
+    
+   
 
     $.ajax({
 
-        url: statusUrl,
-
-        type: "GET",
-
+        url: "/IntelliSearch/Scraper/CheckCrawlStatus",
+        type: "POST",
         dataType: "json",
-
+        data: { Job_Id: $("#job_id").html() }, // Set jobId to the value you want to check
         headers: {
-            "Accept": "application/json"
+            Accept: "application/json",
+            RequestVerificationToken:
+                $('input[name="__RequestVerificationToken"]').val()
         },
 
         success: function (response) {
           
             console.log("Status API Success");
             console.log("Response:", response);
+
+            // 1. CHECK FOR LOGICAL BAD RESPONSE (HTTP 200, but API returned an error)
+           
+
 
             UpdateCrawlStatusPopup(response);
 
@@ -614,107 +588,6 @@ function UpdateCrawlStatusPopup(Data) {
     }
 }
 
-
-// function ShowCrawlStatusPopup() {
-
-//     Swal.fire({
-//         title: "Web Scraping",
-//         html: `
-//     <div class="text-start" >
-
-//                 <div class="mb-3">
-//                     <strong>Status:</strong>
-//                     <span id="popup_crawl_status"
-//                           class="badge bg-primary">
-//                         Running
-//                     </span>
-//                 </div>
-
-//                 <div class="mb-2">
-//                     <strong>Job ID:</strong>
-//                     <div id="popup_job_id"
-//                          class="text-muted text-break">
-//                         -
-//                     </div>
-//                 </div>
-
-//                 <hr>
-
-//                 <div class="row g-2 text-center">
-
-//                     <div class="col-4">
-//                         <div class="border rounded p-2">
-//                             <small class="text-muted d-block">
-//                                 Pages
-//                             </small>
-//                             <strong id="popup_pages_crawled">
-//                                 0
-//                             </strong>
-//                         </div>
-//                     </div>
-
-//                     <div class="col-4">
-//                         <div class="border rounded p-2">
-//                             <small class="text-muted d-block">
-//                                 Indexed
-//                             </small>
-//                             <strong id="popup_docs_indexed">
-//                                 0
-//                             </strong>
-//                         </div>
-//                     </div>
-
-//                     <div class="col-4">
-//                         <div class="border rounded p-2">
-//                             <small class="text-muted d-block">
-//                                 Links
-//                             </small>
-//                             <strong id="popup_links_found">
-//                                 0
-//                             </strong>
-//                         </div>
-//                     </div>
-
-//                 </div>
-
-//                 <div class="mt-3">
-//                     <strong>Errors:</strong>
-//                     <span id="popup_errors"
-//                           class="badge bg-secondary">
-//                         0
-//                     </span>
-//                 </div>
-
-//                 <div class="mt-3">
-//                     <strong>Message:</strong>
-//                     <div id="popup_message"
-//                          class="text-muted text-break">
-//                         Starting crawl...
-//                     </div>
-//                 </div>
-
-//                 <div class="mt-3 text-center"
-//                      id="popup_loading">
-
-//                     <i class="fa fa-spinner fa-spin me-2"></i>
-//                     Checking current status...
-
-//                 </div>
-
-//             </div>
-// `,
-
-//         width: 550,
-
-//         showConfirmButton: true,
-//         confirmButtonText: "Close",
-
-//         allowOutsideClick: false,
-//         allowEscapeKey: false
-//     });
-// }
-
-
 // ==========================================
 // Action URL
 // ==========================================
@@ -775,27 +648,20 @@ function LoadPdfLinks(jobId) {
     }
 
   
-
     $.ajax({
 
-        url: "https://192.168.10.207/fastapi-scrapy-crawler/api/v1/pdf/list-by-job",
-
+        url: "/IntelliSearch/Scraper/CheckCrawlPdf",
         type: "POST",
-
-        contentType: "application/json",
-
         dataType: "json",
-
+        data: { Job_Id: $("#job_id").html() }, // Set jobId to the value you want to check
         headers: {
-            "Accept": "application/json"
+            Accept: "application/json",
+            RequestVerificationToken:
+                $('input[name="__RequestVerificationToken"]').val()
         },
 
-        data: JSON.stringify({
-            job_id: jobId,
-            max_links: 1000
-        }),
-
         success: function (response) {
+
 
             console.log("PDF List:", response);
 
@@ -1114,20 +980,7 @@ function ShowPdfListPopup(response) {
             $("#btn_download_all_pdfs")
                 .off("click")
                 .on("click", function () {
-                    // Swal.fire({
-                    //     title: "Do you want to Download Crawled Pdf?",
-                    //     text: "You won't be able to revert this!",
-                    //     icon: "warning",
-                    //     showCancelButton: true,
-                    //     confirmButtonColor: "#3085d6",
-                    //     cancelButtonColor: "#d33",
-                    //     confirmButtonText: "Yes, Download it!"
-                    // }).then(async (result) => {
-                    //     if (result.isConfirmed) {
-
-
-                    //     }
-                    // });
+                   
                    
                     DownloadAllPdfs(response.job_id);
                 });
@@ -1215,35 +1068,18 @@ function DownloadAllPdfs(jobId) {
     $(".loadertext").html("Downloading...")
     $.ajax({
 
-        url: "https://192.168.10.207/fastapi-scrapy-crawler/api/v1/pdf/download-by-job",
-
+        url: "/IntelliSearch/Scraper/CheckCrawlDownloadPdf",
         type: "POST",
-
-        contentType: "application/json",
-
         dataType: "json",
-
+        data: { Job_Id: $("#job_id").html() }, // Set jobId to the value you want to check
         headers: {
-            "Accept": "application/json"
+            Accept: "application/json",
+            RequestVerificationToken:
+                $('input[name="__RequestVerificationToken"]').val()
         },
 
-        data: JSON.stringify({
-
-            job_id: jobId,
-
-            verify_ssl: false,
-
-            max_files: 1000,
-
-            overwrite_existing: false,
-
-            max_pdf_size_mb: 50,
-
-            replace_if_size_changed: true
-
-        }),
-
         success: function (response) {
+
 
             console.log(
                 "PDF Download Response:",

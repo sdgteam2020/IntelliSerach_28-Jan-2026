@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.GenericRepository;
+using Domain.DTOs.Requests;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -13,5 +14,7 @@ namespace Application.Interfaces.Repository
         Task<MIndexes?> GetActiveIndexById(int id);
         Task<List<MIndexes>> GetActiveIndexes();
         Task<bool> ActiveAndDeActiveIndex(int id, int? updatedBy);
+
+        Task<bool> IsRegisterCrawler(DTORegisterCrawler Data);
     }
 }

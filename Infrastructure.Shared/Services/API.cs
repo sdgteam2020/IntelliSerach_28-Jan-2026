@@ -1,14 +1,19 @@
 ﻿using Application.Interfaces;
 using Domain.DTOs.Requests;
+using Domain.DTOs.Requests.API;
 using Domain.DTOs.Response;
+using Domain.DTOs.Response.API;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using UglyToad.PdfPig.Tokens;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Infrastructure.Shared.Services
 {
     public class API : IAPI
     {
-        public async Task<DTOLoginAPIResponse> Getauthentication(DTOAPILoginRequest data, string APILoginURL)
+        public async Task<DTOAuthApiResponse> Getauthentication(DTOAPILoginRequest data, string APILoginURL)
         {
             try
             {
@@ -22,8 +27,8 @@ namespace Infrastructure.Shared.Services
 
                 var json = JsonSerializer.Serialize(new
                 {
-                    username = data.username,
-                    password = data.password
+                    client_id = data.client_id,
+                    client_secret = data.client_secret
                 });
 
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -34,18 +39,18 @@ namespace Infrastructure.Shared.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return new DTOLoginAPIResponse
+                    return new DTOAuthApiResponse
                     {
                         Status = false,
                         Message = $"API Error {response.StatusCode}: {rawResponse}"
                     };
                 }
 
-                var result = JsonSerializer.Deserialize<DTOLoginAPIResponse>(rawResponse);
+                var result = JsonSerializer.Deserialize<DTOAuthApiResponse>(rawResponse);
 
                 if (result == null)
                 {
-                    return result ?? new DTOLoginAPIResponse
+                    return result ?? new DTOAuthApiResponse
                     {
                         Status = false,
                         Message = "Empty response from API."
@@ -53,14 +58,14 @@ namespace Infrastructure.Shared.Services
                 }
                 else
                 {
-                    result.message = "Login successful.";
+                    result.Message = "Login successful.";
                     result.Status = true;
                     return result;
                 }
             }
             catch (Exception ex)
             {
-                return new DTOLoginAPIResponse
+                return new DTOAuthApiResponse
                 {
                     Status = false,
                     Message = ex.Message
@@ -68,6 +73,181 @@ namespace Infrastructure.Shared.Services
             }
         }
 
+        public async Task<DTOCrawlerCrawlStatusResponse> GetCrawlerCrawlStatus(string Job_Id,string Token,string StatusUrl)
+        {
+            try
+            {
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                };
+
+                using var client = new HttpClient(handler);
+
+                // ===== Headers (Same as JS) =====
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+               
+
+                // ===== Body =====
+                var payload = new
+                {
+                    job_id = Job_Id,
+                  
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                client.Timeout = TimeSpan.FromMinutes(5);
+                // ===== POST Request =====
+                var response = await client.PostAsync(StatusUrl, content);
+
+                var rawResponse = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var result1 = JsonSerializer.Deserialize<DTOCrawlerCrawlStatusResponse>(rawResponse);
+
+                    return new DTOCrawlerCrawlStatusResponse
+                    {
+
+                        Code = 400,
+                        message = "API ERROR : " + result1.message
+                    };
+
+
+                }
+                var result = JsonSerializer.Deserialize<DTOCrawlerCrawlStatusResponse>(rawResponse);
+
+
+                return result ?? new DTOCrawlerCrawlStatusResponse
+                {
+                    Code = 400,
+                    message = "Empty response from API."
+                };
+            }
+            catch (HttpRequestException ex)
+            {
+                return new DTOCrawlerCrawlStatusResponse
+                {
+                    Code = 400,
+                    message =
+                        "HTTP Connection Error: " +
+                        ex.Message +
+                        " | Inner: " +
+                        ex.InnerException?.Message
+                };
+            }
+            catch (TaskCanceledException ex)
+            {
+                return new DTOCrawlerCrawlStatusResponse
+                {
+                    Code = 408,
+                    message = "API request timed out: " + ex.Message
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DTOCrawlerCrawlStatusResponse
+                {
+                    Code = 400,
+                    message =
+                        "Exception: " +
+                        ex.Message +
+                        " | Inner: " +
+                        ex.InnerException?.Message
+                };
+            }
+        }
+        public async Task<DTOCrawlerCrawlErrorResponse> GetCrawlerCrawlErros(string Job_Id, string Token, string StatusUrl)
+        {
+            try
+            {
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                };
+
+                using var client = new HttpClient(handler);
+
+                // ===== Headers (Same as JS) =====
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+                //client.DefaultRequestHeaders.Add("X-CSRFToken", Data.CSRFToken);
+                //client.DefaultRequestHeaders.Add("Cookie", "csrftoken=" + Data.CSRFToken + "; sessionid=" + Data.session_key + "");
+
+                // ===== Body =====
+                var payload = new
+                {
+                    job_id = Job_Id,
+
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                client.Timeout = TimeSpan.FromMinutes(5);
+                // ===== POST Request =====
+                var response = await client.PostAsync(StatusUrl, content);
+
+                var rawResponse = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var result1 = JsonSerializer.Deserialize<DTOCrawlerCrawlErrorResponse>(rawResponse);
+
+                    return new DTOCrawlerCrawlErrorResponse
+                    {
+
+                        Code = 400,
+                        message = "API ERROR : " + result1.message
+                    };
+
+
+                }
+                var result = JsonSerializer.Deserialize<DTOCrawlerCrawlErrorResponse>(rawResponse);
+
+
+                return result ?? new DTOCrawlerCrawlErrorResponse
+                {
+                    Code = 400,
+                    message = "Empty response from API."
+                };
+            }
+            catch (HttpRequestException ex)
+            {
+                return new DTOCrawlerCrawlErrorResponse
+                {
+                    Code = 400,
+                    message =
+                        "HTTP Connection Error: " +
+                        ex.Message +
+                        " | Inner: " +
+                        ex.InnerException?.Message
+                };
+            }
+            catch (TaskCanceledException ex)
+            {
+                return new DTOCrawlerCrawlErrorResponse
+                {
+                    Code = 408,
+                    message = "API request timed out: " + ex.Message
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DTOCrawlerCrawlErrorResponse
+                {
+                    Code = 400,
+                    message =
+                        "Exception: " +
+                        ex.Message +
+                        " | Inner: " +
+                        ex.InnerException?.Message
+                };
+            }
+        }
         public async Task<DTOScraperDataResponse> GetData(DTOScraperDataRequest Data, string APIcrawlURL)
         {
             try
@@ -160,7 +340,7 @@ namespace Infrastructure.Shared.Services
                 using var client = new HttpClient(handler);
 
                 // ===== Headers (Same as JS) =====
-                client.DefaultRequestHeaders.Add("X-API-Key", Data.session_key);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Data.session_key);
                 //client.DefaultRequestHeaders.Add("X-CSRFToken", Data.CSRFToken);
                 //client.DefaultRequestHeaders.Add("Cookie", "csrftoken=" + Data.CSRFToken + "; sessionid=" + Data.session_key + "");
 
@@ -282,6 +462,193 @@ namespace Infrastructure.Shared.Services
                 {
                     //Status = false,
                     message = ex.Message
+                };
+            }
+        }
+
+        public async Task<DTOPdfCrawlResultResponse> GetCrawlerPdf(string Job_Id, string Token, string StatusUrl)
+        {
+            try
+            {
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                };
+
+                using var client = new HttpClient(handler);
+
+                // ===== Headers (Same as JS) =====
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+                //client.DefaultRequestHeaders.Add("X-CSRFToken", Data.CSRFToken);
+                //client.DefaultRequestHeaders.Add("Cookie", "csrftoken=" + Data.CSRFToken + "; sessionid=" + Data.session_key + "");
+
+                // ===== Body =====
+                var payload = new
+                {
+                    job_id = Job_Id,
+
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                client.Timeout = TimeSpan.FromMinutes(5);
+                // ===== POST Request =====
+                var response = await client.PostAsync(StatusUrl, content);
+
+                var rawResponse = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var result1 = JsonSerializer.Deserialize<DTOPdfCrawlResultResponse>(rawResponse);
+
+                    return new DTOPdfCrawlResultResponse
+                    {
+
+                        Code = 400,
+                        message = "API ERROR : " + result1.message
+                    };
+
+
+                }
+                var result = JsonSerializer.Deserialize<DTOPdfCrawlResultResponse>(rawResponse);
+
+
+                return result ?? new DTOPdfCrawlResultResponse
+                {
+                    Code = 400,
+                    message = "Empty response from API."
+                };
+            }
+            catch (HttpRequestException ex)
+            {
+                return new DTOPdfCrawlResultResponse
+                {
+                    Code = 400,
+                    message =
+                        "HTTP Connection Error: " +
+                        ex.Message +
+                        " | Inner: " +
+                        ex.InnerException?.Message
+                };
+            }
+            catch (TaskCanceledException ex)
+            {
+                return new DTOPdfCrawlResultResponse
+                {
+                    Code = 408,
+                    message = "API request timed out: " + ex.Message
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DTOPdfCrawlResultResponse
+                {
+                    Code = 400,
+                    message =
+                        "Exception: " +
+                        ex.Message +
+                        " | Inner: " +
+                        ex.InnerException?.Message
+                };
+            }
+        }
+
+        public async Task<DTOCrawlerPdfDownloadSummary> GetCrawlerDownloadPdf(DTOCrawlPdfDownloadRequest Data)
+        {
+            try
+            {
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                };
+
+                using var client = new HttpClient(handler);
+
+                // ===== Headers (Same as JS) =====
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Data.Token);
+
+
+                // ===== Body =====
+                var payload = new
+                {
+                    job_id= Data.job_id,
+
+                    verify_ssl= Data.verify_ssl,
+
+                    max_files= Data.max_files,
+
+                    overwrite_existing= Data.overwrite_existing,
+
+                    max_pdf_size_mb= Data.max_pdf_size_mb,
+
+                    replace_if_size_changed= Data.replace_if_size_changed
+
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                client.Timeout = TimeSpan.FromMinutes(5);
+                // ===== POST Request =====
+                var response = await client.PostAsync(Data.Url, content);
+
+                var rawResponse = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var result1 = JsonSerializer.Deserialize<DTOCrawlerPdfDownloadSummary>(rawResponse);
+
+                    return new DTOCrawlerPdfDownloadSummary
+                    {
+
+                        Code = 400,
+                        message = "API ERROR : " + result1.message
+                    };
+
+
+                }
+                var result = JsonSerializer.Deserialize<DTOCrawlerPdfDownloadSummary>(rawResponse);
+
+
+                return result ?? new DTOCrawlerPdfDownloadSummary
+                {
+                    Code = 400,
+                    message = "Empty response from API."
+                };
+            }
+            catch (HttpRequestException ex)
+            {
+                return new DTOCrawlerPdfDownloadSummary
+                {
+                    Code = 400,
+                    message =
+                        "HTTP Connection Error: " +
+                        ex.Message +
+                        " | Inner: " +
+                        ex.InnerException?.Message
+                };
+            }
+            catch (TaskCanceledException ex)
+            {
+                return new DTOCrawlerPdfDownloadSummary
+                {
+                    Code = 408,
+                    message = "API request timed out: " + ex.Message
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DTOCrawlerPdfDownloadSummary
+                {
+                    Code = 400,
+                    message =
+                        "Exception: " +
+                        ex.Message +
+                        " | Inner: " +
+                        ex.InnerException?.Message
                 };
             }
         }

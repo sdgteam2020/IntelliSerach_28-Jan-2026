@@ -111,7 +111,7 @@ namespace AIDocSearch.Controllers
                 return BadRequest(new
                 {
                     Code = 400,
-                    Message = "Crawler not connected"
+                    Message = "Indexer not connected"
                 });
             }
 

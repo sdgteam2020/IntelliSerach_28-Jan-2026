@@ -243,24 +243,7 @@ namespace AIDocSearch.Controllers
                 return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.SuccessMessage, IndexesDetails.Where(i => i.index.Contains("fs-")).ToList()));
                 
 
-                DTOAPILoginRequest dTOAPILoginRequest = new DTOAPILoginRequest();
-                dTOAPILoginRequest.username = "admin";
-                dTOAPILoginRequest.password = "Admin@123";
-                string APILoginURL = _configuration["UrlData:APILoginURL"] ?? string.Empty;
-                var ret = await _aPI.Getauthentication(dTOAPILoginRequest, APILoginURL);
-                if (ret != null && ret.Status == true)
-                {
-                    DTOWebScraperDataRequest dTOScraperDataRequest = new DTOWebScraperDataRequest();
-                    dTOScraperDataRequest.CSRFToken = ret.CSRFToken;
-                    dTOScraperDataRequest.session_key = ret.session_key;
-                    string APIuniqueurls = _configuration["UrlData:APIuniqueurls"] ?? string.Empty;
-                    var ret1 = await _aPI.GetFilter(dTOScraperDataRequest, APIuniqueurls);
-                    return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.ScraperingMessage, ret1));
-                }
-                else
-                {
-                    return Json(new DTOGenericResponse<object>(ConnKeyConstants.InternalServerError, ConnKeyConstants.InternalServerErrorMessage, ""));
-                }
+            
             }
             else
             {

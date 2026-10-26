@@ -15,7 +15,7 @@ $(document).ajaxStart(function () {
 $(document).on('click', '.GetCrawlerId', function () {
     let CrawlerId = $(this).data('crawlerid');
     let FileName = $(this).data('filename');
-
+    
     GetFilesFromCrawler(CrawlerId, FileName)
 
 });
@@ -80,7 +80,6 @@ async function getSalt() {
     }
 })();
 
-
 function GetFilesFromCrawler(CrawlerId, FileName) {
     const data = {
         CrawlerId: CrawlerId,
@@ -95,10 +94,19 @@ function GetFilesFromCrawler(CrawlerId, FileName) {
         },
         body: JSON.stringify(data)
     })
-        .then(response => {
+        .then(async  response => {
 
             if (!response.ok) {
-                throw new Error("HTTP Error : " + response.status);
+                const errorData = await response.json();
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: errorData.Message,
+                    customClass: {
+                        popup: "swal-high-z"
+                    }
+                });
+                return;
             }
             $("#loading").hide();
             return response.blob();

@@ -157,11 +157,11 @@ namespace AIDocSearch.Controllers
                     }
                     DTOElasticApiKeyRequest elkRequest = new()
                     {
-                        Name = "postman-admin-key",
+                        Name = "admin-key",
                         Expiration = "1d",
                         RoleDescriptors = new Dictionary<string, ApiKeyRoleDescriptor>
                         {
-                            ["postman_admin"] = new ApiKeyRoleDescriptor
+                            ["admin"] = new ApiKeyRoleDescriptor
                             {
                                 Cluster = new List<string> { "all" },
 

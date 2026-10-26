@@ -8,6 +8,7 @@ namespace AIDocSearch.Interfaces
     {
         string EnsureSalt(HttpContext httpContext);
         void SetUserSession(HttpContext httpContext, DTOSession session);
+        void SetAPITokenSession(HttpContext httpContext, DTOSessionForAPI session);
         void ClearSession(HttpContext httpContext);
     }
 }

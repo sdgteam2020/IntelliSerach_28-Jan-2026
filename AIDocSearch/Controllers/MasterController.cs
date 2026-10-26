@@ -1,4 +1,5 @@
 ﻿using AIDocSearch.Helpers;
+using AIDocSearch.Hubs;
 using AIDocSearch.Services;
 using Application.Interfaces;
 using Application.Interfaces.Repository;
@@ -42,8 +43,9 @@ namespace AIDocSearch.Controllers
         private readonly ICurrentUserService _currentUserService;
         private readonly IUpload _iUpload;
         private readonly IIndexer _iIndexer;
+        private readonly ConnectionManager _cm;
 
-        public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IWebScraperSetting webScraperSetting, IWebServer webServer, IAESEncrytDecry aESEncrytDecry, IDateTimeService dateTimeService, Application.Interfaces.ICurrentUserService currentUserService, IUpload upload, IIndexer iIndexer)
+        public MasterController(IUnitOfWork unitOfWork, IWebHostEnvironment env, IWebScraperSetting webScraperSetting, IWebServer webServer, IAESEncrytDecry aESEncrytDecry, IDateTimeService dateTimeService, Application.Interfaces.ICurrentUserService currentUserService, IUpload upload, IIndexer iIndexer, ConnectionManager cm)
         {
             this.unitOfWork = unitOfWork;
             _env = env;
@@ -54,6 +56,7 @@ namespace AIDocSearch.Controllers
             _currentUserService = currentUserService;
             _iUpload = upload;
             _iIndexer = iIndexer;
+            _cm = cm;
         }
 
         #region Master Table
@@ -694,6 +697,9 @@ namespace AIDocSearch.Controllers
             if (!deleted)
                 return NotFound(new { message = "Index record was not found." });
 
+            var getdata = await _iIndexer.GetById(id);
+            _cm.RemoveBycrawlerId("fs-" + getdata.Index_Name);
+
             return Ok(new { message = "Index deleted successfully." });
         }
         [HttpPost]
@@ -702,10 +708,14 @@ namespace AIDocSearch.Controllers
         public async Task<IActionResult> ActiveAndDeActive(int id)
         {
             var userId = _currentUserService.UserId ?? 0;
-            var updated = await _iIndexer.ActiveAndDeActiveIndex(id, userId);
+            bool updated = await _iIndexer.ActiveAndDeActiveIndex(id, userId);
 
             if (!updated)
                 return NotFound(new { message = "Index record was not found." });
+
+           var getdata= await _iIndexer.GetById(id);
+            _cm.RemoveBycrawlerId("fs-" + getdata.Index_Name);
+
 
             return Ok(new { message = "Index status updated successfully." });
         }

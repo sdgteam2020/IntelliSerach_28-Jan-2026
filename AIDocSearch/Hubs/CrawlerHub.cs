@@ -1,4 +1,6 @@
 ﻿using AIDocSearch.Services;
+using Application.Interfaces.Repository;
+using Domain.DTOs.Requests;
 using Microsoft.AspNetCore.SignalR;
 
 namespace AIDocSearch.Hubs
@@ -8,33 +10,50 @@ namespace AIDocSearch.Hubs
         private readonly ConnectionManager _cm;
         private readonly ILogger<CrawlerHub> _log;
 
-        public CrawlerHub(ConnectionManager cm, ILogger<CrawlerHub> log)
+        private readonly IIndexer _iIndexer;
+        public CrawlerHub(ConnectionManager cm, ILogger<CrawlerHub> log, IIndexer indexer)
         {
             _cm = cm;
             _log = log;
+            _iIndexer = indexer;
         }
 
         /// <summary>
         /// Client -> Server: register crawler id to connection id mapping.
         /// </summary>
-        public async Task RegisterCrawler(string crawlerId)
+        public async Task<bool> RegisterCrawler(DTORegisterCrawler crawler)
         {
+
+          bool isExists = await _iIndexer.IsRegisterCrawler(crawler);
+            if (!isExists)
+            {
+                _log.LogWarning(
+                    "Crawler registration rejected for {CrawlerId}",
+                    crawler.CrawlerId);
+
+                return false;
+            }
+
             _log.LogInformation(
-                "RegisterCrawler: {CrawlerId} connected as {ConnectionId}",
-                crawlerId,
-                Context.ConnectionId
-            );
+               "RegisterCrawler: {CrawlerId} connected as {ConnectionId}",
+               crawler.CrawlerId,
+               Context.ConnectionId
+           );
 
-            _cm.RegisterCrawler(
-                crawlerId,
-                Context.ConnectionId
-            );
+                _cm.RegisterCrawler(
+                    crawler.CrawlerId,
+                    Context.ConnectionId
+                );
 
-            await Clients.All.SendAsync(
-                "CrawlerStatusChanged",
-                crawlerId,
-                true
-            );
+                await Clients.All.SendAsync(
+                    "CrawlerStatusChanged",
+                    crawler.CrawlerId,
+                    true
+                );
+
+            return true;
+
+
         }
        
         public bool IsCrawlerConnected(string crawlerId)
@@ -125,6 +144,39 @@ namespace AIDocSearch.Hubs
             }
 
             await base.OnDisconnectedAsync(exception);
+        }
+        public async Task<bool> UnregisterCrawler(string crawlerId)
+        {
+            if (string.IsNullOrWhiteSpace(crawlerId) ||
+                !_cm.TryGetConnectionId(crawlerId, out var registeredConnectionId))
+            {
+                return false;
+            }
+
+            // Prevent another connection from unregistering this crawler.
+            if (registeredConnectionId != Context.ConnectionId)
+            {
+                _log.LogWarning(
+                    "Connection {ConnectionId} cannot unregister crawler {CrawlerId}",
+                    Context.ConnectionId,
+                    crawlerId);
+
+                return false;
+            }
+
+            _cm.RemoveByConnectionId(Context.ConnectionId);
+
+            await Clients.All.SendAsync(
+                "CrawlerStatusChanged",
+                crawlerId,
+                false);
+
+            _log.LogInformation(
+                "Crawler {CrawlerId} unregistered from connection {ConnectionId}",
+                crawlerId,
+                Context.ConnectionId);
+
+            return true;
         }
         //public override Task OnDisconnectedAsync(Exception? exception)
         //{
