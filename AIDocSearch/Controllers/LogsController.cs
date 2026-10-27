@@ -12,20 +12,20 @@ namespace AIDocSearch.Controllers
     {
         private readonly LogBuffer _logBuffer;
 
-        public LogsController(LogBuffer logBuffer)
-        {
-            _logBuffer = logBuffer;
-        }
+        //public LogsController(LogBuffer logBuffer)
+        //{
+        //    _logBuffer = logBuffer;
+        //}
     
-        [HttpPost("CrawlFilesLogs")]
-        public IActionResult CrawlFilesLogs([FromBody] DTOLogEntryRequest data)
-        {
-            if (data == null)
-                return BadRequest();
+        //[HttpPost("CrawlFilesLogs")]
+        //public IActionResult CrawlFilesLogs([FromBody] DTOLogEntryRequest data)
+        //{
+        //    if (data == null)
+        //        return BadRequest();
 
-            _logBuffer.Enqueue(data);
+        //    _logBuffer.Enqueue(data);
 
-            return Accepted();
-        }
+        //    return Accepted();
+        //}
     }
 }

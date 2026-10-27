@@ -513,7 +513,7 @@ function sortCrawlerCards() {
 
     let $container = $('#crawlerInstalledContainer');
 
-    let $cards = $container.children('.index-item');
+    let $cards = $container.children('.index-item').toArray();
 
     $cards.sort(function (a, b) {
 

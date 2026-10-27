@@ -35,7 +35,7 @@ namespace Infrastructure.Repository
 
         public async Task<DTOGenericResponse<object>> GetUploadFileByUserId(int UserId)
         {
-            var Data = await _context.trnUploadFiles.Where(i => i.UpdatedBy == UserId && i.IsActive==true && i.IsDeleted==false).ToListAsync();
+            var Data = await _context.trnUploadFiles.Where(i => i.UpdatedBy == UserId && i.IsActive==true && i.IsDeleted==false).OrderByDescending(i=>i.CreatedOn).ToListAsync();
             return new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.SuccessGet, Data);
         }
 

@@ -30,6 +30,7 @@ namespace Domain.Entities
         public required string IpAddress { get; set; }
 
         [Required]
+        [StringLength(200)]
         public required string Key { get; set; }
 
     }

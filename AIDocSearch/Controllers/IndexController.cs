@@ -65,8 +65,8 @@ namespace AIDocSearch.Controllers
             {
                 var userIndexes = await _userAccount.GetAllIndexUserWise(_currentUserService.UserId);
                 var allowedIndexIds = userIndexes
-     .Select(x => x.IndexId)
-     .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                .Select(x => x.IndexId)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
                 var filteredData = data
                     .Where(i => allowedIndexIds.Contains(i.uuid))
@@ -83,14 +83,7 @@ namespace AIDocSearch.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SearchUsers([FromForm] DTODataTablesRequest request, [FromForm] string uuid)
         {
-            // Basic datatables-like request mapping
-            //var request = new DTODataTablesRequest
-            //{
-            //    searchValue = q ?? string.Empty,
-            //    Start = 0,
-            //    Length = 20,
-            //    Draw = 1
-            //};
+           
 
             if (_userAccount == null) return Json(new { success = false, data = Array.Empty<object>() });
 

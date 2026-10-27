@@ -166,23 +166,23 @@ namespace AIDocSearch.Controllers
                                 Cluster = new List<string> { "all" },
 
                                 Indices = new List<ApiKeyIndexPermission>
-            {
-                new()
-                {
-                    Names = new List<string> { "*" },
-                    Privileges = new List<string> { "all" }
-                }
-            },
+                        {
+                            new()
+                            {
+                                Names = new List<string> { "*" },
+                                Privileges = new List<string> { "all" }
+                            }
+                        },
 
-                                Applications = new List<ApiKeyApplicationPermission>
-            {
-                new()
-                {
-                    Application = "*",
-                    Privileges = new List<string> { "*" },
-                    Resources = new List<string> { "*" }
-                }
-            },
+                                            Applications = new List<ApiKeyApplicationPermission>
+                        {
+                            new()
+                            {
+                                Application = "*",
+                                Privileges = new List<string> { "*" },
+                                Resources = new List<string> { "*" }
+                            }
+                        },
 
                                 RunAs = new List<string> { "*" }
                             }

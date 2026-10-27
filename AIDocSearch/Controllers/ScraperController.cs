@@ -106,8 +106,8 @@ namespace AIDocSearch.Controllers
             {
                 WebScraperSetting ScraperSetting = await _webScraperSetting.GetById(1);
                 DTOAPILoginRequest dTOAPILoginRequest = new DTOAPILoginRequest();
-                dTOAPILoginRequest.client_id = "test-app";
-                dTOAPILoginRequest.client_secret = "PitG8Ug9sD49mOhGTJhQ6BfbPgH8DVQB9XumP2mXRrDICtvyVVuVJfIu3h8keA_j";
+                dTOAPILoginRequest.client_id = _configuration["UrlData:APILoginclient_id"] ?? string.Empty;
+                dTOAPILoginRequest.client_secret = _configuration["UrlData:APILoginclient_secret"] ?? string.Empty;
                 string APILoginURL = _configuration["UrlData:APILoginURL"] ?? string.Empty;
                 var ret = await _aPI.Getauthentication(dTOAPILoginRequest, APILoginURL);
                 if (ret.Status && !string.IsNullOrEmpty(ret.access_token))

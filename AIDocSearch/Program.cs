@@ -80,7 +80,7 @@ builder.Services.AddAntiforgery(o =>
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(20);
-    options.Cookie.Name = ".Docs.Session";
+    options.Cookie.Name = "IntelliSearch.Session";
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
@@ -135,16 +135,7 @@ builder.Services.AddHttpContextAccessor();
 
     
 
-// Session cookie hardened
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(60);
-    options.Cookie.Name = ".WebAnalytics.Session";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    //options.Cookie.SameSite = SameSiteMode.Strict;
-});
+
 
 // Response compression (Brotli/Gzip)
 builder.Services.AddResponseCompression(options =>

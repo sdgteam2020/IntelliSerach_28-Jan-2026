@@ -1,211 +1,122 @@
 /*! DataTables Bootstrap 3 integration
- * ©2011-2015 SpryMedia Ltd - datatables.net/license
+ * © SpryMedia Ltd - datatables.net/license
  */
 
-/**
- * DataTables integration for Bootstrap 3. This requires Bootstrap 3 and
- * DataTables 1.10 or newer.
- *
- * This file sets the defaults and adds options to DataTables to style its
- * controls using Bootstrap. See http://datatables.net/manual/styling/bootstrap
- * for further information.
- */
-(function( factory ){
-	if ( typeof define === 'function' && define.amd ) {
+(function(factory){
+	if (typeof define === 'function' && define.amd) {
 		// AMD
-		define( ['jquery', 'datatables.net'], function ( $ ) {
-			return factory( $, window, document );
-		} );
+		define(['datatables.net'], function (dt) {
+			return factory(window, document, dt);
+		});
 	}
-	else if ( typeof exports === 'object' ) {
+	else if (typeof exports === 'object') {
 		// CommonJS
-		module.exports = function (root, $) {
-			if ( ! root ) {
-				root = window;
+		var cjsRequires = function (root) {
+			if (! root.DataTable) {
+				require('datatables.net')(root);
 			}
-
-			if ( ! $ || ! $.fn.dataTable ) {
-				// Require DataTables, which attaches to jQuery, including
-				// jQuery if needed and have a $ property so we can access the
-				// jQuery object that is used
-				$ = require('datatables.net')(root, $).$;
-			}
-
-			return factory( $, root, root.document );
 		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root) {
+				if (! root) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				cjsRequires(root);
+				return factory(root, root.document, root.DataTable);
+			};
+		}
+		else {
+			cjsRequires(window);
+			module.exports = factory(window, window.document, window.DataTable);
+		}
 	}
 	else {
 		// Browser
-		factory( jQuery, window, document );
+		factory(window, document, window.DataTable);
 	}
-}(function( $, window, document, undefined ) {
+}(function(window, document, DataTable) {
 'use strict';
-var DataTable = $.fn.dataTable;
 
 
+/**
+ * DataTables integration for FomanticUI (formally SemanticUI)
+ *
+ * This file sets the defaults and adds options to DataTables to style its
+ * controls using Bootstrap. See https://datatables.net/manual/styling/bootstrap
+ * for further information.
+ */
 /* Set the defaults for DataTables initialisation */
-$.extend( true, DataTable.defaults, {
-	dom:
-		"<'ui stackable grid'"+
-			"<'row'"+
-				"<'eight wide column'l>"+
-				"<'right aligned eight wide column'f>"+
-			">"+
-			"<'row dt-table'"+
-				"<'sixteen wide column'tr>"+
-			">"+
-			"<'row'"+
-				"<'seven wide column'i>"+
-				"<'right aligned nine wide column'p>"+
-			">"+
-		">",
-	renderer: 'semanticUI'
-} );
-
-
+DataTable.util.object.assignDeep(DataTable.defaults, {
+    renderer: 'semanticUI'
+});
 /* Default class modification */
-$.extend( DataTable.ext.classes, {
-	sWrapper:      "dataTables_wrapper dt-semanticUI",
-	sFilter:       "dataTables_filter ui input",
-	sProcessing:   "dataTables_processing ui segment",
-	sPageButton:   "paginate_button item"
-} );
-
-
-/* Bootstrap paging button renderer */
-DataTable.ext.renderer.pageButton.semanticUI = function ( settings, host, idx, buttons, page, pages ) {
-	var api     = new DataTable.Api( settings );
-	var classes = settings.oClasses;
-	var lang    = settings.oLanguage.oPaginate;
-	var aria = settings.oLanguage.oAria.paginate || {};
-	var btnDisplay, btnClass, counter=0;
-
-	var attach = function( container, buttons ) {
-		var i, ien, node, button;
-		var clickHandler = function ( e ) {
-			e.preventDefault();
-			if ( !$(e.currentTarget).hasClass('disabled') && api.page() != e.data.action ) {
-				api.page( e.data.action ).draw( 'page' );
-			}
-		};
-
-		for ( i=0, ien=buttons.length ; i<ien ; i++ ) {
-			button = buttons[i];
-
-			if ( $.isArray( button ) ) {
-				attach( container, button );
-			}
-			else {
-				btnDisplay = '';
-				btnClass = '';
-
-				switch ( button ) {
-					case 'ellipsis':
-						btnDisplay = '&#x2026;';
-						btnClass = 'disabled';
-						break;
-
-					case 'first':
-						btnDisplay = lang.sFirst;
-						btnClass = button + (page > 0 ?
-							'' : ' disabled');
-						break;
-
-					case 'previous':
-						btnDisplay = lang.sPrevious;
-						btnClass = button + (page > 0 ?
-							'' : ' disabled');
-						break;
-
-					case 'next':
-						btnDisplay = lang.sNext;
-						btnClass = button + (page < pages-1 ?
-							'' : ' disabled');
-						break;
-
-					case 'last':
-						btnDisplay = lang.sLast;
-						btnClass = button + (page < pages-1 ?
-							'' : ' disabled');
-						break;
-
-					default:
-						btnDisplay = button + 1;
-						btnClass = page === button ?
-							'active' : '';
-						break;
-				}
-
-				var tag = btnClass.indexOf( 'disabled' ) === -1 ?
-					'a' :
-					'div';
-
-				if ( btnDisplay ) {
-					node = $('<'+tag+'>', {
-							'class': classes.sPageButton+' '+btnClass,
-							'id': idx === 0 && typeof button === 'string' ?
-								settings.sTableId +'_'+ button :
-								null,
-							'href': '#',
-							'aria-controls': settings.sTableId,
-							'aria-label': aria[ button ],
-							'data-dt-idx': counter,
-							'tabindex': settings.iTabIndex
-						} )
-						.html( btnDisplay )
-						.appendTo( container );
-
-					settings.oApi._fnBindAction(
-						node, {action: button}, clickHandler
-					);
-
-					counter++;
-				}
-			}
-		}
-	};
-
-	// IE9 throws an 'unknown error' if document.activeElement is used
-	// inside an iframe or frame. 
-	var activeEl;
-
-	try {
-		// Because this approach is destroying and recreating the paging
-		// elements, focus is lost on the select button which is bad for
-		// accessibility. So we want to restore focus once the draw has
-		// completed
-		activeEl = $(host).find(document.activeElement).data('dt-idx');
-	}
-	catch (e) {}
-
-	attach(
-		$(host).empty().html('<div class="ui stackable pagination menu"/>').children(),
-		buttons
-	);
-
-	if ( activeEl !== undefined ) {
-		$(host).find( '[data-dt-idx='+activeEl+']' ).trigger('focus');
-	}
+DataTable.util.object.assignDeep(DataTable.ext.classes, {
+    container: 'dt-container dt-semanticUI',
+    search: {
+        input: 'dt-search ui input'
+    },
+    processing: {
+        container: 'dt-processing ui segment'
+    },
+    table: 'dataTable table unstackable'
+});
+/* Fomantic paging button renderer */
+DataTable.ext.renderer.pagingButton.semanticUI = function (settings, buttonType, content, active, disabled) {
+    var btnClasses = ['dt-paging-button', 'item'];
+    if (active) {
+        btnClasses.push('active');
+    }
+    if (disabled) {
+        btnClasses.push('disabled');
+    }
+    var a = DataTable.Dom
+        .c(disabled ? 'div' : 'a')
+        .attr('href', disabled ? null : '#')
+        .classAdd('page-link')
+        .classAdd(btnClasses.join(' '))
+        .html(content);
+    return {
+        display: a.get(0),
+        clicker: a.get(0)
+    };
 };
-
-
-// Javascript enhancements on table initialisation
-$(document).on( 'init.dt', function (e, ctx) {
-	if ( e.namespace !== 'dt' ) {
-		return;
-	}
-
-	var api = new $.fn.dataTable.Api( ctx );
-
-	// Length menu drop down
-	if ( $.fn.dropdown ) {
-		$( 'div.dataTables_length select', api.table().container() ).dropdown();
-	}
-
-	// Filtering input
-	$( 'div.dataTables_filter.ui.input', api.table().container() ).removeClass('input').addClass('form');
-	$( 'div.dataTables_filter input', api.table().container() ).wrap( '<span class="ui input" />' );
-} );
+DataTable.ext.renderer.pagingContainer.semanticUI = function (settings, buttonEls) {
+    return DataTable.Dom
+        .c('div')
+        .classAdd('ui unstackable pagination menu')
+        .append(buttonEls)
+        .get(0);
+};
+// JavaScript enhancements on table initialisation
+DataTable.Dom.s(document).on('init.dt', function (e, ctx) {
+    if (e.namespace !== 'dt') {
+        return;
+    }
+    let api = new DataTable.Api(ctx);
+    let jq = DataTable.use('jq');
+    // Length menu drop down
+    if (jq.fn.dropdown) {
+        jq('div.dt-length select', api.table().container()).dropdown();
+    }
+    // Filtering input
+    DataTable.Dom
+        .s(api.table().container())
+        .find('div.dt-search.ui.input')
+        .classRemove('input')
+        .classAdd('form');
+    DataTable.Dom
+        .s(api.table().container())
+        .find('div.dt-search input')
+        .each(el => {
+        let wrapper = DataTable.Dom.c('span').classAdd('ui input');
+        el.replaceWith(wrapper.get(0));
+        wrapper.append(el);
+    });
+});
 
 
 return DataTable;

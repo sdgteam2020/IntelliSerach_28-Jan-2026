@@ -258,3 +258,49 @@ table.dataTable thead .sorting_desc {
     color: #0061f2;
     border-color: #0061f2;
 }
+
+/* Keep entries selector on the left and search on the right */
+#tbldata_wrapper > .row:first-child {
+    display: flex;
+    align-items: center;
+}
+
+#tbldata_wrapper .dataTables_length {
+    text-align: left !important;
+}
+
+#tbldata_wrapper .dataTables_filter {
+    text-align: right !important;
+}
+
+    #tbldata_wrapper .dataTables_filter label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+/* Keep information on the left and pagination on the right */
+#tbldata_wrapper .dataTables_info {
+    text-align: left;
+}
+
+#tbldata_wrapper .dataTables_paginate {
+    display: flex;
+    justify-content: flex-end;
+}
+
+    #tbldata_wrapper .dataTables_paginate ul.pagination {
+        justify-content: flex-end;
+        margin: 0;
+    }
+
+@media (max-width: 575.98px) {
+    #tbldata_wrapper .dataTables_filter {
+        text-align: left !important;
+        margin-top: 8px;
+    }
+
+    #tbldata_wrapper .dataTables_paginate {
+        justify-content: flex-start;
+    }
+}

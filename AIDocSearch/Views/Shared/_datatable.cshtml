@@ -1,22 +1,30 @@
-﻿<link asp-href-include="~/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
-<link asp-href-include="~/datatables/responsive.bootstrap4.min.css" rel="stylesheet" />
-<link asp-href-include="~/datatables/responsive.dataTables.min.css" rel="stylesheet" />
-<link asp-href-include="~/datatables/buttons.bootstrap4.min.css" rel="stylesheet" />
-<link asp-href-include="~/datatables/fixedHeader.dataTables.min.css" rel="stylesheet" />
-<link asp-href-include="~/datatables/jquery.dataTables.min.css" rel="stylesheet" />
+﻿<!-- DataTables Bootstrap 4 styles -->
+<link asp-href-include="~/datatables/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/css/responsive.bootstrap4.css" rel="stylesheet" />
+<link asp-href-include="~/datatables/css/buttons.bootstrap4.css" rel="stylesheet" />
+<link href="~/datatables/css/fixedheader.datatables.min.css" rel="stylesheet" />
+
+<!-- Custom DataTables styles -->
 <link asp-href-include="~/css/stylesheetfordatatable.css" rel="stylesheet" />
 
+<!-- DataTables core and Bootstrap 4 integration -->
+<script asp-src-include="~/datatables/js/dataTables.js"></script>
+<script asp-src-include="~/datatables/js/dataTables.bootstrap4.js"></script>
 
-<script asp-src-include="~/js/datatables/jquery.datatables.min.js"></script>
-<script asp-src-include="~/js/datatables/dataTables.responsive.min.js"></script>
-<script asp-src-include="~/js/datatables/responsive.dataTables.min.js"></script>
-<script asp-src-include="~/js/datatables/dataTables.bootstrap4.min.js"></script>
-<script asp-src-include="~/js/datatables/responsive.bootstrap4.min.js"></script> <!-- DataTables Responsive extension and specifically integrates Responsive behavior with Bootstrap 4 styling. -->
-<script asp-src-include="~/js/datatables/dataTables.buttons.min.js"></script> <!-- It adds the foundational functionality needed to add custom buttons (like Export, Print, or custom actions) to a DataTable.-->
-<script asp-src-include="~/js/datatables/buttons.bootstrap4.min.js"></script> <!-- Export buttons (like Copy, CSV, Excel, PDF, Print) to match Bootstrap 4 design and layout. -->
-@* <script asp-src-include="~/js/datatables/jszip.min.js"></script> *@ <!-- for Excel export -->
-@* <script asp-src-include="~/js/datatables/pdfmake.min.js"></script> *@ <!-- for PDF export -->
-@* <script asp-src-include="~/js/datatables/vfs_fonts.js"></script> *@ <!-- required by pdfmake -->
-<script asp-src-include="~/js/datatables/buttons.html5.min.js"></script> <!-- All HTML5 export buttons -->
-<script asp-src-include="~/js/datatables/buttons.print.min.js"></script> <!-- Adds a "Print" button to DataTables toolbar for print preview and printing -->
-<script asp-src-include="~/js/datatables/datatables-call.js"></script>
+<!-- Responsive extension -->
+<script asp-src-include="~/datatables/js/dataTables.responsive.js"></script>
+<script asp-src-include="~/datatables/js/responsive.bootstrap4.js"></script>
+
+<!-- Buttons extension -->
+<script asp-src-include="~/datatables/js/dataTables.buttons.js"></script>
+<script asp-src-include="~/datatables/js/buttons.bootstrap4.js"></script>
+
+<!-- Excel and PDF export dependencies -->
+<script asp-src-include="~/datatables/jszip.min.js"></script>
+<script asp-src-include="~/datatables/pdfmake.min.js"></script>
+<script asp-src-include="~/datatables/vfs_fonts.js"></script>
+<script asp-src-include="~/datatables/js/buttons.html5.js"></script>
+<script asp-src-include="~/datatables/js/buttons.print.js"></script>
+
+<!-- Your existing DataTables initialization -->
+<script asp-src-include="~/datatables/js/datatables-call.js"></script>

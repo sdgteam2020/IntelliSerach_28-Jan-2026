@@ -1,5 +1,4 @@
 ﻿using Application.Interfaces;
-using Azure.Core;
 using Domain.DTOs.Requests;
 using Domain.DTOs.Response;
 using System;

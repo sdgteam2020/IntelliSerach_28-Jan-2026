@@ -1,18 +1,9 @@
 ﻿let table; // Declare table variable outside the function to preserve the instance
 $(document).ready(function () {
-    setTimeout(BindData, 100);
-    $('#tbldata').DataTable({
-        "order": [],
-        "paging": true,
-        "searching": true,
-        "info": true,
-        "autoWidth": false,
-        "responsive": true,
-        "buttons": [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-        ],
-        "select": true
-    });
+  
+    BindData()
+
+    
 });
 function BindData() {
     if ($.fn.DataTable.isDataTable("#tbldata")) {
@@ -85,7 +76,11 @@ function BindData() {
             search: "",
             searchPlaceholder: "Search Domain ID"
         },
-        dom: 'lBfrtip',
+        dom:
+            "<'row mb-2'<'col-sm-10 col-12'l><'col-sm-2 col-12'f>>" +
+            "<'row mb-2'<'col-12'B>>" +
+            "<'row'<'col-12'tr>>" +
+            "<'row mt-2'<'col-sm-8 col-12'i><'col-sm-4 col-12'p>>",
         buttons: [
             {
                 extend: 'copy',
