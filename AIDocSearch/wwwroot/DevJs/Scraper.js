@@ -1,6 +1,9 @@
 ﻿let currentCrawlJobId = null;
 let crawlStatusTimer = null;
 $(document).ready(function () {
+    if ($.fn.DataTable.isDataTable('#pdfTable')) {
+        $('#pdfTable').DataTable().destroy();
+    }
     
     $(document).ajaxStart(function () {
         $(".loadertext").html("Loading...")
@@ -17,6 +20,7 @@ $(document).ready(function () {
         /*$("#downloadDir").text(scraper.download_directory);*/
 
         // ===== Clear Old Rows =====
+
         if ($.fn.DataTable.isDataTable('#pdfTable')) {
             $('#pdfTable').DataTable().destroy();
         }

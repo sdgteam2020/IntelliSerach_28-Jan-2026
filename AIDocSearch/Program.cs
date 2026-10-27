@@ -16,8 +16,16 @@ using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 var configration = builder.Configuration;
+
+
+var connectionString = Environment.GetEnvironmentVariable("IntelliSearch__ConnectionStrings__DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new Exception("Connection string not found in environment variables.");
+}
 builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
-    options.UseSqlServer(configration.GetConnectionString("DefaultConnection")).UseExceptionProcessor());
+    options.UseSqlServer(connectionString).UseExceptionProcessor());
 //builder.Services.AddHttpClient();
 
 builder.Services.AddHttpClient("NoSSL")
@@ -95,12 +103,11 @@ builder.Services.AddCors(options =>
             // Get allowed origins from configuration
             var allowedOrigins = new[]
             {
-                "*",
-                "https://admin.example.com"
+                "*"
             };
             // Always allow localhost in development
             if (builder.Environment.IsDevelopment() &&
-                origin.StartsWith("http://localhost"))
+                origin.StartsWith(""))
             {
                 return true;
             }

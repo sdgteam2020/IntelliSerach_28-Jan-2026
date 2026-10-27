@@ -188,8 +188,11 @@ namespace AIDocSearch.Controllers
                             }
                         }
                     };
-                    string baseUrl = _configuration["UrlData:BaseUrl"] ?? string.Empty;
-                    DTOElasticApiKeyResponse ElasticApiResponse = await elasticAuthApi.LoginElastic(elkRequest, baseUrl,"elastic","elastic");
+                    string baseUrl = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__BaseUrl") ?? string.Empty;
+                    string elasticUser = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__UserName") ?? string.Empty;
+                    string elasticPassword = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__Password") ?? string.Empty;
+
+                    DTOElasticApiKeyResponse ElasticApiResponse = await elasticAuthApi.LoginElastic(elkRequest, baseUrl, elasticUser, elasticPassword);
 
                     var dTOSession = new DTOSession
                     {

@@ -68,7 +68,7 @@ namespace AIDocSearch.Controllers
                         return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.BadRequestMessage, "Invalid search request."));
                         // return BadRequest("Invalid search request.");
                     }
-                    string Url = _configuration["UrlData:Url"] ?? string.Empty;
+                    string Url = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__Url") ?? string.Empty;
                     string encodedKey = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").encodedKey;
                     // Call the search service to get the response
                     var RetData = await _searchService.GetResponse(Data, Url,encodedKey);
@@ -235,7 +235,7 @@ namespace AIDocSearch.Controllers
         {
             if (ModelState.IsValid)
             {
-                string Url = _configuration["UrlData:indicesUrl"] ?? string.Empty;
+                string Url = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__indicesUrl") ?? string.Empty;
                 string encodedKey = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").encodedKey;
                 var IndexesDetails = await _searchService.IndexesDetails(Url, encodedKey);
 
@@ -258,9 +258,9 @@ namespace AIDocSearch.Controllers
         [HttpPost]
         public async Task<IActionResult> GetDoc_webCount()
         {
-            string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
-            string UserName = _configuration["UrlData:UserName"] ?? string.Empty;
-            string Password = _configuration["UrlData:Password"] ?? string.Empty;
+            string Url = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__BaseUrl") ?? string.Empty;
+            string UserName = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__UserName") ?? string.Empty;
+            string Password = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__Password") ?? string.Empty;
            string encodedKey=SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").encodedKey;
             var IndexesDetails = await _searchService.GetCountDoc_Web(Url, encodedKey);
             return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.ScraperingMessage, IndexesDetails));

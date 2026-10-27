@@ -106,9 +106,9 @@ namespace AIDocSearch.Controllers
             {
                 WebScraperSetting ScraperSetting = await _webScraperSetting.GetById(1);
                 DTOAPILoginRequest dTOAPILoginRequest = new DTOAPILoginRequest();
-                dTOAPILoginRequest.client_id = _configuration["UrlData:APILoginclient_id"] ?? string.Empty;
-                dTOAPILoginRequest.client_secret = _configuration["UrlData:APILoginclient_secret"] ?? string.Empty;
-                string APILoginURL = _configuration["UrlData:APILoginURL"] ?? string.Empty;
+                dTOAPILoginRequest.client_id = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__APILoginclient_id") ?? string.Empty;
+                dTOAPILoginRequest.client_secret = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__APILoginclient_secret") ?? string.Empty;
+                string APILoginURL = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__APILoginURL") ?? string.Empty;
                 var ret = await _aPI.Getauthentication(dTOAPILoginRequest, APILoginURL);
                 if (ret.Status && !string.IsNullOrEmpty(ret.access_token))
                 {
@@ -118,7 +118,7 @@ namespace AIDocSearch.Controllers
                     dTOWebScraperDataRequest.url = Data.Url;
                     dTOWebScraperDataRequest.max_pages = ScraperSetting.max_pages;
                     dTOWebScraperDataRequest.Abbreviation = Data.Abbreviation;
-                    string APIcrawlseoURL = _configuration["UrlData:APIcrawlseoURL"] ?? string.Empty;
+                    string APIcrawlseoURL = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__APIcrawlseoURL") ?? string.Empty;
                     DTOSessionForAPI dTOSessionForAPI = new DTOSessionForAPI();
                     dTOSessionForAPI.access_token = ret.access_token;
                     _sessionService.SetAPITokenSession(HttpContext, dTOSessionForAPI);
@@ -156,7 +156,7 @@ namespace AIDocSearch.Controllers
             if (apiSession == null || string.IsNullOrWhiteSpace(apiSession.access_token))
                 return Unauthorized("API session is missing or expired. Please authenticate again.");
 
-            var statusUrl = _configuration["UrlData:APICrawlStatus"];
+            var statusUrl = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__APICrawlStatus");
 
             if (string.IsNullOrWhiteSpace(statusUrl))
                 return StatusCode(500, "Crawl status URL is not configured.");
@@ -181,7 +181,7 @@ namespace AIDocSearch.Controllers
             if (apiSession == null || string.IsNullOrWhiteSpace(apiSession.access_token))
                 return Unauthorized("API session is missing or expired. Please authenticate again.");
 
-            var statusUrl = _configuration["UrlData:APICrawlErros"];
+            var statusUrl = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__APICrawlErros");
 
             if (string.IsNullOrWhiteSpace(statusUrl))
                 return StatusCode(500, "Crawl status URL is not configured.");
@@ -206,7 +206,7 @@ namespace AIDocSearch.Controllers
             if (apiSession == null || string.IsNullOrWhiteSpace(apiSession.access_token))
                 return Unauthorized("API session is missing or expired. Please authenticate again.");
 
-            var statusUrl = _configuration["UrlData:APICrawlPdf"];
+            var statusUrl = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__APICrawlPdf");
 
             if (string.IsNullOrWhiteSpace(statusUrl))
                 return StatusCode(500, "Crawl status URL is not configured.");
@@ -231,7 +231,7 @@ namespace AIDocSearch.Controllers
             if (apiSession == null || string.IsNullOrWhiteSpace(apiSession.access_token))
                 return Unauthorized("API session is missing or expired. Please authenticate again.");
 
-            var statusUrl = _configuration["UrlData:APICrawlDownloadPdf"];
+            var statusUrl = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__APICrawlDownloadPdf");
 
             if (string.IsNullOrWhiteSpace(statusUrl))
                 return StatusCode(500, "Crawl status URL is not configured.");

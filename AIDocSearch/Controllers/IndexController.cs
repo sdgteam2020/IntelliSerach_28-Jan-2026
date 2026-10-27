@@ -57,7 +57,7 @@ namespace AIDocSearch.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetIndexesDetails()
         {
-            string Url = _configuration["UrlData:indicesUrl"] ?? string.Empty;
+            string Url = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__indicesUrl") ?? string.Empty;
             string encodedKey = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").encodedKey;
             var data = await _searchService.IndexesDetails(Url, encodedKey);
            
@@ -169,7 +169,7 @@ namespace AIDocSearch.Controllers
             bool ret = await _indexUserMapping.CheckUserIndexingExists(CurrentUserId, uuid, (string)_currentUserService.RoleName);
             if(ret)
             {
-                string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
+                string Url = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__BaseUrl") ?? string.Empty;
                 string encodedKey = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").encodedKey;
 
                 var retindex = await _searchService.GetDocDetailsByIndexName(Url, indexName, OcrType,encodedKey);
@@ -234,7 +234,7 @@ namespace AIDocSearch.Controllers
             bool ret = await _indexUserMapping.CheckUserIndexingExists(CurrentUserId, uuid, (string)_currentUserService.RoleName);
             if (ret)
             {
-                string Url = _configuration["UrlData:BaseUrl"] ?? string.Empty;
+                string Url = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__BaseUrl") ?? string.Empty;
                 string encodedKey = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").encodedKey;
 
                 var retindex = await _searchService.GetDocCountByIndexName(Url, indexName, encodedKey);
