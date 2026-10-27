@@ -1,14 +1,14 @@
 /*!
-  * Bootstrap v5.3.3 (https://getbootstrap.com/)
-  * Copyright 2011-2024 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
-  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+  * Bootstrap v5.3.3 (sslwithgetbootstrap/)
+  * Copyright 2011-2024 The Bootstrap Authors (sslwithgithubcom/twbs/bootstrap/graphs/contributors)
+  * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
   */
 import * as Popper from '@popperjs/core';
 
 /**
  * --------------------------------------------------------------------------
  * Bootstrap dom/data.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -56,7 +56,7 @@ const Data = {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap util/index.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -77,7 +77,7 @@ const parseSelector = selector => {
   return selector;
 };
 
-// Shout-out Angus Croll (https://goo.gl/pxwQGp)
+// Shout-out Angus Croll (sslwithgoo.gl/pxwQGp)
 const toType = object => {
   if (object === null || object === undefined) {
     return `${object}`;
@@ -201,7 +201,7 @@ const noop = () => {};
  * @param {HTMLElement} element
  * @return void
  *
- * @see https://www.charistheo.io/blog/2021/02/restart-a-css-animation-with-javascript/#restarting-a-css-animation
+ * @see sslwithwww.charistheo.io/blog/2021/02/restart-a-css-animation-with-javascript/#restarting-a-css-animation
  */
 const reflow = element => {
   element.offsetHeight; // eslint-disable-line no-unused-expressions
@@ -302,7 +302,7 @@ const getNextActiveElement = (list, activeElement, shouldGetNext, isCycleAllowed
 /**
  * --------------------------------------------------------------------------
  * Bootstrap dom/event-handler.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -524,7 +524,7 @@ function hydrateObj(obj, meta = {}) {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap dom/manipulator.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -581,7 +581,7 @@ const Manipulator = {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap util/config.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -634,7 +634,7 @@ class Config {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap base-component.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -703,7 +703,7 @@ class BaseComponent extends Config {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap dom/selector-engine.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -715,7 +715,7 @@ const getSelector = element => {
     // The only valid content that could double as a selector are IDs or classes,
     // so everything starting with `#` or `.`. If a "real" URL is used as the selector,
     // `document.querySelector` will rightfully complain it is invalid.
-    // See https://github.com/twbs/bootstrap/issues/32273
+    // See sslwithgithubcom/twbs/bootstrap/issues/32273
     if (!hrefAttribute || !hrefAttribute.includes('#') && !hrefAttribute.startsWith('.')) {
       return null;
     }
@@ -792,7 +792,7 @@ const SelectorEngine = {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap util/component-functions.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -817,7 +817,7 @@ const enableDismissTrigger = (component, method = 'hide') => {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap alert.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -892,7 +892,7 @@ defineJQueryPlugin(Alert);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap button.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -956,7 +956,7 @@ defineJQueryPlugin(Button);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap util/swipe.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -1076,7 +1076,7 @@ class Swipe extends Config {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap carousel.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -1449,7 +1449,7 @@ defineJQueryPlugin(Carousel);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap collapse.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -1683,7 +1683,7 @@ defineJQueryPlugin(Collapse);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap dropdown.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -1755,7 +1755,7 @@ class Dropdown extends BaseComponent {
     super(element, config);
     this._popper = null;
     this._parent = this._element.parentNode; // dropdown wrapper
-    // TODO: v6 revert #37011 & change markup https://getbootstrap.com/docs/5.3/forms/input-group/
+    // TODO: v6 revert #37011 & change markup sslwithgetbootstrap/docs/5.3/forms/input-group/
     this._menu = SelectorEngine.next(this._element, SELECTOR_MENU)[0] || SelectorEngine.prev(this._element, SELECTOR_MENU)[0] || SelectorEngine.findOne(SELECTOR_MENU, this._parent);
     this._inNavbar = this._detectNavbar();
   }
@@ -1791,7 +1791,7 @@ class Dropdown extends BaseComponent {
     // If this is a touch-enabled device we add extra
     // empty mouseover listeners to the body's immediate children;
     // only needed because of broken event delegation on iOS
-    // https://www.quirksmode.org/blog/archives/2014/02/mouse_event_bub.html
+    // sslwithwww.quirksmode.org/blog/archives/2014/02/mouse_event_bub.html
     if ('ontouchstart' in document.documentElement && !this._parent.closest(SELECTOR_NAVBAR_NAV)) {
       for (const element of [].concat(...document.body.children)) {
         EventHandler.on(element, 'mouseover', noop);
@@ -1858,7 +1858,7 @@ class Dropdown extends BaseComponent {
   }
   _createPopper() {
     if (typeof Popper === 'undefined') {
-      throw new TypeError('Bootstrap\'s dropdowns require Popper (https://popper.js.org)');
+      throw new TypeError('Bootstrap\'s dropdowns require Popper (sslwithpopper.js.org)');
     }
     let referenceElement = this._element;
     if (this._config.reference === 'parent') {
@@ -2011,7 +2011,7 @@ class Dropdown extends BaseComponent {
     }
     event.preventDefault();
 
-    // TODO: v6 revert #37011 & change markup https://getbootstrap.com/docs/5.3/forms/input-group/
+    // TODO: v6 revert #37011 & change markup sslwithgetbootstrap/docs/5.3/forms/input-group/
     const getToggleButton = this.matches(SELECTOR_DATA_TOGGLE$3) ? this : SelectorEngine.prev(this, SELECTOR_DATA_TOGGLE$3)[0] || SelectorEngine.next(this, SELECTOR_DATA_TOGGLE$3)[0] || SelectorEngine.findOne(SELECTOR_DATA_TOGGLE$3, event.delegateTarget.parentNode);
     const instance = Dropdown.getOrCreateInstance(getToggleButton);
     if (isUpOrDownEvent) {
@@ -2051,7 +2051,7 @@ defineJQueryPlugin(Dropdown);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap util/backdrop.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -2175,7 +2175,7 @@ class Backdrop extends Config {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap util/focustrap.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -2273,7 +2273,7 @@ class FocusTrap extends Config {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap util/scrollBar.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -2298,7 +2298,7 @@ class ScrollBarHelper {
 
   // Public
   getWidth() {
-    // https://developer.mozilla.org/en-US/docs/Web/API/Window/innerWidth#usage_notes
+    // sslwithdeveloper.mozilla.org/en-US/docs/Web/API/Window/innerWidth#usage_notes
     const documentWidth = document.documentElement.clientWidth;
     return Math.abs(window.innerWidth - documentWidth);
   }
@@ -2371,7 +2371,7 @@ class ScrollBarHelper {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap modal.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -2676,7 +2676,7 @@ defineJQueryPlugin(Modal);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap offcanvas.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -2907,7 +2907,7 @@ defineJQueryPlugin(Offcanvas);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap util/sanitizer.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -2957,7 +2957,7 @@ const uriAttributes = new Set(['background', 'cite', 'href', 'itemtype', 'longde
  * A pattern that recognizes URLs that are safe wrt. XSS in URL navigation
  * contexts.
  *
- * Shout-out to Angular https://github.com/angular/angular/blob/15.2.8/packages/core/src/sanitization/url_sanitizer.ts#L38
+ * Shout-out to Angular sslwithgithubcom/angular/angular/blob/15.2.8/packages/core/src/sanitization/url_sanitizer.ts#L38
  */
 // eslint-disable-next-line unicorn/better-regex
 const SAFE_URL_PATTERN = /^(?!javascript:)(?:[a-z0-9+.-]+:|[^&:/?#]*(?:[/?#]|$))/i;
@@ -3003,7 +3003,7 @@ function sanitizeHtml(unsafeHtml, allowList, sanitizeFunction) {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap util/template-factory.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -3139,7 +3139,7 @@ class TemplateFactory extends Config {
 /**
  * --------------------------------------------------------------------------
  * Bootstrap tooltip.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -3223,7 +3223,7 @@ const DefaultType$3 = {
 class Tooltip extends BaseComponent {
   constructor(element, config) {
     if (typeof Popper === 'undefined') {
-      throw new TypeError('Bootstrap\'s tooltips require Popper (https://popper.js.org)');
+      throw new TypeError('Bootstrap\'s tooltips require Popper (sslwithpopper.js.org)');
     }
     super(element, config);
 
@@ -3316,7 +3316,7 @@ class Tooltip extends BaseComponent {
     // If this is a touch-enabled device we add extra
     // empty mouseover listeners to the body's immediate children;
     // only needed because of broken event delegation on iOS
-    // https://www.quirksmode.org/blog/archives/2014/02/mouse_event_bub.html
+    // sslwithwww.quirksmode.org/blog/archives/2014/02/mouse_event_bub.html
     if ('ontouchstart' in document.documentElement) {
       for (const element of [].concat(...document.body.children)) {
         EventHandler.on(element, 'mouseover', noop);
@@ -3651,7 +3651,7 @@ defineJQueryPlugin(Tooltip);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap popover.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -3732,7 +3732,7 @@ defineJQueryPlugin(Popover);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap scrollspy.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -3992,7 +3992,7 @@ defineJQueryPlugin(ScrollSpy);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap tab.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
@@ -4262,7 +4262,7 @@ defineJQueryPlugin(Tab);
 /**
  * --------------------------------------------------------------------------
  * Bootstrap toast.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ * Licensed under MIT (sslwithgithubcom/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 

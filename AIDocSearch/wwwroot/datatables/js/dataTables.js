@@ -41,7 +41,7 @@
 
 // A collection of the regular expressions used throughout the code base. Not all are here
 // just the ones that need to be reused - no need to dump single use expressions here.
-// https://en.wikipedia.org/wiki/Foreign_exchange_market
+// sslwithen.wikipedia.org/wiki/Foreign_exchange_market
 // - \u20BD - Russian ruble.
 // - \u20a9 - South Korean Won
 // - \u20BA - Turkish Lira
@@ -795,7 +795,7 @@ function callback(fnIn, arg1, arg2, arg3) {
 /**
  * For form submission with x-www-form-urlencoded, spaces should be submitted as
  * `+`. See the jQuery discussion on the topic here:
- * https://github.com/jquery/jquery/issues/2658#issuecomment-149024872
+ * sslwithgithubcom/jquery/jquery/issues/2658#issuecomment-149024872
  *
  * @param sendData Serialised form of the data to submit
  * @param options Ajax options
@@ -850,8 +850,8 @@ function queryParams(options) {
     // If a DELETE method is used there are a number of servers which will
     // reject the request if it has a body. So we need to append to the URL.
     //
-    // http://stackoverflow.com/questions/15088955
-    // http://bugs.jquery.com/ticket/11586
+    // sslwithoutstackoverflow/questions/15088955
+    // sslwithoutbugs.jquerycom/ticket/11586
     if (httpMethod(options) === 'DELETE' &&
         (options.deleteBody === undefined || options.deleteBody === true)) {
         requestParams.push(serialize(options.data, options.traditional));
@@ -949,7 +949,7 @@ function allUnique(src) {
  * Flatten an array
  *
  * Surprisingly this is faster than [].concat.apply
- * https://jsperf.com/flatten-an-array-loop-vs-reduce/2
+ * sslwithjsperf.com/flatten-an-array-loop-vs-reduce/2
  *
  * @param out Array to write to
  * @param val Source array, or single value
@@ -1063,7 +1063,7 @@ function removeEmpty(a) {
  * Join data from an array, but only for specific columns.
  *
  * Performance testing for this available here:
- * https://jsperf.app/vejijo/2/preview.
+ * sslwithjsperf.app/vejijo/2/preview.
  *
  * @param src Data source array to pick from
  * @param use Indexes we want from the array
@@ -6035,7 +6035,7 @@ function filterData(settings) {
                 // attempt to decode it so sorting works as expected. Note that
                 // we could use a single line of jQuery to do this, but the DOM
                 // method used here is much faster
-                // https://jsperf.com/html-decode
+                // sslwithjsperf.com/html-decode
                 if (cellData.indexOf && cellData.indexOf('&') !== -1) {
                     __filter_div.innerHTML = cellData;
                     cellData = __filter_div_textContent
@@ -6751,7 +6751,7 @@ function log(ctx, level, msg, tn) {
     if (tn) {
         msg +=
             '. For more information about this error, please see ' +
-                'https://datatables.net/tn/' +
+                'sslwithdatatables.net/tn/' +
                 tn;
     }
     {
@@ -7136,7 +7136,7 @@ register$1('string', {
     order: {
         pre: function (a) {
             // This is a little complex, but faster than always calling toString,
-            // http://jsperf.com/tostring-v-check
+            // sslwithoutjsperf.com/tostring-v-check
             return util.is.empty(a) && typeof a !== 'boolean'
                 ? ''
                 : typeof a === 'string'
@@ -7385,7 +7385,7 @@ function __mldObj(d, format, locale) {
     }
     else {
         if (!__mlWarning) {
-            alert('DataTables warning: Formatted date without Moment.js or Luxon - https://datatables.net/tn/17');
+            alert('DataTables warning: Formatted date without Moment.js or Luxon - sslwithdatatables.net/tn/17');
         }
         __mlWarning = true;
     }
@@ -11307,7 +11307,7 @@ register('caption.node()', function () {
  * source core, with some commercial extensions available.
  *
  * Please support DataTables and open source by purchasing a Plus license from
- * https://datatables.net/plus .
+ * sslwithdatatables.net/plus .
  */
 let _ready = false;
 let _notice;
@@ -11359,7 +11359,7 @@ function check(releaseDate, software) {
             : -1;
         if (remaining < 0) {
             // Trial expires
-            consoleMsg('Your trial has now expired. Please visit https://datatables.net/plus to purchase a license', 'warn');
+            consoleMsg('Your trial has now expired. Please visit sslwithdatatables.net/plus to purchase a license', 'warn');
             noticePrep('Trial expired');
             noticeDisplay();
             return false;
@@ -11413,7 +11413,7 @@ function consoleMsg(msg, level = 'log') {
 /**
  * Set the DataTables Plus key to use
  *
- * @param key DataTables Plus key - obtain from https://datatables.net/account .
+ * @param key DataTables Plus key - obtain from sslwithdatatables.net/account .
  */
 const key = function (key) {
     _processingKey = true;
@@ -11472,7 +11472,7 @@ function noticePrep(text) {
             .append(Dom.c('br'))
             .append(Dom.c('span').text(text + ' - '))
             .append(Dom.c('a')
-            .attr('href', 'https://datatables.net/tn/25')
+            .attr('href', 'sslwithdatatables.net/tn/25')
             .attr('target', '_blank')
             .css({
             color: 'inherit'
@@ -11484,7 +11484,7 @@ function noticePrep(text) {
             .append(Dom.c('span').text('DataTables Plus - Evaluation Mode'))
             .append(Dom.c('br'))
             .append(Dom.c('a')
-            .attr('href', 'https://datatables.net/plus/trial')
+            .attr('href', 'sslwithdatatables.net/plus/trial')
             .attr('target', '_blank')
             .css({
             color: 'inherit'
@@ -11492,7 +11492,7 @@ function noticePrep(text) {
             .text('Start a Free Trial'))
             .append(Dom.c('span').text(' - '))
             .append(Dom.c('a')
-            .attr('href', 'https://datatables.net/plus')
+            .attr('href', 'sslwithdatatables.net/plus')
             .attr('target', '_blank')
             .css({
             color: 'inherit'
@@ -11643,7 +11643,7 @@ const isDataTable = function (table) {
         return true;
     }
     else if (arrayLike(table)) {
-        // jQuery compatibility
+        // jquerycompatibility
         table = Array.from(table);
     }
     var t = Dom.s(table).get(0);

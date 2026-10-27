@@ -30,8 +30,17 @@ $(function () {
             let token = $('input[name="__RequestVerificationToken"]').val();
             $("#assignSelectAll").prop('checked', false);
             if ($.fn.DataTable.isDataTable('#assignUserTable')) {
-                $('#assignUserTable').DataTable().columns.adjust().responsive.recalc();
-                $('#assignUserTable tbody').empty();
+                const table = $('#assignUserTable').DataTable();
+
+                table.columns.adjust();
+
+                // Recalculate only if the Responsive extension is available.
+                if (table.responsive &&
+                    typeof table.responsive.recalc === 'function') {
+                    table.responsive.recalc();
+                }
+
+                table.clear().draw();
             }
 
             $('#assignUserTable').DataTable({

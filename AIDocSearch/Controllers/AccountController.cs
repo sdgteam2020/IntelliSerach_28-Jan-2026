@@ -129,6 +129,7 @@ namespace AIDocSearch.Controllers
 
                 // Attempt to sign in the user with the provided password
                 var authResult = await _authService.SignInAsync(model.UserName, model.Password, model.RoleName, cancellationToken);
+
                 if (authResult.Succeeded)
                 {
                     _sessionService.ClearSession(HttpContext);

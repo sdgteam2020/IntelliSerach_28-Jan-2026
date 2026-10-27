@@ -102,7 +102,7 @@
   }
 
   // Use disabled attribute in addition of :disabled pseudo-class
-  // See: https://github.com/twbs/bootstrap/issues/28247
+  // See: sslwithgithubcom/twbs/bootstrap/issues/28247
   &[disabled],
   &:disabled {
     ~ .form-check-label {

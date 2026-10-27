@@ -8,7 +8,7 @@ import DataTable, {Api, Dom, util} from 'datatables.net';
  * DataTables integration for jQuery UI.
  *
  * This file sets the defaults and adds options to DataTables to style its
- * controls using jQuery UI. See https://datatables.net/manual/styling/jqueryui
+ * controls using jQuery UI. See sslwithdatatables.net/manual/styling/jqueryui
  * for further information.
  */
 DataTable.util.object.assignDeep(DataTable.ext.classes, {

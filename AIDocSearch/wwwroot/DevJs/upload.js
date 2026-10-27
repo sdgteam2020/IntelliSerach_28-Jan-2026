@@ -14,6 +14,58 @@
         
         DeleteUpload(id);
     });
+
+
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+    const fileInput = document.getElementById("FileName");
+    const errorElement = document.getElementById("fileError");
+
+    if (!fileInput) return;
+
+    fileInput.addEventListener("change", function () {
+        errorElement.textContent = "";
+
+        const file = fileInput.files[0];
+
+        if (!file) return;
+
+        const isPdf =
+            file.type === "application/pdf" ||
+            file.name.toLowerCase().endsWith(".pdf");
+
+        if (!isPdf) {
+            errorElement.textContent = "Please select a PDF file only.";
+            fileInput.value = "";
+            return;
+        }
+
+        if (file.size > maxSize) {
+            errorElement.textContent =
+                "File size must not exceed 5 MB.";
+
+            fileInput.value = "";
+        }
+    });
+
+    $(fileInput.form).on("submit", function (event) {
+        errorElement.textContent = "";
+
+        const file = fileInput.files[0];
+
+        if (!file) {
+            errorElement.textContent = "Please select a PDF file.";
+            event.preventDefault();
+            return;
+        }
+
+        if (file.size > maxSize) {
+            errorElement.textContent =
+                "File size must not exceed 5 MB.";
+
+            fileInput.value = "";
+            event.preventDefault();
+        }
+    });
 });
 async function DeleteUpload(id) {
 

@@ -1,16 +1,17 @@
 using AIDocSearch.CustomMiddleware;
-using AIDocSearch.Services;
 using AIDocSearch.Hubs;
+using AIDocSearch.Services;
 using Domain.IdentityEntities;
 using EntityFramework.Exceptions.SqlServer;
 using Infrastructure;
+using Infrastructure.Repository;
 using Infrastructure.Shared;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore; // Ensure this is included
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.AspNetCore.ResponseCompression;
 using Newtonsoft.Json.Serialization;
-using Infrastructure.Repository;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -57,8 +58,9 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(opts =>
 builder.Services.Configure<SecurityStampValidatorOptions>(options =>
 {
     // Validate every 5 minutes instead of on every request
-    options.ValidationInterval = TimeSpan.FromMinutes(5);
+    options.ValidationInterval = TimeSpan.Zero;
 });
+
 builder.Services.ConfigureApplicationCookie(o =>
 {
     o.LoginPath = "/Account/Login";
@@ -71,6 +73,7 @@ builder.Services.ConfigureApplicationCookie(o =>
     o.Cookie.SameSite = SameSiteMode.Strict; // use Lax/None if you have external IdP redirects
     // Ensure immediate revalidation
     o.Events.OnValidatePrincipal = SecurityStampValidator.ValidatePrincipalAsync;
+
 });
 // Antiforgery cookie hardened (__Host- prefix requires Secure + path "/" + no Domain)
 builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true); 
@@ -175,6 +178,25 @@ builder.Services.AddSignalR(options =>
 builder.Services.AddSingleton<ConnectionManager>();
 builder.Services.AddEndpointsApiExplorer();
 //////////////
+///
+const long maxUploadSize = 6 * 1024 * 1024;
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = maxUploadSize;
+});
+
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = maxUploadSize;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = maxUploadSize;
+    options.ValueLengthLimit = int.MaxValue;
+});
+
 var app = builder.Build();
 
 // If this app is hosted as an IIS application under a virtual path '/IntelliSearch',

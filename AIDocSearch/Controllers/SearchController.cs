@@ -108,6 +108,8 @@ namespace AIDocSearch.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequestSizeLimit(6 * 1024 * 1024)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 5 * 1024 * 1024)]
         public async Task<IActionResult> Upload(DTOUploadRequest Data)
         {
             if (ModelState.IsValid)

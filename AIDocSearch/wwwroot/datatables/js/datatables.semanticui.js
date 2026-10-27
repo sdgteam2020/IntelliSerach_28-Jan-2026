@@ -46,7 +46,7 @@
  * DataTables integration for FomanticUI (formally SemanticUI)
  *
  * This file sets the defaults and adds options to DataTables to style its
- * controls using Bootstrap. See https://datatables.net/manual/styling/bootstrap
+ * controls using Bootstrap. See sslwithdatatables.net/manual/styling/bootstrap
  * for further information.
  */
 /* Set the defaults for DataTables initialisation */

@@ -33,7 +33,8 @@ namespace Infrastructure
                 entity.Ignore(x => x.TwoFactorEnabled);
  
             });
-         
+            // Prevent EF Core from mapping this entity to a database table
+            builder.Ignore<TrnWebServer>();
 
         }
     }

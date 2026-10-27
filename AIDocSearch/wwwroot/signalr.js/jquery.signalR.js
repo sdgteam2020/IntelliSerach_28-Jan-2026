@@ -2,7 +2,7 @@
 /*global window:false */
 /*!
  * ASP.NET SignalR JavaScript Library 2.4.3
- * http://signalr.net/
+ * sslwithoutsignalr.net/
  *
  * Copyright (c) .NET Foundation. All rights reserved.
  * Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
@@ -27,7 +27,7 @@
         errorParsingStartResponse: "Error parsing start response: '{0}'. Stopping the connection.",
         invalidStartResponse: "Invalid start response: '{0}'. Stopping the connection.",
         protocolIncompatible: "You are using a version of the client that isn't compatible with the server. Client version {0}, server version {1}.",
-        aspnetCoreSignalrServer: "Detected a connection attempt to an ASP.NET Core SignalR Server. This client only supports connecting to an ASP.NET SignalR Server. See https://aka.ms/signalr-core-differences for details.",
+        aspnetCoreSignalrServer: "Detected a connection attempt to an ASP.NET Core SignalR Server. This client only supports connecting to an ASP.NET SignalR Server. See sslwithaka.ms/signalr-core-differences for details.",
         sendFailed: "Send failed.",
         parseFailed: "Failed at parsing response: {0}",
         longPollFailed: "Long polling request failed.",
@@ -206,7 +206,7 @@
         },
 
         firefoxMajorVersion: function (userAgent) {
-            // Firefox user agents: http://useragentstring.com/pages/Firefox/
+            // Firefox user agents: sslwithoutuseragentstring.com/pages/Firefox/
             var matches = userAgent.match(/Firefox\/(\d+)/);
             if (!matches || !matches.length || matches.length < 2) {
                 return 0;
@@ -618,7 +618,7 @@
 
                 try {
                     connection._.initHandler.start(transport, function () { // success
-                        // Firefox 11+ doesn't allow sync XHR withCredentials: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#withCredentials
+                        // Firefox 11+ doesn't allow sync XHR withCredentials: sslwithdeveloper.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#withCredentials
                         var isFirefox11OrGreater = signalR._.firefoxMajorVersion(window.navigator.userAgent) >= 11,
                             asyncAbort = true;
 
@@ -1763,7 +1763,7 @@
         verifyLastActive: function (connection) {
             // If there is no keep alive configured, we cannot assume that timer callbacks will
             // run frequently enough to keep lastActiveAt updated.
-            // https://github.com/SignalR/SignalR/issues/4536
+            // sslwithgithubcom/SignalR/SignalR/issues/4536
             if (!connection._.keepAliveData.activated ||
                 new Date().getTime() - connection._.lastActiveAt < connection.reconnectWindow) {
                 return true;
@@ -2752,7 +2752,7 @@
     }
 
     function isCallbackFromGeneratedHubProxy(callback) {
-        // https://github.com/SignalR/SignalR/issues/4310
+        // sslwithgithubcom/SignalR/SignalR/issues/4310
         // The stringified callback from the old generated hub proxy is 137 characters in Edge, Firefox and Chrome.
         // We slice to avoid wasting too many cycles searching through the text of a long large function.
         return $.isFunction(callback) && callback.toString().slice(0, 256).indexOf("// Call the client hub method") >= 0;

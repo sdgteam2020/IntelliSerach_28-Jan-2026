@@ -1,6 +1,9 @@
+@model IEnumerable<Domain.DTOs.Response.DTOIndexesDetailsResponse>
+
 @{
     ViewData["Title"] = "Elasticsearch Index Details";
 }
+@await Html.PartialAsync("_datatable", Model)
 
 <div class="container mt-1">
 
@@ -17,22 +20,7 @@
                     </div>
                    
                     <!-- DataTables CSS/JS includes required for the table initialization -->
-                    <link asp-href-include="~/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
-                    <link asp-href-include="~/datatables/responsive.bootstrap4.min.css" rel="stylesheet" />
-                    <link asp-href-include="~/datatables/responsive.dataTables.min.css" rel="stylesheet" />
-                    <link asp-href-include="~/datatables/buttons.bootstrap4.min.css" rel="stylesheet" />
-                    <link asp-href-include="~/datatables/fixedHeader.dataTables.min.css" rel="stylesheet" />
-                    <link asp-href-include="~/datatables/jquery.dataTables.min.css" rel="stylesheet" />
-
-                    <script asp-src-include="~/js/datatables/jquery.datatables.min.js"></script>
-                    <script asp-src-include="~/js/datatables/dataTables.responsive.min.js"></script>
-                    <script asp-src-include="~/js/datatables/responsive.dataTables.min.js"></script>
-                    <script asp-src-include="~/js/datatables/dataTables.bootstrap4.min.js"></script>
-                    <script asp-src-include="~/js/datatables/responsive.bootstrap4.min.js"></script>
-                    <script asp-src-include="~/js/datatables/dataTables.buttons.min.js"></script>
-                    <script asp-src-include="~/js/datatables/buttons.bootstrap4.min.js"></script>
-                    <script asp-src-include="~/js/datatables/buttons.html5.min.js"></script>
-                    <script asp-src-include="~/js/datatables/buttons.print.min.js"></script>
+                    
 
                    
                     <link href="~/css/indexdetails.css" rel="stylesheet" />
@@ -63,7 +51,7 @@
                                     </div>
                             <div>
 
-                                        <table id="assignUserTable" class="table table-sm mt-4 w-100">
+                                        <table id="assignUserTable" class="table table-hover mb-0 align-middle">
                                 <thead>
                                   <tr><th><input type="checkbox" id="assignSelectAll"/></th><th>UserName</th><th>Name</th></tr>
                                 </thead>

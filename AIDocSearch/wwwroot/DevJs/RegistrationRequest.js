@@ -14,7 +14,7 @@ function BindData() {
         serverSide: true,
         filter: true,
         stateSave: false,
-        "lengthMenu": [[5, 10, 20, 50, 100], [5, 10, 20, 50, 100]],
+        "lengthMenu": [[10, 20, 50, 100], [10, 20, 50, 100]],
         order: [[1, 'desc']],
         ajax: async function (data, callback, settings) {
             let requestData = {

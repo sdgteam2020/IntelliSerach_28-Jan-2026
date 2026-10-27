@@ -44,6 +44,7 @@
                                        accept=".pdf" />
 
                                 <span asp-validation-for="FileName" class="text-danger"></span>
+                                <div id="fileError" class="text-danger mt-1" role="alert"></div>
                             </div>
 
                             <div class="col-md-3">
@@ -88,7 +89,7 @@
                                 <table class="table table-hover mb-0 align-middle" id="tblData">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Sr. No</th>
+                                            <th class="slno-width">Sr. No</th>
                                             <th>File Name</th>
                                             <th>Created On</th>
                                             <th class="text-center">View</th>
