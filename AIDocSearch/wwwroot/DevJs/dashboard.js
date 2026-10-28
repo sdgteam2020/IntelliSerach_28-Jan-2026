@@ -12,11 +12,14 @@
 });
 
 function loadDocWebCount() {
-
+    const token = $('input[name="__RequestVerificationToken"]').val();
     $.ajax({
         url: '/IntelliSearch/Search/GetDoc_webCount',
         type: 'POST',
         dataType: 'json',
+        headers: {
+            'RequestVerificationToken': token
+        },
 
         success: function (response) {
 

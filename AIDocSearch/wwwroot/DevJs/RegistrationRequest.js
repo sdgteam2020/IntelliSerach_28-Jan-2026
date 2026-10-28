@@ -26,9 +26,10 @@ function BindData() {
                 sortDirection: data.order.length > 0 ? data.order[0].dir : '',
             };
             try {
+                const token = $('input[name="__RequestVerificationToken"]').val();
                 let response = await fetch("/IntelliSearch/Account/GetAllUser", {
                     method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" ,'RequestVerificationToken': token },
                     body: new URLSearchParams(requestData).toString()
                 });
 

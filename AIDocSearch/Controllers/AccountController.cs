@@ -323,7 +323,7 @@ namespace AIDocSearch.Controllers
             return View(model);
         }
         [Authorize(Roles = "Admin")]
-
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetAllUser(DTODataTablesRequest request)
         {
             return Json(await _account.GetAllUsers(request));

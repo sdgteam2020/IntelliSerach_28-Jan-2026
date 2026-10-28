@@ -31,6 +31,7 @@ namespace AIDocSearch.Controllers
             _userAccount = userAccount;
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetAllConnections()
         {
             var connections = _cm.GetAllConnections();
@@ -104,6 +105,7 @@ namespace AIDocSearch.Controllers
 
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GetFilesFromCrawler([FromBody]  DTOFilesFromCrawlerRequest data)
         {
             if (!_cm.TryGetConnectionId(data.CrawlerId, out var connectionId))

@@ -86,11 +86,11 @@ function GetFilesFromCrawler(CrawlerId, FileName) {
         FileName: FileName
     };
     $("#loading").show();
-
+    const token = $('input[name="__RequestVerificationToken"]').val();
     fetch('/IntelliSearch/Files/GetFilesFromCrawler', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json', 'RequestVerificationToken': token
         },
         body: JSON.stringify(data)
     })
@@ -128,14 +128,14 @@ function GetCrawlerStatus(CrawlerId) {
     const data = {
         CrawlerId: CrawlerId
     };
-
+    const token = $('input[name="__RequestVerificationToken"]').val();
 
     fetch('/IntelliSearch/Files/GetCrawlerStatus', {
 
         method: 'POST',
 
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json', 'RequestVerificationToken': token
         },
 
         body: JSON.stringify(data)
@@ -197,14 +197,14 @@ function GetCrawlerStatus(CrawlerId) {
 async function GetAllCrawlerStatus() {
 
 
-    valuesArray = []; 
-
+    valuesArray = [];
+    const token = $('input[name="__RequestVerificationToken"]').val();
     fetch('/IntelliSearch/Files/GetAllConnections', {
 
         method: 'POST',
 
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json', 'RequestVerificationToken': token
         }
 
       
