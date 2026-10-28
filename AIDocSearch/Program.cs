@@ -350,7 +350,7 @@ app.MapHub<CrawlerHub>("/crawlerHub");
 app.UseSession();
 app.UseAuthorization();
 // Request timing middleware to log slow requests
-app.UseMiddleware<AIDocSearch.CustomMiddleware.RequestTimingMiddleware>();
+app.UseMiddleware<RequestTimingMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<XssProtectionMiddleware>();
 app.UseMiddleware<SessionCheckMiddleware>();

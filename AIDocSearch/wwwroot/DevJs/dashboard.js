@@ -20,8 +20,6 @@ function loadDocWebCount() {
 
         success: function (response) {
 
-            console.log(response);
-
             if (response && response.Data) {
 
                 let responses = response.Data.Responses;

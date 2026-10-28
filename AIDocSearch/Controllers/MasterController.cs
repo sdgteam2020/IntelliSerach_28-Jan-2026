@@ -412,6 +412,7 @@ namespace AIDocSearch.Controllers
                     if(data.Id==0)
                 {
                     ModelState.AddModelError(string.Empty, "You do not have permission to save new records.");
+                    return View(Request);
                     //  ret = await _webScraperSetting.AddWithReturn(data);
                 }
                     else 

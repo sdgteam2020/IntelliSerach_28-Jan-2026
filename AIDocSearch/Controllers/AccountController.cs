@@ -335,7 +335,7 @@ namespace AIDocSearch.Controllers
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Account");
+            return View();
         }
 
         [HttpGet]

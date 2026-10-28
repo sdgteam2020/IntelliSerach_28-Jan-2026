@@ -265,7 +265,7 @@ namespace AIDocSearch.Controllers
             string Password = Environment.GetEnvironmentVariable("IntelliSearch__UrlData__Password") ?? string.Empty;
            string encodedKey=SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").encodedKey;
             var IndexesDetails = await _searchService.GetCountDoc_Web(Url, encodedKey);
-            return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.ScraperingMessage, IndexesDetails));
+            return Json(new DTOGenericResponse<object>(ConnKeyConstants.Success, ConnKeyConstants.SuccessMessage, IndexesDetails));
         }
         public async Task<IActionResult> IndexMap()
         {

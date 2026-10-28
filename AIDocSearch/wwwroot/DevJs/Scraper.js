@@ -68,8 +68,9 @@ $(document).ready(function () {
                 reset();
                 $("#loading").show();
                 try {
-                    const encInfo = await getSalt();
-                    const cipherText = encryptPayload(dto, encInfo.key, encInfo.iv);
+                   // const encInfo = await getSalt();
+                    //const cipherText = encryptPayload(dto, encInfo.key, encInfo.iv);
+                    const cipherText = encryptPayloadData(JSON.stringify(dto));
                     const fd1 = new FormData();
                     fd1.append("payload", cipherText);
 
@@ -967,8 +968,8 @@ function ShowPdfListPopup(response) {
                         zeroRecords: "No matching PDF found",
 
                         paginate: {
-                            previous: "Previous",
-                            next: "Next"
+                            previous: "<",
+                            next: ">"
                         }
 
                     }

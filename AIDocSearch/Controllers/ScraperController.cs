@@ -9,6 +9,7 @@ using Domain.DTOs.Requests.API;
 using Domain.DTOs.Response;
 using Domain.DTOs.Response.API;
 using Domain.Entities;
+using Infrastructure.Shared.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -25,13 +26,15 @@ namespace AIDocSearch.Controllers
         private readonly IWebServer _webServer;
         private readonly IWebScraperSetting _webScraperSetting;
         private readonly ISessionService _sessionService;
-        public ScraperController(IAPI aPI, IConfiguration configuration, IWebServer webServer, IWebScraperSetting webScraperSetting, ISessionService sessionService)
+        private readonly IAESEncrytDecry _AESEncrytDecry;
+        public ScraperController(IAPI aPI, IConfiguration configuration, IWebServer webServer, IWebScraperSetting webScraperSetting, ISessionService sessionService, IAESEncrytDecry aESEncrytDecry)
         {
             _aPI = aPI;
             _configuration = configuration;
             _webServer = webServer;
             _webScraperSetting = webScraperSetting;
-            _sessionService=sessionService;
+            _sessionService = sessionService;
+            _AESEncrytDecry = aESEncrytDecry;
         }
 
         public IActionResult Index()
@@ -60,21 +63,25 @@ namespace AIDocSearch.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Scraperingpayload(string payload)
         {
-            var key = HttpContext.Session.GetString("AES_KEY");
-            var iv = HttpContext.Session.GetString("AES_IV");
+            DTOScraperRequest Data = await _AESEncrytDecry.DecryptAESWithDTO<DTOScraperRequest>(payload, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
+            if (Data == null)
+                return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.BadRequestMessage, null));
 
-            if (key == null || iv == null)
-                return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, "Key expired", ""));
-            string json = "";
-            try
-            {
-                json = Decrypt(payload, key, iv);
-            }
-            catch (CryptographicException)
-            {
-                return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, "Payload tampered or expired", ""));
-            }
-            var Data = JsonSerializer.Deserialize<DTOScraperRequest>(json);
+            //var key = HttpContext.Session.GetString("AES_KEY");
+            //var iv = HttpContext.Session.GetString("AES_IV");
+
+            //if (key == null || iv == null)
+            //    return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, "Key expired", ""));
+            //string json = "";
+            //try
+            //{
+            //    json = Decrypt(payload, key, iv);
+            //}
+            //catch (CryptographicException)
+            //{
+            //    return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, "Payload tampered or expired", ""));
+            //}
+            //var Data = JsonSerializer.Deserialize<DTOScraperRequest>(json);
             if (Data == null)
                 return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, "Invalid payload data", ""));
             ModelState.Clear();
