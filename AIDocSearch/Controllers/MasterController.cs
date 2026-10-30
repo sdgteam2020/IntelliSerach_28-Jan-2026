@@ -79,7 +79,16 @@ namespace AIDocSearch.Controllers
         }
 
         #endregion Master Table
+       public static string EncodeUriComponent(string value)
+{
+    if (string.IsNullOrEmpty(value))
+        return value;
 
+    // Decode only if the filename is already URL-encoded
+    value = Uri.UnescapeDataString(value);
+
+    return Uri.EscapeDataString(value);
+}
         [HttpGet]
         [Authorize(Roles = "Admin")]
         #region watermarks
@@ -202,8 +211,26 @@ namespace AIDocSearch.Controllers
         public async Task<IActionResult> WatermarkPdfFromUrl(string pdfUrl)
         {
             pdfUrl = Uri.UnescapeDataString(pdfUrl);
+
+
             pdfUrl = _AESEncrytDecry.DecryptAES(pdfUrl, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
 
+            var uri = new Uri(pdfUrl);
+            // 1. URL without filename
+            string pdfBaseUrl = uri.GetLeftPart(UriPartial.Authority)
+                              + uri.AbsolutePath.Substring(
+                                  0, uri.AbsolutePath.LastIndexOf('/') + 1);
+
+            // 2. Filename (also handles # in the filename)
+            string outFileName = Path.GetFileName(uri.AbsolutePath);
+
+            // Handle # if it is part of the actual filename
+            if (!string.IsNullOrEmpty(uri.Fragment))
+            {
+                outFileName += uri.Fragment;
+
+            }
+            pdfUrl= pdfBaseUrl+""+ EncodeUriComponent(outFileName);
             if (string.IsNullOrWhiteSpace(pdfUrl))
                 return BadRequest("pdfUrl is required");
 
@@ -219,13 +246,25 @@ namespace AIDocSearch.Controllers
                 ServerCertificateCustomValidationCallback =
            HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
             };
-            string extension = Path.GetExtension(new Uri(pdfUrl).AbsolutePath)?.ToLower();
+
+           
+           
+            // Extract extension
+            string extension = Path.GetExtension(outFileName)
+                ?.ToLowerInvariant();
 
             // If not PDF, open original URL
             if (extension != ".pdf")
             {
                 return Redirect(pdfUrl);
             }
+
+            // If not PDF, open original URL
+            if (extension != ".pdf")
+            {
+                return Redirect(pdfUrl);
+            }
+         
             using var httpClient = new HttpClient(handler)
             {
                 Timeout = TimeSpan.FromSeconds(60)
@@ -261,7 +300,7 @@ namespace AIDocSearch.Controllers
                     $"Inner: {ex.InnerException?.Message}");
             }
 
-            string outFileName = Path.GetFileName(new Uri(pdfUrl).AbsolutePath);
+           // string outFileName = Path.GetFileName(new Uri(pdfUrl).AbsolutePath);
 
             string clientIP = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 

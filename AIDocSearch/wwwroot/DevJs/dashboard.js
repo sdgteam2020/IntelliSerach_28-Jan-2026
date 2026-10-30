@@ -12,13 +12,18 @@
 });
 
 function loadDocWebCount() {
-    const token = $('input[name="__RequestVerificationToken"]').val();
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
+
     $.ajax({
         url: '/IntelliSearch/Search/GetDoc_webCount',
         type: 'POST',
         dataType: 'json',
         headers: {
-            'RequestVerificationToken': token
+            'RequestVerificationToken': csrfToken
         },
 
         success: function (response) {

@@ -27,7 +27,11 @@ $(function () {
         let searchTimeout;
         function doSearch(q) {
 
-            let token = $('input[name="__RequestVerificationToken"]').val();
+            const csrfToken = token();
+
+            if (!csrfToken) {
+                throw new Error("Anti-forgery token is missing.");
+            }
             $("#assignSelectAll").prop('checked', false);
             if ($.fn.DataTable.isDataTable('#assignUserTable')) {
                 const table = $('#assignUserTable').DataTable();
@@ -57,7 +61,7 @@ $(function () {
                     url: '/IntelliSearch/Index/SearchUsers',
                     type: 'POST',
                     headers: {
-                        'RequestVerificationToken': token
+                        'RequestVerificationToken': csrfToken
                     },
 
                     data: function (d) {
@@ -176,12 +180,16 @@ $(function () {
                 UserIds: Array.from(selectedUsers),
                 AllSelected: $("#assignSelectAll").is(':checked')
             };
+            const csrfToken = token();
 
+            if (!csrfToken) {
+                throw new Error("Anti-forgery token is missing.");
+            }
             $.ajax({
                 url: '/IntelliSearch/Index/AssignIndex',
                 method: 'POST',
                 contentType: 'application/json',
-                headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                headers: { 'RequestVerificationToken': csrfToken },
                 data: JSON.stringify({
                     Data: encryptPayloadData(JSON.stringify(params))
                 }),
@@ -446,6 +454,12 @@ $(function () {
 
     });
     function GetstatisticsByIndexName(indexName, uuid) {
+
+        const csrfToken = token();
+
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }
         $.ajax({
 
             url: '/IntelliSearch/Index/GetstatisticsByIndexName',
@@ -463,8 +477,7 @@ $(function () {
 
             headers: {
 
-                'RequestVerificationToken':
-                    $('input[name="__RequestVerificationToken"]').val()
+                'RequestVerificationToken': csrfToken
             },
 
             success: function (response) {
@@ -594,7 +607,14 @@ $(function () {
 
         });
     }
-    function GetDocDetailsByIndexName(indexName, uuid,OcrType) {
+    function GetDocDetailsByIndexName(indexName, uuid, OcrType) {
+
+        const csrfToken = token();
+
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }
+
         $.ajax({
 
             url: '/IntelliSearch/Index/GetDocDetailsByIndexName',
@@ -613,8 +633,7 @@ $(function () {
 
             headers: {
 
-                'RequestVerificationToken':
-                    $('input[name="__RequestVerificationToken"]').val()
+                'RequestVerificationToken':csrfToken
             },
 
             success: function (response) {
@@ -841,7 +860,7 @@ $(function () {
 
         <div class="table-responsive">
 
-            <table class="table table-hover table-bordered align-middle mb-0 file-list-table">
+            <table class="table table-bordered table-striped align-middle file-list-table">
 
                 <thead class="table-light">
 
@@ -1108,13 +1127,17 @@ $(function () {
     }
     function loadAssignedUsers(IndexId) {
 
-        let token = $('input[name="__RequestVerificationToken"]').val();
+        const csrfToken = token();
+
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }
 
         $.ajax({
             url: '/IntelliSearch/Index/GetIndexWiseAssginUsers',
             type: 'POST',
             headers: {
-                'RequestVerificationToken': token
+                'RequestVerificationToken': csrfToken
             },
             data: {
                 IndexId: IndexId

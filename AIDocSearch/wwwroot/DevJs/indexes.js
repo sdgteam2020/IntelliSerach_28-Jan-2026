@@ -20,18 +20,22 @@
         return matchingKey ? object[matchingKey] : undefined;
     }
 
-    function token() {
-        return $('input[name="__RequestVerificationToken"]').val();
-    }
+ 
 
     function postJson(url, data) {
+
+        const csrfToken = token();
+
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }
         return $.ajax({
             url: url,
             type: "POST",
             contentType: "application/json; charset=utf-8",
             data: data === undefined ? undefined : JSON.stringify(data),
             headers: {
-                RequestVerificationToken: token()
+                RequestVerificationToken: csrfToken
             }
         });
     }

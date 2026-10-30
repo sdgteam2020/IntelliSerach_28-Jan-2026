@@ -97,6 +97,11 @@ async function ShowError() {
     $("#errorStatus").text("Loading error records...");
 
     try {
+        const csrfToken = token();
+
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }
         $.ajax({
 
             url: "/IntelliSearch/Scraper/CheckCrawlErros",
@@ -105,8 +110,7 @@ async function ShowError() {
             data: { Job_Id: $("#job_id").html() }, // Set jobId to the value you want to check
             headers: {
                 Accept: "application/json",
-                RequestVerificationToken:
-                    $('input[name="__RequestVerificationToken"]').val()
+                RequestVerificationToken: csrfToken
             },
 
             success: function (data) {

@@ -1,4 +1,416 @@
 /* ============================================
+   INTELLISEARCH — FUTURISTIC BLUE UI
+   Append at the END of your existing CSS
+   ============================================ */
+
+:root {
+    --ai-blue: #0b64dc;
+    --ai-blue-dark: #0755cf;
+    --ai-cyan: #00cfff;
+    --ai-navy: #071a38;
+    --ai-bg: #edf4ff;
+    --ai-panel: #ffffff;
+    --ai-text: #102746;
+    --ai-muted: #6b7e99;
+    --ai-border: #d5e6ff;
+    --ai-glow: 0 8px 26px rgba(22, 119, 255, 0.12);
+    --ai-radius: 16px;
+}
+
+/* Global page */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: radial-gradient(ellipse at 10% 0%, rgba(0, 207, 255, 0.09), transparent 38%), radial-gradient(ellipse at 100% 30%, rgba(22, 119, 255, 0.08), transparent 35%), var(--ai-bg) !important;
+    color: var(--ai-text);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Navigation */
+.custom-navbar {
+    background: linear-gradient( 110deg, #071a38 0%, #064cba 52%, #1677ff 100% ) !important;
+    border-bottom: 1px solid rgba(0, 207, 255, 0.45) !important;
+    box-shadow: 0 5px 24px rgba(7, 26, 56, 0.20);
+    padding: 8px 14px;
+}
+
+    .custom-navbar .navbar-brand img {
+        max-height: 54px;
+        width: auto;
+        filter: none;
+    }
+
+    .custom-navbar .nav-link,
+    .navbar-nav .nav-link {
+        color: #f4f9ff !important;
+        font-weight: 600;
+        border: 1px solid transparent;
+        border-radius: 9px;
+        padding: 10px 12px;
+        margin-right: 3px;
+        transition: all 0.25s ease;
+    }
+
+        .custom-navbar .nav-link:hover,
+        .custom-navbar .nav-link:focus {
+            color: #ffffff !important;
+            background: rgba(0, 207, 255, 0.14);
+            border-color: rgba(0, 207, 255, 0.30);
+            box-shadow: 0 0 14px rgba(0, 207, 255, 0.13);
+        }
+
+        .custom-navbar .nav-link.active {
+            color: #ffffff !important;
+            background: rgba(0, 207, 255, 0.15);
+            border-color: rgba(0, 207, 255, 0.35);
+            box-shadow: inset 0 -2px 0 var(--ai-cyan);
+        }
+
+/* Main content panels */
+main.pb-3 {
+    padding-top: 20px;
+    padding-bottom: 90px !important;
+}
+
+.container .card:not(.index-card):not(.file-card) {
+    border: 1px solid var(--ai-border) !important;
+    border-left: 1px solid var(--ai-blue) !important;
+   /* border-radius: var(--ai-radius) !important;*/
+    background: var(--ai-panel);
+    box-shadow: var(--ai-glow);
+}
+
+.card-header {
+    background: linear-gradient( 110deg, #0b64dc, #168dff ) !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid rgba(0, 207, 255, 0.45) !important;
+    font-weight: 700;
+    padding: 12px 16px;
+}
+
+    /* Section headers: Indexer Application / Website Crawler */
+
+/* Index cards */
+.index-card {
+    position: relative;
+    border: 1px solid #b9d8ff !important;
+    border-left: 2px solid var(--ai-blue) !important;
+    border-radius: 3px !important;
+    background: linear-gradient( 150deg, #ffffff 0%, #f5faff 100% ) !important;
+    box-shadow: 0 6px 18px rgba(13, 74, 145, 0.10);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+    .index-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient( 90deg, #1677ff, #00cfff, #1677ff );
+        background-size: 200% 100%;
+        opacity: 0.9;
+    }
+
+    .index-card:hover {
+        transform: translateY(-5px);
+        border-color: #65baff !important;
+        box-shadow: 0 12px 28px rgba(22, 119, 255, 0.17), 0 0 0 1px rgba(0, 207, 255, 0.10);
+    }
+
+    .index-card .card-header {
+        background: linear-gradient( 110deg, #0871df, #249ce9 ) !important;
+        color: #ffffff !important;
+        border-bottom: 1px solid #a8dfff !important;
+        min-height: 45px;
+        padding: 10px 13px;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .index-card .card-body {
+        padding: 15px;
+        background: transparent;
+    }
+
+/* Statistics */
+.metric-box {
+    background: linear-gradient( 145deg, #ffffff, #edf6ff );
+    border: 1px solid #c8e0ff;
+    border-radius: 12px;
+    padding: 10px 7px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+    .metric-box:hover {
+        border-color: var(--ai-cyan);
+        box-shadow: 0 0 12px rgba(0, 207, 255, 0.14);
+    }
+
+.metric-value {
+    color: #075bd5 !important;
+    font-size: 1.12rem;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+}
+
+.metric-box .text-muted,
+.metric-box small {
+    color: var(--ai-muted) !important;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 9px !important;
+    font-weight: 600 !important;
+    transition: all 0.22s ease;
+}
+
+.btn-primary {
+    background: linear-gradient( 110deg, #0865e8, #168dff ) !important;
+    border: 1px solid #168dff !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.15);
+}
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 7px 18px rgba(22, 119, 255, 0.25);
+    }
+
+.btn-outline-primary {
+    background: #ffffff !important;
+    color: #0869e8 !important;
+    border: 1px solid #c6ddff !important;
+    box-shadow: none;
+}
+
+    .btn-outline-primary:hover {
+        background: #eaf5ff !important;
+        border-color: #168dff !important;
+        color: #064eb5 !important;
+        box-shadow: 0 0 12px rgba(0, 207, 255, 0.12);
+        transform: translateY(-1px);
+    }
+
+.btn-danger {
+    background: linear-gradient( 110deg, #ed3455, #ff5267 ) !important;
+    border: none !important;
+}
+
+/* Search box */
+.form-control,
+.fut-search-input {
+    border: 1px solid #cbdff7 !important;
+    border-radius: 10px !important;
+    background-color: #ffffff !important;
+    color: #102746 !important;
+    transition: all 0.2s ease;
+}
+
+    .form-control:focus,
+    .fut-search-input:focus {
+        border-color: var(--ai-blue) !important;
+        box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12) !important;
+    }
+
+    .form-control::placeholder {
+        color: #8a9bb2;
+    }
+
+/* Tables */
+.table {
+    border: 1px solid var(--ai-border) !important;
+    border-radius: 10px;
+    overflow: hidden;
+    color: var(--ai-text);
+    background: #ffffff;
+}
+
+    .table thead th {
+        background: #167bff !important;
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+        font-weight: 700;
+        vertical-align: middle;
+    }
+
+    .table tbody tr {
+        transition: background 0.18s ease;
+    }
+
+        .table tbody tr:hover {
+            background-color: #edf6ff !important;
+        }
+
+    .table td {
+        vertical-align: middle;
+        border-color: #e5eefb;
+    }
+
+/* User selection tags */
+.DispalyUserList {
+    background: #f3f8ff;
+    border: 1px solid #cbdff7;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+    .DispalyUserList .user-tag {
+        background: linear-gradient( 110deg, #0865e8, #168dff );
+        border: 1px solid rgba(0, 207, 255, 0.3);
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(22, 119, 255, 0.12);
+    }
+
+/* Crawler connection status */
+.health-green {
+    color: #07864a !important;
+}
+
+.health-yellow {
+    color: #a86b00 !important;
+}
+
+.health-red {
+    color: #e22d48 !important;
+}
+
+/* File cards */
+.file-card {
+    border: 1px solid #d2e4fb !important;
+    border-left: 4px solid var(--ai-blue) !important;
+    border-radius: 14px !important;
+    background: #ffffff;
+    box-shadow: 0 5px 16px rgba(13, 74, 145, 0.08);
+    transition: all 0.22s ease;
+}
+
+    .file-card:hover {
+        border-color: #8acaff !important;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(22, 119, 255, 0.14);
+    }
+
+/* Modal */
+.modal-content {
+    border: 1px solid #c8e0ff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 18px 50px rgba(7, 26, 56, 0.20);
+}
+
+.modal-header {
+    background: linear-gradient( 110deg, #071a38, #086de2 ) !important;
+    border-bottom: 1px solid rgba(0, 207, 255, 0.4);
+}
+
+.modal-title {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.btn-close {
+    background-color: transparent !important;
+    filter: none;
+}
+
+/* Search result highlighting */
+.highlightQuery {
+    background: #c7fff0;
+    color: #064b49;
+    border-radius: 4px;
+    padding: 2px 5px;
+}
+
+/* Pagination */
+.page-btn {
+    background: #ffffff;
+    color: #075bd5;
+    border: 1px solid #cbdff7;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+    .page-btn:hover,
+    .page-btn.active {
+        background: linear-gradient( 110deg, #0865e8, #168dff );
+        color: #ffffff;
+        border-color: #168dff;
+    }
+
+/* Footer */
+footer,
+.footer {
+    background: linear-gradient( 110deg, #071a38, #084fa9 ) !important;
+    color: #ffffff !important;
+    border-top: 1px solid rgba(0, 207, 255, 0.40);
+    box-shadow: 0 -4px 20px rgba(7, 26, 56, 0.08);
+}
+
+.ai-tagline {
+    color: #ffffff !important;
+    background: none;
+    -webkit-text-fill-color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+
+
+.loader-spinner {
+    border-color: #d9eaff;
+    border-top-color: #0877ff;
+}
+
+/* Accessible focus */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 3px solid rgba(0, 180, 255, 0.55);
+    outline-offset: 3px;
+}
+
+/* Responsive cards */
+@media (max-width: 768px) {
+    .custom-navbar .nav-link {
+        margin: 3px 0;
+    }
+
+    .index-card .card-body {
+        padding: 12px;
+    }
+
+    .metric-box {
+        padding: 8px 5px;
+    }
+
+    .metric-value {
+        font-size: 1rem;
+    }
+
+    main.pb-3 {
+        padding-top: 12px;
+    }
+}
+
+/* Respect reduced-motion settings */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+/* ============================================
    Futuristic Dashboard Layout - CSS Variables
    ============================================ */
 :root {
@@ -425,7 +837,7 @@ body {
 /* Subtle underline on active link */
     .custom-navbar .nav-link.active {
         background: rgba(255,255,255,0.04);
-        box-shadow: inset 0 -2px 0 #000ecc;
+        box-shadow: inset 0 -2px 0 #ffffff;
     }
 
 /* Toggler color adjustments */

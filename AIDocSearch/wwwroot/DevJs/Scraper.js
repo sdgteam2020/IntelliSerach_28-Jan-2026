@@ -37,7 +37,11 @@ $(document).ready(function () {
         if (typeof $(this).valid === "function" && !$(this).valid()) {
             return;
         }
-        const token = $('input[name="__RequestVerificationToken"]').val();
+        const csrfToken = token();
+
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }
         const form = this;
 
         // build FormData (includes files)
@@ -77,7 +81,7 @@ $(document).ready(function () {
                     const response = await fetch('/IntelliSearch/Scraper/Scraperingpayload', {
                         method: 'POST',
                         headers: {
-                            "RequestVerificationToken": token // matches [ValidateAntiForgeryToken]
+                            "RequestVerificationToken": csrfToken // matches [ValidateAntiForgeryToken]
                         },
                         body: fd1 // don't set content-type; fetch will handle for FormData
                     });
@@ -458,7 +462,11 @@ function CheckCrawlStatus() {
     
     
    
+    const csrfToken = token();
 
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
     $.ajax({
 
         url: "/IntelliSearch/Scraper/CheckCrawlStatus",
@@ -467,8 +475,7 @@ function CheckCrawlStatus() {
         data: { Job_Id: $("#job_id").html() }, // Set jobId to the value you want to check
         headers: {
             Accept: "application/json",
-            RequestVerificationToken:
-                $('input[name="__RequestVerificationToken"]').val()
+            RequestVerificationToken:csrfToken
         },
 
         success: function (response) {
@@ -651,7 +658,11 @@ function LoadPdfLinks(jobId) {
 
         return;
     }
+    const csrfToken = token();
 
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
   
     $.ajax({
 
@@ -661,8 +672,7 @@ function LoadPdfLinks(jobId) {
         data: { Job_Id: $("#job_id").html() }, // Set jobId to the value you want to check
         headers: {
             Accept: "application/json",
-            RequestVerificationToken:
-                $('input[name="__RequestVerificationToken"]').val()
+            RequestVerificationToken:csrfToken
         },
 
         success: function (response) {
@@ -735,7 +745,7 @@ function ShowPdfListPopup(response) {
             <div class="table-responsive">
 
                 <table id="tblPdfList"
-                       class="table table-bordered table-hover align-middle mb-0"
+                       class="table table-bordered table-striped align-middle"
                        style="width:100%;">
 
                     <thead class="table-light">
@@ -1071,6 +1081,11 @@ function DownloadAllPdfs(jobId) {
 
     $("#loading").show();
     $(".loadertext").html("Downloading...")
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
     $.ajax({
 
         url: "/IntelliSearch/Scraper/CheckCrawlDownloadPdf",
@@ -1079,8 +1094,8 @@ function DownloadAllPdfs(jobId) {
         data: { Job_Id: $("#job_id").html() }, // Set jobId to the value you want to check
         headers: {
             Accept: "application/json",
-            RequestVerificationToken:
-                $('input[name="__RequestVerificationToken"]').val()
+            RequestVerificationToken: csrfToken
+               
         },
 
         success: function (response) {
@@ -1183,7 +1198,7 @@ function reset()
     $("#job_id").text("-");
     $("#crawl_status")
         .removeClass()
-        .addClass("badge bg-secondary fs-5 px-4 py-2")
+        .addClass("badge fs-5 px-4 py-2")
         .text("Waiting");
 
     $("#alias").text("-");

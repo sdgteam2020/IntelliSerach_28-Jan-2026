@@ -61,30 +61,17 @@ builder.Services.Configure<SecurityStampValidatorOptions>(options =>
     options.ValidationInterval = TimeSpan.Zero;
 });
 
-builder.Services.ConfigureApplicationCookie(o =>
-{
-    o.LoginPath = "/Account/Login";
-    o.AccessDeniedPath = "/Account/AccessDenied";
-    o.SlidingExpiration = true;
-    o.ExpireTimeSpan = TimeSpan.FromMinutes(30);
 
-    o.Cookie.HttpOnly = true;
-    o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    o.Cookie.SameSite = SameSiteMode.Strict; // use Lax/None if you have external IdP redirects
-    // Ensure immediate revalidation
-    o.Events.OnValidatePrincipal = SecurityStampValidator.ValidatePrincipalAsync;
-
-});
 // Antiforgery cookie hardened (__Host- prefix requires Secure + path "/" + no Domain)
-builder.Services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true); 
-builder.Services.AddAntiforgery(o =>
-{
-    o.Cookie.Name = "__Host-AntiForgery";
 
-    //  o.Cookie.HttpOnly = true;
-    // o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    o.Cookie.Path = "/"; // required for __Host- cookies
-    // o.Cookie.SameSite = SameSiteMode.Strict; // enable if you don't post from cross-site contexts
+builder.Services.AddAntiforgery(options =>
+{
+    options.SuppressXFrameOptionsHeader = true;
+    //options.Cookie.Name = "__Host-AntiForgery";
+    //options.Cookie.Path = "/";
+    //options.Cookie.HttpOnly = true;
+    //options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    //options.Cookie.SameSite = SameSiteMode.Strict;
 });// Identity application cookie hardening
 
 // Session cookie hardened
@@ -96,42 +83,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     //options.Cookie.SameSite = SameSiteMode.Strict;
-});
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("CorsPolicy", policy =>
-    {
-        policy.SetIsOriginAllowed(origin =>
-        {
-            // Get allowed origins from configuration
-            var allowedOrigins = new[]
-            {
-                "*"
-            };
-            // Always allow localhost in development
-            if (builder.Environment.IsDevelopment() &&
-                origin.StartsWith(""))
-            {
-                return true;
-            }
-
-            // Check against configured list
-            return allowedOrigins.Contains(origin) ||
-                   allowedOrigins.Contains("*");
-        });
-
-        // Only allow specific methods
-        policy.WithMethods("GET", "POST", "PUT");
-
-        // Only allow specific headers
-        policy.WithHeaders("Authorization", "Content-Type", "X-Requested-With");
-
-        // Allow credentials (cookies, auth headers)
-        policy.AllowCredentials();
-
-        // Cache preflight for 1 hour
-        policy.SetPreflightMaxAge(TimeSpan.FromHours(1));
-    });
 });
 builder.Services.AddSelfInfrastructure();
 builder.Services.AddInfrastructure();
@@ -344,7 +295,6 @@ app.UseStaticFiles(new StaticFileOptions
     }
 }); 
 app.UseRouting();
-app.UseCors("CorsPolicy");
 app.MapHub<CrawlerHub>("/crawlerHub");
 // Ensure session is available before authorization and MVC execution
 app.UseSession();

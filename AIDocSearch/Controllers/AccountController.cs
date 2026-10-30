@@ -1,17 +1,18 @@
-﻿using Infrastructure.Shared.Helpers;
+﻿using AIDocSearch.Interfaces;
+using Application.Interfaces;
+using Application.Interfaces.Repository;
 using Domain.CommonModel;
 using Domain.Constants;
 using Domain.DTOs.Requests;
 using Domain.DTOs.Response;
 using Domain.IdentityEntities;
+using Infrastructure.Shared.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography;
-using Application.Interfaces.Repository;
-using Application.Interfaces;
-using AIDocSearch.Interfaces;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using static Org.BouncyCastle.Asn1.Cmp.Challenge;
 
 namespace AIDocSearch.Controllers
 {
@@ -299,7 +300,10 @@ namespace AIDocSearch.Controllers
                 ModelState.AddModelError(string.Empty, ConnKeyConstants.SaltNullMessage);
                 return View(model);
             }
-
+            if (model.RankId <= 0)
+            {
+                return BadRequest();
+            }
             if (ModelState.IsValid)
             {
                 // Decrypt the incoming password using the injected encryption service

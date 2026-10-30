@@ -26,10 +26,17 @@ function BindData() {
                 sortDirection: data.order.length > 0 ? data.order[0].dir : '',
             };
             try {
-                const token = $('input[name="__RequestVerificationToken"]').val();
+                const csrfToken = token();
+
+                if (!csrfToken) {
+                    throw new Error("Anti-forgery token is missing.");
+                }
+                if (!csrfToken) {
+                    throw new Error("Anti-forgery token is missing.");
+                }
                 let response = await fetch("/IntelliSearch/Account/GetAllUser", {
                     method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" ,'RequestVerificationToken': token },
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" ,'RequestVerificationToken': csrfToken },
                     body: new URLSearchParams(requestData).toString()
                 });
 
@@ -134,14 +141,18 @@ $(document).on('click', '.updateuser', async function () {
         return;
     }
 
-    const token = $('input[name="__RequestVerificationToken"]').val();
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
 
     try {
         const resp = await fetch("/IntelliSearch/Account/UpdateApprovalStatus", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "RequestVerificationToken": token
+                "RequestVerificationToken": csrfToken
             },
             body: JSON.stringify({
                 Id: userId,

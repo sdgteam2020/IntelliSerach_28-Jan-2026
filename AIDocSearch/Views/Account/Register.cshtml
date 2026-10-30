@@ -1,4 +1,5 @@
 ﻿@model Domain.DTOs.Requests.DTORegisterRequest
+
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 @{
@@ -22,7 +23,8 @@
     <link href="~/css/login.css" rel="stylesheet" />
     <script src="~/js/crypto-js.min.js"></script>
     <link href="~/css/register.css" rel="stylesheet" />
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery/jquery.min.js"></script>
+
 </head>
 <body>
     <canvas id="canvas"></canvas>
@@ -48,7 +50,7 @@
                         <div class="form-group row mb-3">
                             <label asp-for="UserName" class="col-sm-3 col-form-label text-white"></label>
                             <div class="col-sm-9">
-                                <input asp-for="UserName" class="form-control" value="@ViewBag.UserName" />
+                                <input asp-for="UserName" class="form-control" />
                                 <span asp-validation-for="UserName" class="text-danger"></span>
                             </div>
                         </div>

@@ -5,12 +5,16 @@
     });
 
     try {
-        const token = $('input[name="__RequestVerificationToken"]').val();
+        const csrfToken = token();
+
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }
         const response = await fetch('/IntelliSearch/Master/GetAllMMaster', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'RequestVerificationToken': token
+                'RequestVerificationToken': csrfToken
             },
             body: userdata
         });

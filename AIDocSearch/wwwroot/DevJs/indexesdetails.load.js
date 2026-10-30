@@ -334,11 +334,14 @@ $(function () {
     }
 
     function load() {
-        let token = $('input[name="__RequestVerificationToken"]').val();
+        let csrfToken = token();
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }
         $.ajax({
             url: '/IntelliSearch/Index/GetIndexesDetails',
             method: 'POST',
-            headers: { 'RequestVerificationToken': token },
+            headers: { 'RequestVerificationToken': csrfToken },
             success: function (resp) {
                 if (resp && resp.success) {
 
@@ -357,13 +360,16 @@ $(function () {
         const userdata = new URLSearchParams({
             id: 0
         });
-        const token = $('input[name="__RequestVerificationToken"]').val();
+        const csrfToken = token();
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }   
         try {
             const response = await fetch('/IntelliSearch/Master/GetAllWebServer', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    "RequestVerificationToken": token   // Pass the CSRF token in the header
+                    "RequestVerificationToken": csrfToken   // Pass the CSRF token in the header
                 },
                 body: userdata
             });
@@ -407,15 +413,17 @@ function refreshAllCrawlerStatus() {
 
         if (!crawlerId)
             return;
-       
+        const csrfToken = token();
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }   
         $.ajax({
             url: '/IntelliSearch/Files/GetCrawlerStatusLive',
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             headers: {
-                'RequestVerificationToken':
-                    $('input[name="__RequestVerificationToken"]').val()
+                'RequestVerificationToken':csrfToken
             },
             data: JSON.stringify(crawlerId),
             success: function (response) {
@@ -455,7 +463,7 @@ function updateCrawlerStatus(
     if (connected) {
 
         $text
-            .text('Crawler Connected')
+            .text('Indexer Connected')
             .removeClass(
                 'text-danger text-secondary'
             )

@@ -273,9 +273,7 @@ footer {
     border-width: 0px 1px 1px 4px !important;
     border-style: solid !important;
     border-color: rgb(4 76 146) rgb(4 76 146) rgb(4 76 146) rgb(13 110 253) !important;
-}
-.card-header:first-child {
-    border-radius: 0 0 0 0 !important;
+    --bs-card-border-radius: 10px !important;
 }
 
 .table {
@@ -426,7 +424,7 @@ footer {
 }
 .slno-width {
     width: 100px !important;
-    min-width: 100px !important;
+    min-width: 20px !important;
     max-width: 100px !important;
     white-space: nowrap;
 }

@@ -67,21 +67,7 @@ namespace AIDocSearch.Controllers
             if (Data == null)
                 return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.BadRequestMessage, null));
 
-            //var key = HttpContext.Session.GetString("AES_KEY");
-            //var iv = HttpContext.Session.GetString("AES_IV");
-
-            //if (key == null || iv == null)
-            //    return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, "Key expired", ""));
-            //string json = "";
-            //try
-            //{
-            //    json = Decrypt(payload, key, iv);
-            //}
-            //catch (CryptographicException)
-            //{
-            //    return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, "Payload tampered or expired", ""));
-            //}
-            //var Data = JsonSerializer.Deserialize<DTOScraperRequest>(json);
+           
             if (Data == null)
                 return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, "Invalid payload data", ""));
             ModelState.Clear();

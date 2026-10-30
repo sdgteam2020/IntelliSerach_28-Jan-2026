@@ -31,12 +31,16 @@ $(".navbar-nav a.nav-link").each(function () {
     }
 });
 async function getSalt() {
-    const token = $('input[name="__RequestVerificationToken"]').val();
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
     const response = await fetch('/IntelliSearch/Account/GetSalt', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
-            "RequestVerificationToken": token // matches [ValidateAntiForgeryToken]
+            "RequestVerificationToken": csrfToken // matches [ValidateAntiForgeryToken]
         }
     });
 
@@ -86,11 +90,15 @@ function GetFilesFromCrawler(CrawlerId, FileName) {
         FileName: FileName
     };
     $("#loading").show();
-    const token = $('input[name="__RequestVerificationToken"]').val();
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
     fetch('/IntelliSearch/Files/GetFilesFromCrawler', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json', 'RequestVerificationToken': token
+            'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken
         },
         body: JSON.stringify(data)
     })
@@ -128,14 +136,18 @@ function GetCrawlerStatus(CrawlerId) {
     const data = {
         CrawlerId: CrawlerId
     };
-    const token = $('input[name="__RequestVerificationToken"]').val();
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
 
     fetch('/IntelliSearch/Files/GetCrawlerStatus', {
 
         method: 'POST',
 
         headers: {
-            'Content-Type': 'application/json', 'RequestVerificationToken': token
+            'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken
         },
 
         body: JSON.stringify(data)
@@ -198,13 +210,16 @@ async function GetAllCrawlerStatus() {
 
 
     valuesArray = [];
-    const token = $('input[name="__RequestVerificationToken"]').val();
+    const csrfToken = token();
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }   
     fetch('/IntelliSearch/Files/GetAllConnections', {
 
         method: 'POST',
 
         headers: {
-            'Content-Type': 'application/json', 'RequestVerificationToken': token
+            'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken
         }
 
       
@@ -432,5 +447,8 @@ function getFileIcon(extension) {
         default:
             return "fa-solid fa-file text-secondary";
     }
+}
+function token() {
+    return $('input[name="__RequestVerificationToken"]').val();
 }
 

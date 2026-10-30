@@ -83,12 +83,16 @@ async function DeleteUpload(id) {
         return;
 
     try {
-        const token = $('input[name="__RequestVerificationToken"]').val();
+        const csrfToken = token();
+
+        if (!csrfToken) {
+            throw new Error("Anti-forgery token is missing.");
+        }
         const response = await fetch('/IntelliSearch/Search/DeleteFiles', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                "RequestVerificationToken": token   // Pass the CSRF token in the header
+                "RequestVerificationToken": csrfToken   // Pass the CSRF token in the header
             },
             body: JSON.stringify({ Id: id })
         });

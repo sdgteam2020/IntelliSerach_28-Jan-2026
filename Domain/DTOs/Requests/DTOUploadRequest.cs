@@ -9,6 +9,7 @@ namespace Domain.DTOs.Requests
         [AllowedExtensions(new[] { ".pdf" })]
         [AllowedContentType(new[] { "application/pdf" })]
         [MaxFileNameLength(100)]
+        [ValidFileName]
         public IFormFile? FileName { get; set; }
     }
 }

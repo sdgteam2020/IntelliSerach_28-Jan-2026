@@ -14,7 +14,7 @@
     }
 
 .card-header-custom {
-    background: linear-gradient(135deg, #0076db, #2a95e1);
+    background: linear-gradient(110deg, #0b64dc, #168dff) !important;
     color: white;
     padding: 2px;
     display: flex;
@@ -256,11 +256,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #f8fafc;
+    background: #2d8cf12b;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 1px;
     padding: 3px 4px;
-     margin-bottom: 1px;
+    margin-bottom: 1px;
     gap: 12px;
 }
 

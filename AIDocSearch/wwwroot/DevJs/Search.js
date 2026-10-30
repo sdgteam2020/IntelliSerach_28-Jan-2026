@@ -69,7 +69,11 @@ async function searchContent(reset = true,IsFilter) {
     $("#loading").show();
     
     const startTime = performance.now(); // Start timing
-    const token = $('input[name="__RequestVerificationToken"]').val();
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
 
     let dataString = $("#searchInput").val();
     if (
@@ -94,7 +98,7 @@ async function searchContent(reset = true,IsFilter) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            "RequestVerificationToken": token   // Pass the CSRF token in the header
+            "RequestVerificationToken": csrfToken   // Pass the CSRF token in the header
         },
         body: JSON.stringify(
             {
@@ -499,13 +503,17 @@ async function GetFilter(active, SearchableIndex) {
     const userdata = new URLSearchParams({
         id: 0
     });
-    const token = $('input[name="__RequestVerificationToken"]').val();
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
     try {
         const response = await fetch('/IntelliSearch/Search/GetFilter', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                "RequestVerificationToken": token   // Pass the CSRF token in the header
+                "RequestVerificationToken": csrfToken   // Pass the CSRF token in the header
             },
             body: userdata
         });
@@ -591,13 +599,17 @@ async function GetWebServerUrlMapping() {
     const userdata = new URLSearchParams({
         id: 0
     });
-    const token = $('input[name="__RequestVerificationToken"]').val();
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
     try {
         const response = await fetch('/IntelliSearch/Master/GetAllWebServer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                "RequestVerificationToken": token   // Pass the CSRF token in the header
+                "RequestVerificationToken": csrfToken   // Pass the CSRF token in the header
             },
             body: userdata
         });

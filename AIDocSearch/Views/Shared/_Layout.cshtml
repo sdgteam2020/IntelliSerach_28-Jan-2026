@@ -6,7 +6,7 @@
 @inject UserManager<ApplicationUser> userManager;
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IConfiguration configuration;
-<html lang="en">
+<html lang="en" class="light-theme">
 <head>
   
     <meta charset="utf-8" />
@@ -114,13 +114,14 @@
                         <li class="nav-item d-flex align-items-center">
                             @if (User.Identity.IsAuthenticated)
                             {
-                                <span class="navbar-text text-white"> <h4 class="alert-heading">Welcome @dtoSession.RankName @dtoSession.Name!</h4> </span>
+                                <span class="navbar-text text-white"> <h4 class="alert-heading">Welcome @dtoSession.RankName @dtoSession.Name </h4> </span>
                                 <input type="hidden" id="payloadaes" value="@dtoSession.AESKey" />
                                 <input type="hidden" id="spnUserName" value="@dtoSession.UserName" />
                             }
                         </li>
                         <li class="nav-item d-flex align-items-center">
-                            <button id="themeToggle" class="btn btn-sm btn-outline-light me-2 m-lg-2" aria-pressed="false" title="Toggle theme">
+                            <span class="navbar-text text-white m-2"> <h4 class="alert-heading"> (@dtoSession.RoleName) </h4> </span>
+                            <button id="themeToggle" class="btn btn-sm btn-outline-light me-2 m-lg-2 d-none" aria-pressed="false" title="Toggle theme">
                                 <i class="fas fa-moon" aria-hidden="true"></i>
                             </button>
                         </li>
@@ -131,7 +132,7 @@
     </header>
    
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main" class="">
             @RenderBody()
         </main>
     </div>
@@ -153,8 +154,8 @@
     <script src="~/sweetalert2/sweetalert2.min.js" asp-append-version="true" defer></script>
     <script src="~/js/crypto-js.min.js" asp-append-version="true" defer></script>
     <script src="~/js/futuristic.js" asp-append-version="true" defer></script>
-    <script src="~/js/site.js" ></script>
-    <script src="~/devjs/loadaes.js"></script>
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+    <script src="~/devjs/loadaes.js" asp-append-version="true" defer></script>
    
     @await RenderSectionAsync("Scripts", required: false)
 </body>

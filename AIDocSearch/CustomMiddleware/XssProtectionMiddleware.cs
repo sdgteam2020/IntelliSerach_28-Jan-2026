@@ -1,62 +1,76 @@
 ﻿namespace AIDocSearch.CustomMiddleware
 {
-    public class XssProtectionMiddleware
+    public sealed class XssProtectionMiddleware
     {
         private readonly RequestDelegate _next;
 
         public XssProtectionMiddleware(RequestDelegate next)
         {
-            _next = next;
+            _next = next ?? throw new ArgumentNullException(nameof(next));
         }
 
         public async Task Invoke(HttpContext context)
         {
             var request = context.Request;
 
-            // You can skip some paths if needed (e.g. static files, health checks)
-            // if (request.Path.StartsWithSegments("/health")) { await _next(context); return; }
-
-            // 1) Check query string values
-            foreach (var kv in request.Query)
+            // Check query-string values.
+            foreach (var queryParameter in request.Query)
             {
-                if (XssHelper.ContainsXss(kv.Value))
+                if (XssHelper.ContainsXss(queryParameter.Value.ToString()))
                 {
-                    await BlockRequest(context, "Query parameter");
+                    await BlockRequest(context);
                     return;
                 }
             }
 
-            // 2) Check form fields for POST/PUT with form content
+            // Check form fields for POST, PUT, and PATCH requests.
             if (HttpMethods.IsPost(request.Method) ||
                 HttpMethods.IsPut(request.Method) ||
                 HttpMethods.IsPatch(request.Method))
             {
                 if (request.HasFormContentType)
                 {
-                    var form = await request.ReadFormAsync();
-                    foreach (var kv in form)
+                    try
                     {
-                        if (XssHelper.ContainsXss(kv.Value))
+                        var form = await request.ReadFormAsync();
+
+                        foreach (var formField in form)
                         {
-                            await BlockRequest(context, "Form field");
-                            return;
+                            if (XssHelper.ContainsXss(formField.Value.ToString()))
+                            {
+                                await BlockRequest(context);
+                                return;
+                            }
                         }
                     }
+                    catch (InvalidDataException)
+                    {
+                        await BlockRequest(context);
+                        return;
+                    }
+                    catch (BadHttpRequestException)
+                    {
+                        await BlockRequest(context);
+                        return;
+                    }
                 }
-
-                // (Optional) If you also use JSON bodies, you can read & scan Request.Body
-                // with EnableBuffering – but since your screenshot shows
-                // application/x-www-form-urlencoded, this part is not mandatory now.
             }
 
-            // If everything is clean, continue the pipeline
             await _next(context);
         }
 
-        private static async Task BlockRequest(HttpContext context, string source)
+        private static async Task BlockRequest(HttpContext context)
         {
+            if (context.Response.HasStarted)
+            {
+                return;
+            }
+
+            context.Response.Clear();
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await context.Response.WriteAsync("Invalid input detected (" + source + ").");
+            context.Response.ContentType = "text/plain; charset=utf-8";
+
+            await context.Response.WriteAsync("Invalid request.");
         }
     }
 }
