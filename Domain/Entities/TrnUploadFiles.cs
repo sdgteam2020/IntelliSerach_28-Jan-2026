@@ -10,10 +10,10 @@ namespace Domain.Entities
         public int TrnUploadId { get; set; }
 
         [Required]
-        [Column(TypeName = "varchar(500)")]
+        [Column(TypeName = "nvarchar(500)")]
         public required string FileName { get; set; }
         [Required]
-        [Column(TypeName = "varchar(500)")]
+        [Column(TypeName = "nvarchar(500)")]
         public required string OrignalFileName { get; set; }
 
     }

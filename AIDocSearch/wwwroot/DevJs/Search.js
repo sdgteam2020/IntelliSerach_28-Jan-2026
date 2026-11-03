@@ -154,7 +154,12 @@ async function searchContent(reset = true,IsFilter) {
                     //     ...(hit.highlight?.['table_rows.raw'] || []),
                     //     ...(hit.highlight?.['table_rows.raw_text'] || [])
                     // ];
-                    // const content = hit._source?.content?.join(" ... ") || hit._source?.content || "";
+                    // Solution 2: Safely wrap it in an array if it's a string/single value
+                    const contentArray = Array.isArray(hit._source?.content)
+                        ? hit._source.content
+                        : [hit._source?.content].filter(Boolean);
+
+                    const content = contentArray.join(', ');
                   
                     const score = hit._score ?? 0;
                     const canonical_url = hit._source?.canonical_url || '';
@@ -227,8 +232,15 @@ async function searchContent(reset = true,IsFilter) {
                         // ...tableRawHighlights,// p-2
                         // ...contentHighlights, //p-1
                          
-                         
+
                     ];
+                    let result;
+
+                    if (highlights.length === 0) {
+                        result = content; // Replace with your default value or empty array []
+                    } else {
+                        result = highlights;
+                    }
                     const displayTitle =
                         Array.isArray(titleHighlights)
                             ? titleHighlights.find(item => typeof item === "string" && item.trim()) || title
@@ -354,7 +366,7 @@ async function searchContent(reset = true,IsFilter) {
 
         <div class="result-snippet">
             <ul>
-                ${highlights}  ............
+                ${result}  ............
             </ul> 
         </div>
     </div>
@@ -382,7 +394,7 @@ async function searchContent(reset = true,IsFilter) {
 
         <div class="result-snippet">
             <ul>
-                 ${highlights}   ............
+                 ${result}   ............
             </ul>
         </div>
         ${tableHtml}

@@ -1,9 +1,10 @@
-﻿using Domain.Constants;
+﻿using Application.Interfaces;
+using Application.Interfaces.Repository;
+using Domain.Constants;
 using Domain.DTOs.Response;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
-using Application.Interfaces.Repository;
-using Application.Interfaces;
+using System.Text.RegularExpressions;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Exceptions;
 namespace Infrastructure.Shared.Services
@@ -101,6 +102,15 @@ namespace Infrastructure.Shared.Services
                 }
             }
 
+            // 2. Reject Windows Short File Names (SFN / 8.3)
+            // Examples: FILE~1.PDF, DOCUMENT~2.PDF
+            string fileName = Path.GetFileName(file.FileName ?? string.Empty);
+            string nameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+
+            if (Regex.IsMatch(Path.GetFileNameWithoutExtension(fileName), @"^[A-Za-z0-9_-]+~[0-9]+$", RegexOptions.IgnoreCase))
+            {
+                return "Please rename your file using only letters, numbers, spaces, underscores (_), and hyphens (-). Special characters (like #, $, or ~) are not allowed.";
+            }
             try
             {
                 await using var stream = file.OpenReadStream();
