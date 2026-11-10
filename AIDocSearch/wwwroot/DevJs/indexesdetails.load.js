@@ -1,6 +1,57 @@
 // devjs/indexesdetails.load.js
 // This file fetches the data and renders table with assign buttons
 let webServerList = [];
+
+$(document).on('click', '.btnIndexprivate', function () {
+
+    let CrawlerId = $(this).data('crawler-id');
+    let uuid = $(this).data('uuid');
+
+    Swal.fire({
+        title: 'Make Index Public?',
+        text: 'Are you sure you want to make this index Public?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, make it Public!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+
+            UpdateIndexPrivatePublic(CrawlerId, uuid, false);
+
+        }
+
+    });
+
+});
+$(document).on('click', '.btnIndexpublic', function () {
+
+    let CrawlerId = $(this).data('crawler-id');
+    let uuid = $(this).data('uuid');
+
+    Swal.fire({
+        title: 'Make Index Private?',
+        text: 'Are you sure you want to make this index private?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, make it private!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+
+            UpdateIndexPrivatePublic(CrawlerId, uuid, true);
+
+        }
+
+    });
+
+});
 $(function () {
 
     function renderTable(data, type) {
@@ -75,6 +126,7 @@ $(function () {
                 .forEach(function (item) {
 
                     let crawlerId = item.index || '';
+                    let uuid = item.uuid || '';
 
                     let spanHtml = `
                 <span class="running text-secondary crawler-status-text"
@@ -84,6 +136,28 @@ $(function () {
                 <span class="crawler-status-dot"
                       data-crawler-id="${crawlerId}">
                 </span>
+
+                 <button type="button"
+                            class="btn btn-outline-danger btn-sm confirmRestart d-none" data-crawler-id="${crawlerId}">
+                            <i class="fas fa-sync-alt me-1"></i>
+
+                        </button>
+
+                   <button type="button"
+        class="btn btn-outline-success btn-sm btnIndexpublic d-none"
+        title="Public"
+        data-crawler-id="${crawlerId}"
+        data-uuid="${uuid}">
+    <i class="fas fa-lock-open me-1"></i>
+</button>
+
+<button type="button"
+        class="btn btn-outline-danger btn-sm btnIndexprivate d-none"
+        title="Private"
+        data-crawler-id="${crawlerId}"
+        data-uuid="${uuid}">
+    <i class="fas fa-lock me-1"></i>
+</button>
             `;
 
                     let htmlCrawlerStatistics = `
@@ -116,7 +190,10 @@ $(function () {
                         <div class="crawler-status">
                             <div class="status-left">
                                 ${spanHtml}
+
+                                
                             </div>
+                           
                         </div>
 
                         <div class="card-body">
@@ -220,7 +297,8 @@ $(function () {
 
             data.filter(item => item.IsCrawlerInstall === false)
                 .forEach(function (item) {
-
+                    let crawlerId = item.index || '';
+                    let uuid = item.uuid || '';
                     html.push(`
                 <div class="col-12 col-md-6 col-xl-3 index-item"
                      data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
@@ -234,7 +312,28 @@ $(function () {
                                 </h5>
                             </div>
                         </div>
+                         <div class="crawler-status">
+                            <div class="status-left">
 
+                              <button type="button"
+        class="btn btn-outline-success btn-sm btnIndexpublic d-none"
+        title="Public"
+        data-crawler-id="${crawlerId}"
+        data-uuid="${uuid}">
+    <i class="fas fa-lock-open me-1"></i>
+</button>
+
+<button type="button"
+        class="btn btn-outline-danger btn-sm btnIndexprivate d-none"
+        title="Private"
+        data-crawler-id="${crawlerId}"
+        data-uuid="${uuid}">
+    <i class="fas fa-lock me-1"></i>
+</button>
+                                
+                            </div>
+                           
+                        </div>
                         <div class="card-body">
 
                             <div class="metrics-grid">
@@ -316,6 +415,7 @@ $(function () {
         ///use in realtime
         refreshAllCrawlerStatus();
         startCrawlerStatusMonitoring();
+        GetAllPrivateIndexes();
         ////////
 
         $(document)
@@ -458,12 +558,17 @@ function updateCrawlerStatus(
         crawlerId +
         '"]'
     );
-
+      
+    let $restart_indexer = $(
+        '.confirmRestart[data-crawler-id="' +
+        crawlerId +
+        '"]'
+    );
 
     if (connected) {
 
         $text
-            .text('Indexer Connected')
+            .text('Connected')
             .removeClass(
                 'text-danger text-secondary'
             )
@@ -477,14 +582,14 @@ function updateCrawlerStatus(
             )
             .addClass(
                 'live-dot'
-            );
-
+        );
+        $restart_indexer.removeClass('d-none')
     }
     else {
         //console.log($indexingstatistics)
        // $indexingstatistics.addClass("d-none");
         $text
-            .text('Indexer Not Connected')
+            .text('Not Connected')
             .removeClass(
                 'text-success text-secondary'
             )
@@ -498,7 +603,9 @@ function updateCrawlerStatus(
             )
             .addClass(
                 'offline-dot'
-            );
+        );
+
+        $restart_indexer.addClass('d-none')
     }
     // Automatically sort:
     // Live first -> Offline second
@@ -543,4 +650,161 @@ function sortCrawlerCards() {
     });
 
     $container.append($cards);
+}
+function UpdateIndexPrivatePublic(CrawlerId, uuid,IsPrivate) {
+
+    const data = {
+        CrawlerId: CrawlerId,
+        uuid: uuid,
+        IsPrivate: IsPrivate
+    };
+
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Anti-forgery token is missing."
+        });
+        return;
+    }
+
+    $("#loading").show();
+
+    fetch('/IntelliSearch/Index/UpdateIndexPrivatePublic', {
+
+        method: 'POST',
+
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': csrfToken
+        },
+
+        body: JSON.stringify(data)
+
+    })
+        .then(async response => {
+
+            const result = await response.json();
+
+            if (!response.ok) {
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: result.Message || result.message,
+                    customClass: {
+                        popup: "swal-high-z"
+                    }
+                });
+
+                return;
+            }
+
+            Swal.fire({
+                position: "top-end",
+                icon: "success",
+                title: result.Message || result.message,
+                showConfirmButton: false,
+                timer: 1500
+            });
+            GetAllPrivateIndexes();
+        })
+        .catch(error => {
+
+            console.error(error);
+
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Something went wrong. Please try again."
+            });
+
+        })
+        .finally(() => {
+
+            $("#loading").hide();
+
+        });
+
+}
+function GetAllPrivateIndexes() {
+
+    $.ajax({
+        url: '/IntelliSearch/Index/GetAllPrivateIndexes',
+        type: 'POST',
+
+        headers: {
+            'RequestVerificationToken': token()
+        },
+
+        success: function (response) {
+
+            let privateIndexes = response.Data ?? response.data ?? [];
+
+            // Handle JSON string response
+            if (typeof privateIndexes === "string") {
+                privateIndexes = JSON.parse(privateIndexes);
+            }
+
+            // Handle nested response
+            if (!Array.isArray(privateIndexes)) {
+                privateIndexes = privateIndexes.Data
+                    ?? privateIndexes.data
+                    ?? [];
+            }
+
+            if (!Array.isArray(privateIndexes)) {
+                console.error("Invalid private index response");
+                return;
+            }
+
+            // Get private IndexId values
+            let privateUUIDs = new Set(
+                privateIndexes
+                    .filter(x => x.IsPrivate === true || x.isPrivate === true)
+                    .map(x => String(x.IndexId ?? x.indexId).trim())
+            );
+
+            console.log("Private UUIDs:", privateUUIDs);
+
+            // Update Public / Private buttons
+            $('.btnIndexpublic, .btnIndexprivate').each(function () {
+
+                let uuid = String(
+                    $(this).attr('data-uuid') ?? ''
+                ).trim();
+
+                let isPrivate = privateUUIDs.has(uuid);
+
+                if ($(this).hasClass('btnIndexprivate')) {
+
+                    // Show private button if index is private
+                    $(this).toggleClass('d-none', !isPrivate);
+
+                } else {
+
+                    // Show public button if index is public
+                    $(this).toggleClass('d-none', isPrivate);
+
+                }
+
+            });
+
+        },
+
+        error: function (xhr) {
+
+            console.error(xhr);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Unable to retrieve index privacy status.'
+            });
+
+        }
+
+    });
 }

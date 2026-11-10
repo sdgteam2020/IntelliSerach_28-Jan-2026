@@ -110,7 +110,7 @@ main.pb-3 {
         left: 0;
         right: 0;
         height: 3px;
-        background: linear-gradient( 90deg, #1677ff, #00cfff, #1677ff );
+        background: linear-gradient( 90deg, #1677ff, #1458c7, #1677ff );
         background-size: 200% 100%;
         opacity: 0.9;
     }
@@ -962,46 +962,7 @@ html.light-theme .footer.bg-white {
     }
 }
 
-/* ============================================
-   Search Results, Filters, and Pagination
-   ============================================ */
-.filters {
-    display: flex;
-    gap: 0.6rem;
-    padding: 0.6rem 0.4rem;
-    margin: 0 0 1rem 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
 
-    .filters .filter {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.5rem 0.9rem;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.03);
-        /*color: var(--fut-text-secondary);*/
-        font-weight: 600;
-        cursor: pointer;
-        border: 1px solid rgb(35 54 251) !important;
-        transition: var(--fut-transition-standard);
-    }
-
-.filters .filter:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #0066cc;
-}
-
-.filters .filter.active {
-    background: linear-gradient(90deg, #0066cc 0%, #5a4bd6 100%);
-    color: #fff !important;
-    box-shadow: 0 8px 26px rgba(90, 75, 214, 0.14);
-}
-.filtersWithSearch {
-    background: linear-gradient(90deg, #ffffff 0%, #ffffff 100%) !important;
-    color: #007bff !important;
-    box-shadow: 0 8px 26px rgba(90, 75, 214, 0.14);
-}
 .search-suggestions,
 #suggestions {
     max-width: 100%;
@@ -1179,17 +1140,6 @@ html.light-theme .footer.bg-white {
     }
 }
 
-/* Light theme overrides for filters and results */
-html.light-theme .filters .filter {
-    background: rgba(0, 0, 0, 0.02);
-    color: var(--fut-text-secondary);
-    border: 1px solid rgba(15, 23, 42, 0.04);
-}
-
-html.light-theme .filters .filter.active {
-    background: var(--fut-primary-neon);
-    color: #fff !important;
-}
 
 html.light-theme .google-result {
     border-bottom: 1px solid rgba(15, 23, 42, 0.04);
@@ -1338,3 +1288,380 @@ html.light-theme .btn-secondary {
     color: var(--fut-text-primary) !important;
 }
 
+/* ==========================================
+   INTELLISEARCH PROFESSIONAL NAVBAR
+   ========================================== */
+
+.intel-navbar.custom-navbar {
+    --nav-blue: #1769e8;
+    --nav-text: #ffffff;
+    background: linear-gradient( 105deg, #1458c7 0%, #1769e8 55%, #2584f5 100% ) !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255,255,255,.15) !important;
+    box-shadow: 0 3px 14px rgba(17,76,160,.12);
+    padding: 0 18px;
+    min-height: 70px;
+    margin-bottom: 12px !important;
+    z-index: 1030;
+}
+
+/* Container */
+
+.intel-navbar .intel-nav-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    padding: 0;
+}
+
+/* ==========================================
+   BRAND
+   ========================================== */
+
+.intel-navbar .intel-navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    margin-right: 20px;
+    text-decoration: none;
+}
+
+.intel-navbar .intel-navbar-logo {
+    width: 48px !important;
+    height: 48px !important;
+    max-height: 48px !important;
+    object-fit: contain;
+    margin: 0 !important;
+    filter: none !important;
+}
+
+.intel-navbar-brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.intel-brand-name {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 750;
+    letter-spacing: -.3px;
+}
+
+.intel-navbar-brand-text small {
+    color: #dbeafe;
+    font-size: 10px;
+    letter-spacing: .3px;
+}
+
+/* ==========================================
+   NAVIGATION
+   ========================================== */
+
+.intel-navbar .intel-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+    .intel-navbar .intel-nav-links .nav-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 38px;
+        padding: 9px 12px !important;
+        margin: 0 !important;
+        background: transparent;
+        color: rgba(255,255,255,.88) !important;
+        border: 1px solid transparent !important;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        white-space: nowrap;
+        box-shadow: none !important;
+        transition: background .2s, color .2s;
+    }
+
+        .intel-navbar .intel-nav-links .nav-link i {
+            font-size: 13px;
+            opacity: .9;
+        }
+
+        .intel-navbar .intel-nav-links .nav-link:hover {
+            color: #fff !important;
+            background: rgba(255,255,255,.12) !important;
+            border-color: rgba(255,255,255,.08) !important;
+        }
+
+        /* Active Navigation */
+
+        .intel-navbar .intel-nav-links .nav-link.active {
+            background: rgba(255,255,255,.18) !important;
+            color: #fff !important;
+            border-color: rgba(255,255,255,.20) !important;
+            box-shadow: inset 0 -2px 0 #ffffff !important;
+        }
+
+/* Dropdown arrow */
+
+.intel-navbar .dropdown-toggle::after {
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+/* ==========================================
+   RIGHT SIDE
+   ========================================== */
+
+.intel-navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Theme Button */
+
+.intel-navbar #themeToggle.intel-theme-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,.10) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,.15) !important;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+    .intel-navbar #themeToggle.intel-theme-btn:hover {
+        background: rgba(255,255,255,.20) !important;
+    }
+
+/* ==========================================
+   USER ACCOUNT
+   ========================================== */
+
+.intel-navbar .intel-user-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 10px 5px 5px;
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 11px;
+    color: #fff;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+    .intel-navbar .intel-user-btn:hover {
+        background: rgba(255,255,255,.18);
+    }
+
+.intel-user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,.20);
+    color: #fff;
+    border-radius: 9px;
+    font-size: 14px;
+}
+
+.intel-user-information {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
+    min-width: 0;
+}
+
+.intel-user-name {
+    font-size: 12px;
+    font-weight: 650;
+    color: #fff;
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.intel-user-role {
+    color: #dbeafe;
+    font-size: 10px;
+}
+
+/* ==========================================
+   DROPDOWN MENUS
+   ========================================== */
+
+.intel-navbar .intel-nav-dropdown {
+    min-width: 230px;
+    padding: 7px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 12px 35px rgba(15,23,42,.15);
+    margin-top: 10px;
+}
+
+    .intel-navbar .intel-nav-dropdown .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 10px 12px;
+        border-radius: 7px;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 550;
+        text-decoration: none;
+        background: transparent;
+        white-space: normal;
+    }
+
+        .intel-navbar .intel-nav-dropdown .dropdown-item:hover,
+        .intel-navbar .intel-nav-dropdown .dropdown-item:focus {
+            background: #eff6ff;
+            color: #1769e8;
+        }
+
+        .intel-navbar .intel-nav-dropdown .dropdown-item i {
+            width: 17px;
+            text-align: center;
+            color: #64748b;
+        }
+
+.intel-account-header {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+    .intel-account-header strong {
+        font-size: 13px;
+        color: #1e293b;
+    }
+
+    .intel-account-header small {
+        font-size: 11px;
+        color: #64748b;
+    }
+
+/* Logout */
+
+.intel-navbar .intel-nav-dropdown .intel-logout-item {
+    color: #dc3545 !important;
+    width: 100%;
+    border: none !important;
+    cursor: pointer;
+}
+
+    .intel-navbar .intel-nav-dropdown .intel-logout-item i {
+        color: #dc3545;
+    }
+
+    .intel-navbar .intel-nav-dropdown .intel-logout-item:hover {
+        background: #fff1f2 !important;
+        color: #b91c1c !important;
+    }
+
+/* ==========================================
+   LIGHT THEME COMPATIBILITY
+   ========================================== */
+
+html.light-theme .intel-navbar.custom-navbar {
+    background: linear-gradient( 105deg, #1458c7, #1769e8, #2584f5 ) !important;
+}
+
+html.light-theme .intel-navbar .nav-link,
+html.light-theme .intel-navbar .intel-brand-name,
+html.light-theme .intel-navbar .intel-user-btn {
+    color: #fff !important;
+}
+
+html.light-theme .intel-navbar #themeToggle.intel-theme-btn {
+    color: #fff !important;
+    border-color: rgba(255,255,255,.15) !important;
+    background: rgba(255,255,255,.10) !important;
+}
+
+/* ==========================================
+   RESPONSIVE NAVBAR
+   ========================================== */
+
+@media (max-width: 1399.98px) {
+
+    .intel-navbar .intel-navbar-brand {
+        margin-right: 8px;
+    }
+
+    .intel-navbar .intel-nav-links .nav-link {
+        padding: 8px 9px !important;
+        font-size: 12px;
+    }
+
+    .intel-user-name {
+        max-width: 130px;
+    }
+}
+
+@media (max-width: 1199.98px) {
+
+    .intel-navbar.custom-navbar {
+        padding: 10px 16px;
+    }
+
+    .intel-navbar .navbar-collapse {
+        width: 100%;
+        padding-top: 12px;
+    }
+
+    .intel-navbar .intel-nav-links {
+        align-items: stretch;
+        gap: 4px;
+    }
+
+        .intel-navbar .intel-nav-links .nav-link {
+            justify-content: flex-start;
+            padding: 11px 12px !important;
+        }
+
+    .intel-navbar-right {
+        justify-content: space-between;
+        margin: 14px 0 0;
+        padding: 12px 0 4px;
+        border-top: 1px solid rgba(255,255,255,.15);
+    }
+
+    .intel-navbar .intel-user-btn {
+        width: auto;
+    }
+}
+
+@media (max-width: 575.98px) {
+
+    .intel-navbar-brand-text small {
+        display: none;
+    }
+
+    .intel-navbar .intel-navbar-logo {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .intel-brand-name {
+        font-size: 15px;
+    }
+}

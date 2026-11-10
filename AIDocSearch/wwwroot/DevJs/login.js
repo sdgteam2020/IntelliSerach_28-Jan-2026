@@ -1,4 +1,22 @@
-﻿document.querySelector("form").addEventListener("submit", function (e) {
+﻿document.addEventListener("DOMContentLoaded", function () {
+
+    document.addEventListener("input", function (event) {
+
+        if (event.target.matches("input[type='text'], textarea")) {
+
+            let value = event.target.value;
+
+            let cleanValue = value.replace(/[@#$'"!%^<>?]/g, "");
+
+            if (value !== cleanValue) {
+                event.target.value = cleanValue;
+            }
+        }
+
+    });
+
+});
+document.querySelector("form").addEventListener("submit", function (e) {
     e.preventDefault();
 
     const UserNameInput = document.querySelector("#UserName");

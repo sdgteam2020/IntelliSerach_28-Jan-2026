@@ -34,8 +34,9 @@ namespace AIDocSearch.Controllers
         private readonly IUserRepository _iUserRepository;
         private readonly IElasticAuthApi elasticAuthApi;
         private readonly IConfiguration _configuration;
+        private readonly IindexUserMapping _iindexUserMapping;
 
-        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserAccount _account, IRank rank, IEncryptionService encryptionService, IAuthService authService, IRegisterService registerService, ISessionService sessionService, IAESEncrytDecry aESEncrytDecry, IUserRepository iUserRepository, IElasticAuthApi elasticAuthApi, IConfiguration configuration)
+        public AccountController(ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserAccount _account, IRank rank, IEncryptionService encryptionService, IAuthService authService, IRegisterService registerService, ISessionService sessionService, IAESEncrytDecry aESEncrytDecry, IUserRepository iUserRepository, IElasticAuthApi elasticAuthApi, IConfiguration configuration, IindexUserMapping iindexUserMapping)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
@@ -51,6 +52,7 @@ namespace AIDocSearch.Controllers
             _iUserRepository = iUserRepository;
             this.elasticAuthApi = elasticAuthApi;
             _configuration = configuration;
+            _iindexUserMapping = iindexUserMapping;
         }
 
         [HttpGet]
@@ -157,6 +159,24 @@ namespace AIDocSearch.Controllers
                         // Fallback to a safe default
                         ret = new Domain.Entities.MRank { RankAbbreviation = "N/A" };
                     }
+                    List<string> allowedIndices = new();
+
+                    List<string> allindexnottouse = await _iindexUserMapping.GetPrivateIndexNoAcessThisuserId(selectedUser.Id.ToString());
+                    if (model.RoleName=="Admin")
+                        allowedIndices.Add("*");
+
+                    else if (allindexnottouse == null || !allindexnottouse.Any())
+                    {
+                        // If there are no private indexes to restrict, allow all indexes (*)
+                        allowedIndices.Add("*");
+                    }
+                    else
+                    {
+                        // Otherwise, add the formatted restrictions
+                        string combinedExclusionPattern = $"/~({string.Join("|", allindexnottouse)})/";
+                        allowedIndices.Add(combinedExclusionPattern);
+                    }
+                    
                     DTOElasticApiKeyRequest elkRequest = new()
                     {
                         Name = "admin-key",
@@ -171,7 +191,8 @@ namespace AIDocSearch.Controllers
                         {
                             new()
                             {
-                                Names = new List<string> { "*" },
+                                //Names = new List<string> { "*" },
+                                 Names = allowedIndices,
                                 Privileges = new List<string> { "all" }
                             }
                         },

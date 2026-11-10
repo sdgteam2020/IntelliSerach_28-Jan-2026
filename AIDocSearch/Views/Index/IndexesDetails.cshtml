@@ -98,340 +98,94 @@
 
 
 
-                    <div class="modal fade" id="indexingstatisticsModal" tabindex="-1"
-                         data-bs-backdrop="static"
-                         data-bs-keyboard="false">
-
-                        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-
-                           <div class="modal-content crawler-modal">
-
-
-                        <div class="modal-header crawler-header">
-                                    <span class="d-none spanindexNameForDashboard"></span>
-                                    <span class="d-none spanuuidForDashboard"></span>
-
-                            
-                            <h5 class="modal-title">
-                                <i class="fa-solid fa-spider me-2"></i>
-                                        <span class="lbl_for_CrawlerDashboard"></span>
-                            </h5>
-
+                    <div class="modal fade" id="indexingstatisticsModal" tabindex="-1" aria-labelledby="indexingStatisticsTitle" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content crawler-modal">
+      <div class="modal-header crawler-header">
+        <span class="d-none spanindexNameForDashboard"></span>
+        <span class="d-none spanuuidForDashboard"></span>
+        <h5 class="modal-title" id="indexingStatisticsTitle"><i class="fa-solid fa-spider me-2"></i><span class="lbl_for_CrawlerDashboard"></span></h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i class="fa-solid fa-x text-white"></i></button>
-
-                        </div>
-
-
-                        <div class="modal-body">
-
-
-                        <!-- Status -->
-
-                        <div class="crawler-status">
-
-                                        <div class="crawler-status">
-
-                                            <div class="status-left">
-
-                                                <span class="live-dot"
-                                                      id="crawlerStatusDot">
-                                                </span>
-
-
-                                                <span class="running "
-                                                      id="crawlerStatusText">
-                                                    Indexer crawler...
-                                                </span>
-
-
-                                                <span class="sync"
-                                                      id="lastSync">
-                                                </span>
-
-                                            </div>
-                                            <div class="status-right ">
-                                                <button type="button"
-                                                        class="refresh-btn"
-                                                        data-index=""
-                                                        data-uuid=""
-                                                        id="refreshStatisticsbyIndexName">
-                                                    <span class="refresh-icon">↻</span>
-                                                    Refresh
-                                                </button>
-                                            </div>
-                                        </div>
-
-                        </div>
-
-
-
-                        <div class="dashboard-container">
-
-
-                        <h1>
-                            Index Analytics
-                        </h1>
-
-
-                        <div class="row g-3">
-
-
-
-                        <!-- Card -->
-
-                        <div class="col-lg-2 col-md-4">
-
-                        <div class="stat-card blue-card">
-
-                        <div class="icon">
-                        <i class="fa-solid fa-file"></i>
-                        </div>
-
-                        <div class="stat-number"
-                        id="filesDiscovered">
-                        0
-                        </div>
-
-                        <div class="stat-label">
-                        Files Discovered
-                        </div>
-
-                        </div>
-
-                        </div>
-
-
-
-                        <div class="col-lg-2 col-md-4">
-
-                        <div class="stat-card green-card" role="button" id="AllDocDetailsByIndexName">
-
-                        <div class="icon">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        </div>
-
-                        <div class="stat-number"
-                        id="indexedSearchable">
-                        0
-                        </div>
-
-                        <div class="stat-label">
-                        Indexed Searchable
-                        </div>
-
-                        </div>
-
-                        </div>
-
-
-
-
-                        <div class="col-lg-2 col-md-4">
-
-                        <div class="stat-card purple-card" role="button" id="OCRDocDetailsByIndexName">
-
-                        <div class="icon">
-                        <i class="fa-solid fa-eye"></i>
-                        </div>
-
-                        <div class="stat-number"
-                        id="indexedOcr_Files">
-                        0
-                        </div>
-
-                        <div class="stat-label">
-                        OCR Enabled
-                        </div>
-
-                        </div>
-
-                        </div>
-
-
-
-
-
-                        <div class="col-lg-2 col-md-4">
-
-                                                <div class="stat-card orange-card" role="button" id="NotOCRDocDetailsByIndexName">
-
-                        <div class="icon">
-                        <i class="fa-solid fa-file-lines"></i>
-                        </div>
-
-                        <div class="stat-number"
-                        id="indexedNotOcr_Files">
-                        0
-                        </div>
-
-                        <div class="stat-label">
-                        Text Extraction
-                        </div>
-
-                        </div>
-
-                        </div>
-
-
-
-
-                        <div class="col-lg-2 col-md-4">
-
-                        <div class="stat-card red-card">
-
-                        <div class="icon">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-
-
-                        <div class="stat-number"
-                        id="failedProcess">
-                        0
-                        </div>
-
-                        <div class="stat-label">
-                        Unsupported Files 
-                        </div>
-
-                        </div>
-
-                        </div>
-
-
-
-
-
-                        <div class="col-lg-2 col-md-4">
-
-                        <div class="stat-card dark-card">
-
-                        <div class="icon">
-                                                        <i class="fa-solid fa-spinner"></i>
-                        </div>
-
-
-                        <div class="stat-number"
-                        id="indexunderProgress">
-                        0
-                        </div>
-
-
-                        <div class="stat-label">
-                        Under Progress
-                        </div>
-
-                        </div>
-
-                        </div>
-
-
-                        </div>
-
-
-
-
-                        <!-- Progress -->
-
-                        <div class="progress-panel">
-
-
-                        <div class="progress-title">
-
-                        <i class="fa-solid fa-database"></i>
-                         Indexing Progress
-
-                        </div>
-
-
-
-                        <div class="row align-items-center">
-
-
-                        <div class="col-md-3 d-none">
-
-                        <div class="progress-text d-none"
-                        id="progressText">
-
-                        0 of 0 files searchable
-
-                        </div>
-
-                        </div>
-
-
-
-                        <div class="col-md-10">
-
-
-                        <div class="progress">
-
-                        <div class="progress-bar"
-                        id="progressBar"
-                        >
-                        </div>
-
-                        </div>
-
-
-                        </div>
-
-
-
-
-                        <div class="col-md-2 text-end">
-
-                        <span class="progress-percent"
-                        id="progressPercent">
-
-                        0%
-
-                        </span>
-
-                        </div>
-
-
-
-                        </div>
-
-
-
-                        </div>
-
-                                        <div class="extension-panel">
-
-                                            <div class="extension-title">
-                                                <i class="fa-solid fa-file-circle-check file-check-icon"></i>
-                                                Crawled File Types
-                                            </div>
-
-                                            <div id="CrawleExtensionsContainer"
-                                                 class="extension-list">
-                                            </div>
-
-                                        </div>
-
-                                        <div class="extension-panel d-none">
-
-                        <div class="extension-title">
-                            <i class="fa-solid fa-file-circle-check"></i>
-                            Supported File Types
-                        </div>
-
-                        <div id="extensionContainer"
-                             class="extension-list ">
-
-                        </div>
-
-                    </div>
-                        </div>
-
-
-                        </div>
-
-
-                        </div>
-                        </div>
-                        </div>
+      </div>
+      <div class="modal-body indexing-body">
+        <div class="crawler-status">
+          <div class="status-left">
+            <span class="live-dot" id="crawlerStatusDot"></span>
+            <span class="running" id="crawlerStatusText">Indexer crawler...</span>
+            <span class="sync" id="lastSync"></span>
+          </div>
+          <div class="status-right">
+            <button type="button" class="refresh-btn" data-index="" data-uuid="" id="refreshStatisticsbyIndexName"><span class="refresh-icon">↻</span> Refresh</button>
+          </div>
+        </div>
+        <div class="dashboard-container">
+          <h1 class="index-heading">Index Analytics</h1>
+          <div class="index-flow" aria-label="Indexing process statistics">
+            <svg class="index-connectors" viewBox="0 0 1200 420" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <marker id="indexArrowHead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#417ad8"/></marker>
+              </defs>
+              <!-- discovered -> searchable -->
+              <path class="flow-path p1" d="M225 210 H336" marker-end="url(#indexArrowHead)"/>
+              <!-- searchable -> OCR and text extraction -->
+              <path class="flow-path p2" d="M526 210 H575 V103 H650" marker-end="url(#indexArrowHead)"/>
+              <path class="flow-path p3" d="M526 210 H575 V317 H650" marker-end="url(#indexArrowHead)"/>
+              <!-- discovered -> in progress and unsupported, matching slide 2 -->
+              <path class="flow-path p4" d="M130 122 V1 H1070 V20" marker-end="url(#indexArrowHead)"/>
+              <path class="flow-path p5" d="M130 298 V429 H1070 V405" marker-end="url(#indexArrowHead)"/>
+            </svg>
+            <div class="stat-card blue-card flow-files" aria-label="Files discovered">
+              <div class="icon"><i class="fa-solid fa-file"></i></div>
+              <div class="stat-number" id="filesDiscovered">0</div>
+              <div class="stat-label">Files Discovered</div>
+            </div>
+            <div class="stat-card green-card flow-indexed" role="button" tabindex="0" id="AllDocDetailsByIndexName">
+              <div class="icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+              <div class="stat-number" id="indexedSearchable">0</div>
+              <div class="stat-label">Indexed Searchable</div>
+            </div>
+            <div class="stat-card purple-card flow-ocr" role="button" tabindex="0" id="OCRDocDetailsByIndexName">
+              <div class="icon"><i class="fa-solid fa-eye"></i></div>
+              <div class="stat-number" id="indexedOcr_Files">0</div>
+              <div class="stat-label">OCR Based</div>
+            </div>
+            <div class="stat-card orange-card flow-text" role="button" tabindex="0" id="NotOCRDocDetailsByIndexName">
+              <div class="icon"><i class="fa-solid fa-file-lines"></i></div>
+              <div class="stat-number" id="indexedNotOcr_Files">0</div>
+                                                <div class="stat-label">Text Based</div>
+            </div>
+            <div class="stat-card dark-card flow-progress">
+              <div class="icon"><i class="fa-solid fa-spinner"></i></div>
+              <div class="stat-number" id="indexunderProgress">0</div>
+              <div class="stat-label">Under Progress</div>
+            </div>
+            <div class="stat-card red-card flow-unsupported">
+              <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="stat-number" id="failedProcess">0</div>
+              <div class="stat-label">Unsupported Files</div>
+            </div>
+          </div>
+          <div class="progress-panel">
+            <div class="progress-title"><i class="fa-solid fa-database me-2"></i>Indexing Progress</div>
+            <div class="row align-items-center g-3">
+              <div class="col-md-3 d-none"><div class="progress-text d-none" id="progressText">0 of 0 files searchable</div></div>
+              <div class="col-10"><div class="progress"><div class="progress-bar" id="progressBar" role="progressbar" aria-label="Indexing progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0%"></div></div></div>
+              <div class="col-2 text-end"><span class="progress-percent" id="progressPercent">0%</span></div>
+            </div>
+          </div>
+          <div class="extension-panel">
+            <div class="extension-title"><i class="fa-solid fa-file-circle-check file-check-icon me-2"></i>Crawled File Types</div>
+            <div id="CrawleExtensionsContainer" class="extension-list"></div>
+          </div>
+          <div class="extension-panel d-none">
+            <div class="extension-title">Supported File Types</div>
+            <div id="extensionContainer" class="extension-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
                     </div>
 

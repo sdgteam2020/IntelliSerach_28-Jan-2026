@@ -59,13 +59,12 @@ $(document).ready(function () {
 
         
         Swal.fire({
-            title: "Do you want to Crawler?",
-            text: "You won't be able to revert this!",
+            title: "Do you want to Crawl?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, Crawler it!"
+            confirmButtonText: "Yes, Crawl it!"
         }).then(async (result) => {
             if (result.isConfirmed) {
                

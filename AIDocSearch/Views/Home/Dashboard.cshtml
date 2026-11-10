@@ -1,129 +1,321 @@
-﻿@*
-    Futuristic Dashboard with Hero Search and Glassmorphism Cards
-*@
-@{
+﻿@{
     ViewData["Title"] = "Dashboard";
-    var userName = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Guest";
 }
 
-<link href="~/css/search.css" rel="stylesheet" />
-<link href="~/css/dashboard.css" rel="stylesheet" />
+<link rel="stylesheet"
+      href="~/css/search.css"
+      asp-append-version="true" />
 
-<!-- Hero Section with Centered Search -->
-<div class="container mt-2">
-<div class="fut-hero">
-    <div class="fut-hero-content">
-        <!-- Logo -->
-        <img src="~/images/logo.png"
-             alt="Indian Army IntelliSearch Logo"
-             class="fut-logo " />
+<link rel="stylesheet"
+      href="~/css/dashboard.css"
+      asp-append-version="true" />
 
-        <!-- Title -->
-        <h1 class="fut-title  d-none">
-            Indian Army IntelliSearch
-        </h1>
+<main class="intel-dashboard">
 
-        <!-- Subtitle -->
-        <h2 class="fut-subtitle d-none">
-            Your Smart Document Exploration and Search Engine
-        </h2>
+    <!-- Main Hero -->
+    <section class="intel-hero">
 
-        <!-- Search Form -->
-        <form id="searchForm"
-              method="post"
-              action="~/Search/Index"
-              class="fut-search-form"
-              role="search">
+        <div class="intel-hero-inner">
 
-            <div class="fut-search-wrapper">
-                <img src="~/images/Search.png"
-                     alt=""
-                     class="fut-search-icon"
-                     aria-hidden="true" />
+            <!-- Brand Identity -->
+            <div class="intel-brand">
 
-                <input type="text"
-                       id="searchInput"
-                       name="searchInput"
-                       class="fut-search-input"
-                       placeholder='Search text, "exact phrase", or (AI Similar Search)...'
-                       aria-label="Search"
-                       autofocus
-                       autocomplete="off"
-                      @*  pattern='(?:[A-Za-z0-9 ]+|"[A-Za-z0-9 ]+"|\([A-Za-z0-9 ]+\))?'
-                       title='Only letters, numbers and spaces are allowed. You may also use "quotes" or (parentheses). The field can be blank.' *@ />
-                <button id="searchBtn"
-                        class="fut-search-btn"
-                        type="submit">
-                    <i class="fas fa-search" aria-hidden="true"></i> Search
-                </button>
-                <span class="msgerror alert alert-danger m-lg-1 d-none"></span>
-            </div>
-            
-            <div id="suggestions"></div>
-           
-        </form>
-    </div>
+                @* <div class="intel-logo-box">
+                    <img src="~/images/logo.png"
+                         alt="Indian Army IntelliSearch"
+                         class="fut-logo intel-logo" />
+                </div> *@
 
-    <!-- Cards Section -->
-    <div class="fut-cards-section">
-        <div class="fut-cards-row">
+                <div class="intel-brand-content">
+                    <div class="intel-eyebrow">
+                        <span class="intel-status-dot"></span>
+                        INTELLIGENT DOCUMENT DISCOVERY
+                    </div>
 
-            <!-- Card 1: Quick Stats -->
-            <div class="fut-card">
-                <div class="fut-card-icon">
-                    <i class="fas fa-chart-line"></i>
+                    <h1>Indian Army <span>IntelliSearch</span></h1>
+
+                    <p>
+                        Search, explore and discover knowledge
+                        across documents and indexed web sources.
+                    </p>
                 </div>
-                <h3 class="fut-card-title">Quick Stats</h3>
-                <p class="fut-card-text">
-                    Access powerful analytics and insights from your document repository.
-                </p>
-                <ul class="fut-card-list">
-                    <li>
-                        <i class="fas fa-file-alt"></i>
-                        Total Indexed Docs: <span id="totalDocuments">Loading...</span>
-                    </li>
 
-                    <li>
-                        <i class="fas fa-database"></i>
-                        Total Crawled Website: <span id="totalScrapWeb">Loading...</span>
-                    </li>
-                </ul>
             </div>
 
-            <!-- Card 2: Recent Activity -->
-            <div class="fut-card">
-                <div class="fut-card-icon">
-                    <i class="fas fa-history"></i>
-                </div>
-                <h3 class="fut-card-title">Recent Activity</h3>
-                <p class="fut-card-text">
-                    Track your latest searches and document interactions.
-                </p>
-                <ul class="fut-card-list">
-                    <li><i class="fas fa-clock"></i> Last search: <span class="spnlastsearchdate"></span></li>
-                    <li><i class="fas fa-search"></i> Recent Search: <span class="spnRecentSearches"></span></li>
-                </ul>
-            </div>
+            <!-- Search -->
+            <form id="searchForm"
+                  method="post"
+                  action="@Url.Action("Index", "Search")"
+                  class="fut-search-form"
+                  role="search">
 
-            <!-- Card 3: Quick Tips -->
-            <div class="fut-card">
-                <div class="fut-card-icon">
-                    <i class="fas fa-lightbulb"></i>
+                <div class="fut-search-container">
+
+                    <div class="fut-search-wrapper">
+
+                      
+                        <button type="button"
+                                class="fut-upload-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#uploadPdfModal"
+                                title="Upload PDF to Searchable Index"
+                                aria-label="Upload PDF">
+
+                            <i class="fa-solid fa-plus"></i>
+
+                        </button>
+
+                        <input type="text"
+                               id="searchInput"
+                               name="searchInput"
+                               class="fut-search-input"
+                               placeholder="Search documents, keywords, phrases or related topics..."
+                               aria-label="Search Documents"
+                               autocomplete="off"
+                               autofocus />
+
+                        <button id="searchBtn"
+                                type="submit"
+                                class="fut-search-btn">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>Search</span>
+
+                        </button>
+
+
+                    </div>
+
+                    <!-- Existing Suggestions -->
+                    <div id="suggestions"
+                         class="search-suggestions"></div>
+
+                    <!-- Validation -->
+                    <div class="msgerror alert alert-danger d-none mt-2"
+                         role="alert"></div>
+
                 </div>
-                <h3 class="fut-card-title">Quick Tips</h3>
-                <p class="fut-card-text">
-                    Enhance your search experience with these pro tips.
-                </p>
-                <ul class="fut-card-list">
-                    <li><i class="fas fa-quote-left"></i> Use "quotes" for exact phrase search</li>
-                    <li><i class="fas fa-circle-nodes"></i> Use (parentheses) for AI Similar Search</li>
-                </ul>
+
+            </form>
+
+            <!-- Search Hints -->
+            <div class="intel-search-hints">
+
+                <span class="intel-hints-title">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Search smarter:
+                </span>
+
+                <span class="intel-hint">
+                    <i class="fa-solid fa-font"></i>
+                    Keyword Search
+                </span>
+
+                <span class="intel-hint">
+                    <i class="fa-solid fa-quote-left"></i>
+                    Exact Phrases
+                </span>
+
+                <span class="intel-hint">
+                    <i class="fa-solid fa-brain"></i>
+                    AI Similarity
+                </span>
+
             </div>
 
         </div>
-    </div>
 
-</div>
-</div>
+    </section>
+
+    <!-- Dashboard Cards -->
+    <section class="intel-dashboard-section">
+
+        <div class="intel-section-header">
+
+            <div>
+                <h2>Overview</h2>
+                <p>Your search workspace at a glance</p>
+            </div>
+
+            <div class="intel-section-indicator">
+                <i class="fa-solid fa-chart-simple"></i>
+                Dashboard
+            </div>
+
+        </div>
+
+        <div class="intel-cards-grid">
+
+            <!-- Card 1: Quick Stats -->
+            <article class="intel-card">
+
+                <div class="intel-card-header">
+
+                    <div class="intel-card-icon blue">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+
+                    <span class="intel-card-category">
+                        Repository
+                    </span>
+
+                </div>
+
+                <h3>Quick Statistics</h3>
+
+                <p class="intel-card-description">
+                    Overview of indexed documents and crawled sources.
+                </p>
+
+                <div class="intel-card-data">
+
+                    <div class="intel-stat-row">
+
+                        <div class="intel-stat-label">
+                            <i class="fa-regular fa-file-lines"></i>
+                            Indexed Documents
+                        </div>
+
+                        <span id="totalDocuments"
+                              class="intel-stat-value">
+                            Loading...
+                        </span>
+
+                    </div>
+
+                    <div class="intel-stat-row">
+
+                        <div class="intel-stat-label">
+                            <i class="fa-solid fa-globe"></i>
+                            Crawled Websites
+                        </div>
+
+                        <span id="totalScrapWeb"
+                              class="intel-stat-value">
+                            Loading...
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+            <!-- Card 2: Recent Activity -->
+            <article class="intel-card">
+
+                <div class="intel-card-header">
+
+                    <div class="intel-card-icon purple">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+
+                    <span class="intel-card-category">
+                        Activity
+                    </span>
+
+                </div>
+
+                <h3>Recent Activity</h3>
+
+                <p class="intel-card-description">
+                    View your latest search activity and interactions.
+                </p>
+
+                <div class="intel-card-data">
+
+                    <div class="intel-activity-row">
+
+                        <div class="intel-activity-icon">
+                            <i class="fa-regular fa-clock"></i>
+                        </div>
+
+                        <div class="intel-activity-content">
+                            <span class="intel-data-label">
+                                Last Search
+                            </span>
+                            <span class="spnlastsearchdate intel-data-text">
+                                No recent activity
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="intel-activity-row">
+
+                        <div class="intel-activity-icon">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+
+                        <div class="intel-activity-content">
+                            <span class="intel-data-label">
+                                Recent Query
+                            </span>
+                            <span class="spnRecentSearches intel-data-text">
+                                No searches yet
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+            <!-- Card 3: Search Tips -->
+            <article class="intel-card">
+
+                <div class="intel-card-header">
+
+                    <div class="intel-card-icon amber">
+                        <i class="fa-regular fa-lightbulb"></i>
+                    </div>
+
+                    <span class="intel-card-category">
+                        Guide
+                    </span>
+
+                </div>
+
+                <h3>Search Tips</h3>
+
+                <p class="intel-card-description">
+                    Simple techniques to improve search accuracy.
+                </p>
+
+                <div class="intel-card-data">
+
+                    <div class="intel-tip-row">
+                        <div class="intel-tip-icon">
+                            <i class="fa-solid fa-quote-left"></i>
+                        </div>
+                        <div>
+                            <strong>Exact Phrase</strong>
+                            <span>Use "double quotes" for exact text.</span>
+                        </div>
+                    </div>
+
+                    <div class="intel-tip-row">
+                        <div class="intel-tip-icon">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <strong>AI Similarity</strong>
+                            <span>Use (parentheses) for semantic search.</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
+</main>
+
+<!-- Existing PDF Upload Modal -->
+@await Html.PartialAsync("_Upload")
+
 <script src="~/devjs/dashboard.js"></script>
-

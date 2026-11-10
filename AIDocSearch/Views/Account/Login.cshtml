@@ -38,7 +38,7 @@
                 </div>
                 <div class="card-body">
                     <form asp-action="Login" asp-controller="Account" method="post" novalidate>
-                        <input type="hidden" id="payloadaes" value="@ViewBag.hdns" />
+                        <input type="hidden" id="payloadaes" value="@ViewBag.hdns" autocomplete="off" />
                         @Html.AntiForgeryToken()
 
                         <div class="mb-3">
@@ -60,7 +60,7 @@
                                     <i class="fas fa-key"></i>
                                 </span>
                                 <input asp-for="Password"
-                                       class="form-control" value="Admin@123"
+                                       class="form-control" value="Admin@123" autocomplete="off"
                                        required />
                             </div>
                         </div>

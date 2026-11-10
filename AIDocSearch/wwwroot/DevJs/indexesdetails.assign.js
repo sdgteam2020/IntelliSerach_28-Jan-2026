@@ -341,11 +341,16 @@ $(function () {
     $(document).on('click', '#refreshStatisticsbyIndexName', function () {
         let indexName = $(this).attr('data-index');
         let uuid = $(this).attr('data-uuid');
+
+        Statisticsanimation();
         GetstatisticsByIndexName(indexName, uuid);
+
+       
     });
     $(document).on('click', '.btn-indexingstatistics-index', function () {
 
         ResetCrawlerDashboard();
+        Statisticsanimation();
         let indexName = $(this).data('index');
         let uuid = $(this).data('uuid');
         $(".spanindexNameForDashboard").html(indexName)
@@ -486,8 +491,8 @@ $(function () {
                     response.data.DTOStatisticsHits &&
                     response.data.DTOStatisticsHits.length > 0 &&
                     response.data.DTOStatisticsHits[0]._source) {
-                    DTODocCountByIndexName = response.data.DTODocCountByIndexName;
-                    DTOStatisticsHits = response.data.DTOStatisticsHits[0]._source;
+                    let  DTODocCountByIndexName = response.data.DTODocCountByIndexName;
+                    let    DTOStatisticsHits = response.data.DTOStatisticsHits[0]._source;
                     const size = DTODocCountByIndexName.Size
                     const ScanTime = DTOStatisticsHits.scantime
                     const Total = DTODocCountByIndexName.Total
@@ -2270,4 +2275,54 @@ function ResetCrawlerDashboard() {
     $("#extensionContainer")
         .empty();
 
+}
+
+function Statisticsanimation() {
+    'use strict';
+
+    const modal = document.getElementById('indexingstatisticsModal');
+    if (!modal) return;
+
+    // Restart animation on every function call
+    function restartAnimation() {
+        modal.classList.remove('flow-ready');
+
+        // Force browser reflow to restart CSS animations
+        void modal.offsetWidth;
+
+        modal.classList.add('flow-ready');
+    }
+
+    // Register event listeners only once
+    if (modal.dataset.flowInitialized !== 'true') {
+        modal.dataset.flowInitialized = 'true';
+
+        modal.addEventListener('shown.bs.modal', restartAnimation);
+
+        modal.addEventListener('hidden.bs.modal', function () {
+            modal.classList.remove('flow-ready');
+        });
+
+        // Keyboard accessibility: bind only once
+        [
+            'AllDocDetailsByIndexName',
+            'OCRDocDetailsByIndexName',
+            'NotOCRDocDetailsByIndexName'
+        ].forEach(function (id) {
+            const card = document.getElementById(id);
+            if (!card) return;
+
+            card.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    card.click();
+                }
+            });
+        });
+    }
+
+    // Restart immediately if modal is already visible
+    if (modal.classList.contains('show')) {
+        restartAnimation();
+    }
 }

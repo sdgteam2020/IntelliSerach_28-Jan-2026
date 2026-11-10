@@ -1,4 +1,5 @@
 using AIDocSearch.Helpers;
+using AIDocSearch.Hubs;
 using AIDocSearch.Services;
 using Application.Interfaces;
 using Application.Interfaces.Repository;
@@ -12,6 +13,8 @@ using Infrastructure.Shared.Helpers;
 using Infrastructure.Shared.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.IdentityModel.Tokens;
 using System.Linq;
 using System.Security.AccessControl;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -28,13 +31,16 @@ namespace AIDocSearch.Controllers
         private readonly ICurrentUserService _currentUserService;
         private readonly IUserAccount _userAccount;
         private readonly IAESEncrytDecry _AESEncrytDecry;
+        private readonly ConnectionManager _cm;
+        private readonly IHubContext<CrawlerHub> _hub;
         public IndexController(
             ISearch searchService,
             IConfiguration configuration,
             IindexUserMapping indexUserMapping,
             IDateTimeService dateTimeService,
             ICurrentUserService currentUserService, IAESEncrytDecry aESEncrytDecry,
-            IUserAccount userAccount)
+            IUserAccount userAccount,
+            ConnectionManager cm, IHubContext<CrawlerHub> hub)
         {
             _searchService = searchService;
             _configuration = configuration;
@@ -43,6 +49,8 @@ namespace AIDocSearch.Controllers
             _currentUserService = currentUserService;
             _userAccount = userAccount;
             _AESEncrytDecry = aESEncrytDecry;
+            _cm = cm;
+            _hub = hub;
         }
 
         // returns the view that will load data client-side
@@ -257,6 +265,133 @@ namespace AIDocSearch.Controllers
 
             }
 
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestartCrawler([FromBody] DTOIndexerByCrawlerId data)
+        {
+            if(string.IsNullOrEmpty(data.CrawlerId))
+            {
+                return BadRequest(new
+                {
+                    Code = 400,
+                    Message = "CrawlerId Not Null"
+                });
+            }
+
+            if (!_cm.TryGetConnectionId(data.CrawlerId, out var connectionId))
+            {
+                return BadRequest(new
+                {
+                    Code = 400,
+                    Message = "Indexer not connected"
+                });
+            }
+
+
+            var (requestId, alreadyExists) =
+                _cm.CreateRequest(data.CrawlerId);
+
+            if (!alreadyExists)
+                await _hub.Clients.Client(connectionId)
+                    .SendAsync("RestartIndexer", requestId);
+
+            return Ok(new
+            {
+                Code = 200,
+                Message = "Indexer restarted"
+            });
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> UpdateIndexPrivatePublic(
+    [FromBody] DTOIndexPublicPrivateRequest data)
+        {
+            int CurrentUserId = (int)_currentUserService.UserId;
+            string RoleName = (string)_currentUserService.RoleName;
+
+            if (data == null ||
+                string.IsNullOrEmpty(data.CrawlerId) ||
+                string.IsNullOrEmpty(data.uuid))
+            {
+                return BadRequest(new
+                {
+                    Code = 400,
+                    Message = "Invalid request data"
+                });
+            }
+
+            string successMessage = data.IsPrivate
+                ? "Index successfully changed to Private."
+                : "Index successfully changed to Public.";
+
+            string failureMessage = data.IsPrivate
+                ? "Failed to make index Private."
+                : "Failed to make index Public.";
+
+            bool ret = await _indexUserMapping
+                .CheckUserIndexingExists(CurrentUserId, data.uuid);
+
+            if (!ret)
+            {
+                var map = new TrnIndexUserMapping
+                {
+                    IndexName = data.CrawlerId,
+                    IndexId = data.uuid,
+                    UserId = CurrentUserId,
+                    IsPrivate = data.IsPrivate
+                };
+
+                await _indexUserMapping.AddWithCheckIndexId(map);
+
+                return Ok(new
+                {
+                    Code = 200,
+                    Message = successMessage
+                });
+            }
+
+            bool result = await _indexUserMapping.UpdateIndexPrivatePublic(
+                data.CrawlerId,
+                data.IsPrivate,
+                CurrentUserId.ToString(),
+                RoleName
+            );
+
+            if (!result)
+            {
+                return BadRequest(new
+                {
+                    Code = 400,
+                    Message = failureMessage
+                });
+            }
+
+            return Ok(new
+            {
+                Code = 200,
+                Message = successMessage
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetAllPrivateIndexes()
+        {
+            int CurrentUserId = (int)_currentUserService.UserId;
+            string RoleName = (string)_currentUserService.RoleName;
+            var privateIndexes = await _indexUserMapping.GetAllPrivateIndex(RoleName, CurrentUserId.ToString());
+            return Ok(new
+            {
+                Code = 200,
+                Message = "Private indexes retrieved successfully",
+                Data = privateIndexes
+            });
         }
     }
 }

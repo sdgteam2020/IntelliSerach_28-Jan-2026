@@ -2,8 +2,45 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
-let AllliveIndex=[];
+let AllliveIndex = [];
 const errormsg002 = "Oops! We couldn’t complete your request. Please try again.";
+
+
+$(document).ready(function () {
+
+
+    toastr.options = {
+        "closeButton": false,
+        "debug": false,
+        "newestOnTop": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
+   
+    $(document).on("input", "input[type='text'], textarea", function () {
+
+        // Remove restricted special characters
+        var value = $(this).val();
+
+        var cleanValue = value.replace(/[@#$'!]/g, "");
+
+        if (value !== cleanValue) {
+            $(this).val(cleanValue);
+        }
+
+    });
+
+});
 $("#loading").hide();
 
 // 1) Global loader hooks (for jQuery + fetch)
@@ -18,6 +55,32 @@ $(document).on('click', '.GetCrawlerId', function () {
     
     GetFilesFromCrawler(CrawlerId, FileName)
 
+});
+$(document).on('click', '.confirmRestart', function () {
+    let CrawlerId = $(this).data('crawler-id');
+
+    Swal.fire({
+        title: 'Restart Indexer?',
+        text: 'Are you sure you want to restart this indexer/crawler?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, restart it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Call your restart function here
+            RestartCrawler(CrawlerId);
+
+            // Optional: Show success alert
+            Swal.fire(
+                'Restarting!',
+                'The indexer restart process has been triggered.',
+                'success'
+            );
+        }
+    });
 });
 let currentUrl = window.location.pathname.toLowerCase();
 
@@ -125,6 +188,53 @@ function GetFilesFromCrawler(CrawlerId, FileName) {
             window.open(url);
             $("#loading").hide();
         })
+        .catch(error => {
+            console.error(error);
+            $("#loading").hide();
+        });
+}
+function RestartCrawler(CrawlerId) {
+    const data = {
+        CrawlerId: CrawlerId
+    };
+    $("#loading").show();
+    const csrfToken = token();
+
+    if (!csrfToken) {
+        throw new Error("Anti-forgery token is missing.");
+    }
+    fetch('/IntelliSearch/Index/RestartCrawler', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json', 'RequestVerificationToken': csrfToken
+        },
+        body: JSON.stringify(data)
+    })
+        .then(async response => {
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: errorData.Message,
+                    customClass: {
+                        popup: "swal-high-z"
+                    }
+                });
+                $("#loading").hide();
+            }
+            $("#loading").hide();
+            const errorData = await response.json();
+            Swal.fire({
+                position: "top-end",
+                icon: "success",
+                title: errorData.Message,
+                showConfirmButton: false,
+                timer: 1500
+            });
+        })
+        
         .catch(error => {
             console.error(error);
             $("#loading").hide();
@@ -451,4 +561,5 @@ function getFileIcon(extension) {
 function token() {
     return $('input[name="__RequestVerificationToken"]').val();
 }
+
 

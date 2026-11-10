@@ -7,7 +7,7 @@ namespace Domain.DTOs.Requests
         [Required]
         [RegularExpression(@"^(https?:\/\/)?(([\w-]+\.)+[\w-]+|(\d{1,3}\.){3}\d{1,3})(\/[\w\-._~:/?#[\]@!$&'()*+,;=%]*)?$",
 ErrorMessage = "Please enter a valid URL")]
-        [Display(Name = "Enter Url")]
+        [Display(Name = "Enter Url to Crawling")]
         public required string Url { get; set; }
 
         [Required]

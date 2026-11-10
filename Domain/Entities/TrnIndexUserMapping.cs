@@ -25,6 +25,6 @@ namespace Domain.Entities
         [ForeignKey(nameof(UserId))]
         public ApplicationUser? AspUserId { get; set; }
 
-
+        public bool IsPrivate { get; set; }=false;
     }
 }

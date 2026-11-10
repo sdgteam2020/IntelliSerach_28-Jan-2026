@@ -1,0 +1,118 @@
+﻿<!-- Upload Modal -->
+<div class="modal fade"
+     id="uploadPdfModal"
+     tabindex="-1"
+     aria-labelledby="uploadPdfModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content upload-modal-content">
+
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="uploadPdfModalLabel">
+                    <i class="fa-solid fa-cloud-arrow-up text-primary me-2"></i>
+                    Upload PDF
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body pt-0">
+
+                <form id="uploadForm"
+                      asp-controller="Search"
+                      asp-action="Upload"
+                      method="post"
+                      enctype="multipart/form-data"
+                      autocomplete="off">
+
+                    @Html.AntiForgeryToken()
+
+                    <div id="uploadDropZone" class="upload-dropzone">
+
+                        <div class="upload-icon">
+                            <i class="fa-solid fa-file-arrow-up"></i>
+                        </div>
+
+                        <h6 class="fw-semibold">
+                            Drag and drop your PDF here
+                        </h6>
+
+                        <p class="text-muted small">
+                            or select a file from your device
+                        </p>
+
+                        <label for="fileInput" class="upload-browse-btn">
+                            <i class="fa-regular fa-folder-open me-2"></i>
+                            Browse files
+                        </label>
+
+                        <input 
+                               id="fileInput"
+                               type="file"
+                               accept=".pdf,application/pdf"
+                               class="d-none" />
+
+                        <div class="upload-hint">
+                            PDF only • Maximum 5 MB
+                        </div>
+                    </div>
+
+                    <!-- Upload Progress -->
+                    <div id="uploadProgressBox"
+                         class="upload-progress-box"
+                         style="display:none;">
+
+                        <div class="upload-file-icon">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </div>
+
+                        <div class="upload-file-details">
+
+                            <div class="upload-file-header">
+                                <span id="uploadFileName"></span>
+                                <span id="uploadPercent">0%</span>
+                            </div>
+
+                            <div class="upload-progress-track">
+                                <div id="uploadProgressBar"
+                                     class="upload-progress-fill"></div>
+                            </div>
+
+                            <div class="upload-status">
+                                <span id="uploadStatus">Uploading...</span>
+                                <span id="uploadFileSize"></span>
+                            </div>
+
+                        </div>
+
+                        <button type="button"
+                                id="cancelUpload"
+                                class="upload-cancel-btn"
+                                title="Cancel upload">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div id="fileError"
+                         class="text-danger mt-2"
+                         role="alert"></div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer border-0">
+                <button type="button"
+                        class="btn btn-light rounded-pill px-4"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="~/devjs/upload.main.js"></script>

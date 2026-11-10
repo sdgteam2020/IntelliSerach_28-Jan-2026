@@ -109,41 +109,108 @@ namespace AIDocSearch.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequestSizeLimit(6 * 1024 * 1024)]
-        [RequestFormLimits(MultipartBodyLengthLimit = 5 * 1024 * 1024)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 6 * 1024 * 1024)]
         public async Task<IActionResult> Upload(DTOUploadRequest Data)
         {
-            if (ModelState.IsValid)
+            const long maxFileSize = 5 * 1024 * 1024;
+
+            if (Data.FileName == null)
             {
-                string FilePath = Path.Combine(_env.WebRootPath, "UploadForIndexing");
-               
-                if (Data.FileName == null)
+                ModelState.AddModelError(
+                    nameof(Data.FileName),
+                    "Please select a PDF file.");
+            }
+            else
+            {
+                if (Data.FileName.Length == 0)
                 {
-                    ModelState.AddModelError(string.Empty, "Please select a file to upload.");
-                    return View(Data);
+                    ModelState.AddModelError(
+                        nameof(Data.FileName),
+                        "Empty files are not allowed.");
                 }
-                string UserName = SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").UserName;
-                var ret = await _upload.UploadFileAsync(Data.FileName, FilePath, Convert.ToInt32(_currentUserService.UserId), UserName);
-                if (ret.Code == 200)
+
+                if (Data.FileName.Length > maxFileSize)
                 {
-                    //if (!IsFSCrawlerRunning())
-                    //{
-                    //    RunFSCrawler();
-                    //}
-                    await LoadUserFiles();
-                    TempData["SuccessMessage"] = "File uploaded successfully.";
-                    return RedirectToAction(nameof(Upload)); // PRG pattern
+                    ModelState.AddModelError(
+                        nameof(Data.FileName),
+                        "File size must not exceed 5 MB.");
                 }
-                else
+
+                if (!string.Equals(
+                        Path.GetExtension(Data.FileName.FileName),
+                        ".pdf",
+                        StringComparison.OrdinalIgnoreCase))
                 {
-                    await LoadUserFiles();
-                    ModelState.AddModelError(string.Empty, ret.Message ?? "File upload failed.");
-                    return View(Data);
+                    ModelState.AddModelError(
+                        nameof(Data.FileName),
+                        "Only PDF files are allowed.");
                 }
             }
-            await LoadUserFiles();
-            return View(Data);
-        }
 
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToArray()
+                });
+            }
+
+            try
+            {
+                string filePath = Path.Combine(
+                    _env.WebRootPath,
+                    "UploadForIndexing");
+
+                var session = SessionHeplers.GetObject<DTOSession>(
+                    HttpContext.Session, "Users");
+
+                if (session == null)
+                {
+                    return Unauthorized(new
+                    {
+                        success = false,
+                        message = "Session expired. Please login again."
+                    });
+                }
+
+                string userName = session.UserName;
+
+                var ret = await _upload.UploadFileAsync(
+                    Data.FileName,
+                    filePath,
+                    Convert.ToInt32(_currentUserService.UserId),
+                    userName);
+
+                if (ret.Code == 200)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "File uploaded successfully."
+                    });
+                }
+
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ret.Message ?? "File upload failed."
+                });
+            }
+            catch (Exception)
+            {
+                // Log the exception using your application's logger.
+
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An error occurred while uploading the file."
+                });
+            }
+        }
         public bool IsFSCrawlerRunning()
         {
             return Process.GetProcesses()

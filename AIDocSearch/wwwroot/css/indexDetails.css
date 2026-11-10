@@ -14,7 +14,7 @@
     }
 
 .card-header-custom {
-    background: linear-gradient(110deg, #0b64dc, #168dff) !important;
+    background: linear-gradient(110deg, #0b64dc, #1458c7) !important;
     color: white;
     padding: 2px;
     display: flex;
@@ -645,3 +645,463 @@
         color: #0d6efd;
         border: 1px solid #b6d4fe;
     }
+
+
+
+
+/*
+    ///////////////////////////////////////////Statistics//////////////////////////////////////////*/
+#indexingstatisticsModal .crawler-modal {
+    border: 0;
+    border-radius: 18px;
+    overflow: hidden
+}
+
+#indexingstatisticsModal .crawler-header {
+    background: linear-gradient(100deg,#082748,#0767d8);
+    color: #fff;
+    padding: 16px 22px
+}
+
+#indexingstatisticsModal .indexing-body {
+    background: #f8fbff;
+    padding: 18px 22px 24px
+}
+
+#indexingstatisticsModal .crawler-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #e1eeff;
+    border: 1px solid #d2e4fb;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 15px
+}
+
+#indexingstatisticsModal .status-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-width: 0
+}
+
+#indexingstatisticsModal .status-right {
+    margin-left: auto
+}
+
+#indexingstatisticsModal .live-dot, #indexingstatisticsModal .offline-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex: none;
+    display: inline-block;
+    background: #16a34a;
+    animation: indexPulse 1.6s ease-in-out infinite
+}
+
+#indexingstatisticsModal .offline-dot {
+    background: #ef4444
+}
+
+#indexingstatisticsModal .running {
+    font-weight: 700;
+    color: #15803d
+}
+
+#indexingstatisticsModal .sync {
+    color: #64748b;
+    font-size: 12px
+}
+
+#indexingstatisticsModal .refresh-btn {
+    border: 1px solid #bdd9fe;
+    background: #fff;
+    color: #1369d3;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background .2s,color .2s
+}
+
+    #indexingstatisticsModal .refresh-btn:hover {
+        background: #1769d8;
+        color: #fff
+    }
+
+#indexingstatisticsModal .refresh-icon {
+    display: inline-block;
+    font-size: 20px;
+    line-height: 1;
+    transition: transform .5s
+}
+
+#indexingstatisticsModal .refresh-btn:active .refresh-icon {
+    transform: rotate(180deg)
+}
+
+#indexingstatisticsModal .index-heading {
+    font-size: 25px;
+    font-weight: 750;
+    color: #0875d6;
+    margin: 0 0 8px
+}
+
+#indexingstatisticsModal .index-flow {
+    height: 420px;
+    position: relative;
+    isolation: isolate
+}
+
+#indexingstatisticsModal .index-connectors {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    z-index: 0;
+    pointer-events: none
+}
+
+#indexingstatisticsModal .flow-path {
+    fill: none;
+    stroke: #417ad8;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    stroke-dasharray: 1300;
+    stroke-dashoffset: 0
+}
+
+#indexingstatisticsModal .stat-card {
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 18%;
+    height: 174px;
+    max-width: none;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 9px 26px rgba(15,23,42,.085);
+    padding: 16px 8px;
+    opacity: 1;
+    transform: none;
+    transition: box-shadow .25s,translate .25s;
+}
+
+    #indexingstatisticsModal .stat-card[role="button"] {
+        cursor: pointer
+    }
+
+    #indexingstatisticsModal .stat-card:hover {
+        translate: 0 -5px;
+        box-shadow: 0 16px 28px rgba(15,23,42,.13)
+    }
+
+    #indexingstatisticsModal .stat-card:focus-visible {
+        outline: 3px solid #2563eb;
+        outline-offset: 3px
+    }
+
+    #indexingstatisticsModal .stat-card .icon {
+        font-size: 27px;
+        margin-bottom: 10px
+    }
+
+#indexingstatisticsModal .stat-number {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.2
+}
+
+#indexingstatisticsModal .stat-label {
+    color: #65758a;
+    font-size: 13px;
+    margin-top: 9px;
+    white-space: normal
+}
+
+#indexingstatisticsModal .blue-card .icon, #indexingstatisticsModal .blue-card .stat-number {
+    color: #2563eb
+}
+
+#indexingstatisticsModal .green-card .icon, #indexingstatisticsModal .green-card .stat-number {
+    color: #16a34a
+}
+
+#indexingstatisticsModal .purple-card .icon, #indexingstatisticsModal .purple-card .stat-number {
+    color: #9333ea
+}
+
+#indexingstatisticsModal .orange-card .icon, #indexingstatisticsModal .orange-card .stat-number {
+    color: #ea580c
+}
+
+#indexingstatisticsModal .red-card .icon, #indexingstatisticsModal .red-card .stat-number {
+    color: #dc2626
+}
+
+#indexingstatisticsModal .dark-card .icon, #indexingstatisticsModal .dark-card .stat-number {
+    color: #111827
+}
+/* Card centers deliberately line up with arrows in the slide-2 diagram */
+#indexingstatisticsModal .flow-files {
+    left: 1.8%;
+    top: 123px
+}
+
+#indexingstatisticsModal .flow-indexed {
+    left: 28%;
+    top: 123px
+}
+
+#indexingstatisticsModal .flow-ocr {
+    left: 54.2%;
+    top: 16px
+}
+
+#indexingstatisticsModal .flow-text {
+    left: 54.2%;
+    top: 230px
+}
+
+#indexingstatisticsModal .flow-progress {
+    right: 1.8%;
+    top: 25px
+}
+
+#indexingstatisticsModal .flow-unsupported {
+    right: 1.8%;
+    top: 230px
+}
+
+#indexingstatisticsModal .progress-panel, #indexingstatisticsModal .extension-panel {
+    background: #fff;
+    border-radius: 17px;
+    padding: 20px 24px;
+    box-shadow: 0 6px 23px rgba(15,23,42,.065);
+    margin-top: 14px
+}
+
+#indexingstatisticsModal .progress-title, #indexingstatisticsModal .extension-title {
+    color: #0875d6;
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 14px
+}
+
+#indexingstatisticsModal .progress {
+    height: 14px;
+    background: #dce6f2;
+    border-radius: 99px;
+    overflow: hidden
+}
+
+#indexingstatisticsModal .progress-bar {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg,#7fc0ec,#0879da);
+    transition: width 1.4s cubic-bezier(.19,1,.22,1)
+}
+
+#indexingstatisticsModal .progress-percent {
+    font-size: 21px;
+    font-weight: 800
+}
+
+#indexingstatisticsModal .extension-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px
+}
+
+#indexingstatisticsModal .extension-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #dce4ef;
+    border-radius: 99px;
+    padding: 8px 14px;
+    font-weight: 600;
+    transition: transform .2s,box-shadow .2s
+}
+
+    #indexingstatisticsModal .extension-badge:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 14px rgba(0,0,0,.1)
+    }
+
+#indexingstatisticsModal .file-check-icon {
+    color: #28a745
+}
+
+#indexingstatisticsModal.flow-ready .stat-card {
+    animation: indexCardEnter .55s ease-out both
+}
+
+#indexingstatisticsModal.flow-ready .flow-files {
+    animation-delay: .08s
+}
+
+#indexingstatisticsModal.flow-ready .flow-indexed {
+    animation-delay: .45s
+}
+
+#indexingstatisticsModal.flow-ready .flow-ocr {
+    animation-delay: .82s
+}
+
+#indexingstatisticsModal.flow-ready .flow-text {
+    animation-delay: .98s
+}
+
+#indexingstatisticsModal.flow-ready .flow-progress {
+    animation-delay: 1.17s
+}
+
+#indexingstatisticsModal.flow-ready .flow-unsupported {
+    animation-delay: 1.3s
+}
+
+#indexingstatisticsModal.flow-ready .flow-path {
+    animation: indexDrawLine .85s ease-in-out both
+}
+
+#indexingstatisticsModal.flow-ready .p1 {
+    animation-delay: .18s
+}
+
+#indexingstatisticsModal.flow-ready .p2 {
+    animation-delay: .56s
+}
+
+#indexingstatisticsModal.flow-ready .p3 {
+    animation-delay: .74s
+}
+
+#indexingstatisticsModal.flow-ready .p4 {
+    animation-delay: .94s
+}
+
+#indexingstatisticsModal.flow-ready .p5 {
+    animation-delay: 1.1s
+}
+
+@keyframes indexCardEnter {
+    from {
+        opacity: .35;
+        transform: translateY(14px) scale(.97)
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+    }
+}
+
+@keyframes indexDrawLine {
+    from {
+        stroke-dashoffset: 1300
+    }
+
+    to {
+        stroke-dashoffset: 0
+    }
+}
+
+@keyframes indexPulse {
+    50% {
+        opacity: .35;
+        box-shadow: 0 0 0 5px rgba(22,163,74,.12)
+    }
+}
+
+@media(max-width:991px) {
+    #indexingstatisticsModal .index-flow {
+        height: auto;
+        display: grid;
+        grid-template-columns: repeat(3,minmax(0,1fr));
+        gap: 14px;
+        padding: 10px 0
+    }
+
+    #indexingstatisticsModal .index-connectors {
+        display: none
+    }
+
+    #indexingstatisticsModal .stat-card {
+        position: relative;
+        left: auto;
+        right: auto;
+        top: auto;
+        width: 100%;
+        height: 145px
+    }
+
+    #indexingstatisticsModal .stat-number {
+        font-size: 29px
+    }
+}
+
+@media(max-width:575px) {
+    #indexingstatisticsModal .indexing-body {
+        padding: 12px
+    }
+
+    #indexingstatisticsModal .crawler-status {
+        flex-wrap: wrap
+    }
+
+    #indexingstatisticsModal .status-right {
+        margin-left: 0
+    }
+
+    #indexingstatisticsModal .index-flow {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 10px
+    }
+
+    #indexingstatisticsModal .stat-card {
+        height: 135px;
+        padding: 12px 6px
+    }
+
+    #indexingstatisticsModal .stat-label {
+        font-size: 12px
+    }
+
+    #indexingstatisticsModal .progress-panel, #indexingstatisticsModal .extension-panel {
+        padding: 15px
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    #indexingstatisticsModal .stat-card {
+        opacity: 1;
+        transform: none;
+        animation: none !important;
+        transition: none !important
+    }
+
+    #indexingstatisticsModal .flow-path {
+        stroke-dashoffset: 0;
+        animation: none !important
+    }
+
+    #indexingstatisticsModal .live-dot, #indexingstatisticsModal .offline-dot {
+        animation: none
+    }
+
+    #indexingstatisticsModal .progress-bar {
+        transition: none
+    }
+}
+/*    ///////////////////////////////////////////END Statistics//////////////////////////////////////////*/

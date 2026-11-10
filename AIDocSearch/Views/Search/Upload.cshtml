@@ -24,60 +24,13 @@
                 </div>
 
                 <div class="card-body">
-                    <form asp-controller="Search"
-                          asp-action="Upload"
-                          method="post"
-                          enctype="multipart/form-data"
-                          autocomplete="off">
-
-                        @Html.AntiForgeryToken()
-
-                        <div class="row align-items-center">
-                            <div class="col-md-4">
-                                <label class="fw-bold">Upload (PDF)</label>
-                            </div>
-
-                            <div class="col-md-5">
-                                <input asp-for="FileName" required
-                                       type="file"
-                                       class="form-control"
-                                       accept=".pdf" />
-
-                                <span asp-validation-for="FileName" class="text-danger"></span>
-                                <div id="fileError" class="text-danger mt-1" role="alert"></div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa fa-upload"></i> Upload
-                                </button>
-                            </div>
-                        </div>
-                        @if (TempData["SuccessMessage"] != null)
-                        {
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="fa fa-check-circle"></i>
-                                @TempData["SuccessMessage"]
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"><i class="fa-solid fa-x text-white"></i></button>
-                            </div>
-                        }
-
-                        @if (!ViewData.ModelState.IsValid)
-                        {
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <i class="fa fa-exclamation-triangle"></i>
-                                Please fix the errors below.
-                                <ul class="mb-0 mt-2">
-                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                                    {
-                                        <li>@error.ErrorMessage</li>
-                                    }
-                                </ul>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"><i class="fa-solid fa-x text-white"></i></button>
-                            </div>
-                        }
-
-                    </form>
+                    <button type="button"
+                            class="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#uploadPdfModal">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        Upload PDF
+                    </button>
                     @{
                         int srNo = 1;
                     }
@@ -141,8 +94,9 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                </div>
         </div>
     </div>
 </div>
+@await Html.PartialAsync("_Upload")
 <script src="~/devjs/upload.js"></script>

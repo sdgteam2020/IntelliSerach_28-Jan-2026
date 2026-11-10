@@ -2,6 +2,103 @@
  * Futuristic Dashboard - Interactive UI Enhancements
  * Adds focus states, scroll reveal animations, and micro-interactions
  */
+$(function () {
+    const selector = '[title], [data-bs-original-title]';
+
+    // Remove previously created Bootstrap tooltips
+    $(selector).each(function () {
+        bootstrap.Tooltip.getInstance(this)?.dispose();
+    });
+
+    let activeElement = null;
+    let activeTooltip = null;
+
+    function positionTooltip(element, tooltipElement) {
+        if (!element || !tooltipElement) return;
+
+        const rect = element.getBoundingClientRect();
+
+        tooltipElement.style.position = 'fixed';
+        tooltipElement.style.margin = '0';
+        tooltipElement.style.transform = 'none';
+        tooltipElement.style.inset = 'auto';
+
+        const tooltipRect = tooltipElement.getBoundingClientRect();
+        const gap = 8;
+
+        const left = Math.max(
+            8,
+            Math.min(
+                rect.left,
+                window.innerWidth - tooltipRect.width - 8
+            )
+        );
+
+        let top = rect.top - tooltipRect.height - gap;
+
+        // Display below when there is insufficient space above
+        if (top < 8) {
+            top = rect.bottom + gap;
+        }
+
+        tooltipElement.style.left = left + 'px';
+        tooltipElement.style.top = top + 'px';
+    }
+
+    $(document).on('mouseenter focusin', selector, function () {
+        const element = this;
+
+        if (activeElement && activeElement !== element && activeTooltip) {
+            activeTooltip.hide();
+        }
+
+        activeElement = element;
+
+        let instance = bootstrap.Tooltip.getInstance(element);
+
+        if (!instance) {
+            instance = new bootstrap.Tooltip(element, {
+                trigger: 'manual',
+                animation: false,
+                placement: 'top',
+                container: 'body'
+            });
+        }
+
+        activeTooltip = instance;
+        instance.show();
+
+        requestAnimationFrame(function () {
+            if (activeElement !== element) return;
+
+            const tooltipElement = document.querySelector(
+                '#' + CSS.escape(element.getAttribute('aria-describedby') || '')
+            );
+
+            positionTooltip(element, tooltipElement);
+        });
+    });
+
+    $(document).on('mouseleave focusout', selector, function () {
+        if (activeElement === this && activeTooltip) {
+            activeTooltip.hide();
+            activeElement = null;
+            activeTooltip = null;
+        }
+    });
+
+    $(window).on('scroll resize', function () {
+        if (!activeElement) return;
+
+        const tooltipId = activeElement.getAttribute('aria-describedby');
+        if (!tooltipId) return;
+
+        positionTooltip(
+            activeElement,
+            document.getElementById(tooltipId)
+        );
+    });
+});
 
 (function () {
     'use strict';

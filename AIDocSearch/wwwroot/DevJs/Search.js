@@ -7,25 +7,71 @@ $(document).ready(async function () {
 
     GetFilter(0, SearchableIndex);
     //GetWebServerUrlMapping();
+   // let selectedFilter = "1"; // Default selection
+    let isFilterLoading = false;
 
-    $(document).on('click', '.filter', function () {
+    $(document).on('click', '.mainfilter', async function () {
 
-        // Prevent clicking again
+        if (isFilterLoading || $(this).hasClass('active')) {
+            return;
+        }
+
+        const $selected = $(this);
+
+        selectedFilter =
+            $selected.attr('data-bs-original-title') ||
+            $selected.attr('title');
+
+        if (!selectedFilter) {
+            toastr.warning("Invalid search index selected.");
+            return;
+        }
+
+        isFilterLoading = true;
+
+        $('.mainfilter')
+            .addClass('disabled')
+            .css('pointer-events', 'none');
+
+        $('.mainfilter').removeClass('active');
+        $selected.addClass('active');
+
+        try {
+            await GetFilter(selectedFilter, SearchableIndex);
+            await searchContent(true, true);
+        }
+        catch (error) {
+            console.error("Filter search failed:", error);
+            toastr.error("Failed to load search results.");
+        }
+        finally {
+            $('.mainfilter')
+                .removeClass('disabled')
+                .css('pointer-events', '');
+
+            isFilterLoading = false;
+        }
+    });
+
+    $(document).on('click', '.secondfilter', function () {
+
         if ($(this).hasClass('disabled')) {
             return;
         }
 
-        // Disable all filters (or only this one)
-        $('.filter').addClass('disabled').css('pointer-events', 'none');
+        // Remove active class from other filters
+        $('.secondfilter').removeClass('active');
 
-        $('.filter').removeClass('active');
+        // Set selected filter active
         $(this).addClass('active');
-     
-        selectedFilter = $(this).attr('title');
 
-        GetFilter(selectedFilter, SearchableIndex);
-         searchContent(true,true);
+        // Get selected filter value
+
+
+        // Execute search
+        searchContent(true);
     });
+
 
     if ($('#searchInput').val() != "") {
         searchContent(true);
@@ -82,7 +128,12 @@ async function searchContent(reset = true,IsFilter) {
         dataString.startsWith('"') &&
         dataString.endsWith('"')
     ) {
-        $('#ddlSearch').val(3)
+        let selectedValue = 3;
+
+        $('.secondfilter').removeClass('active');
+
+        $(`.secondfilter[data-secondfilters="${selectedValue}"]`).addClass('active');
+
     }
     else if (
         dataString &&
@@ -90,10 +141,15 @@ async function searchContent(reset = true,IsFilter) {
         dataString.startsWith('(') &&
         dataString.endsWith(')')
     ) {
-        $('#ddlSearch').val(2)
+        let selectedValue = 2;
+
+        $('.secondfilter').removeClass('active');
+
+        $(`.secondfilter[data-secondfilters="${selectedValue}"]`).addClass('active');
     }
-    const parms = { DataString: dataString, size: size, from: from, Filter: selectedFilter, Type: $('#ddlSearch').val() }
-   
+    
+    const parms = { DataString: dataString, size: size, from: from, Filter: selectedFilter, Type: $('.secondfilter.active').data('secondfilters') }
+    
     await fetch('/IntelliSearch/Search/SearchContent', {
         method: 'POST',
         headers: {
@@ -341,66 +397,139 @@ async function searchContent(reset = true,IsFilter) {
                         Mainurl = cleanPath;
 
                         let html = `
-    <div class="google-result">
-        <div class="result-header">
-            <div class="result-left">
+<div class="google-result modern-result-card">
 
-             <span class="text-decoration-none GetCrawlerId"
-                               title="${fileName}"
-                               data-CrawlerId="${indexName}"
-                               data-FileName="${Mainurl}">
-                                <i class="${Icon_for_Download_Url} ${iconClass} me-1"></i>
-                                ${Mainurl.length > 20 ? Mainurl.substring(0,100) + '...' : Mainurl}
+    <div class="result-header">
 
-                            </span>
-               
+        <div class="result-left">
+
+            <div class="result-document-icon">
+                <i class="${escapeHtml(Icon_for_Download_Url)} ${escapeHtml(iconClass)}"></i>
             </div>
-            <div class="result-right">
-                <div class="result-score">
-                    <div class="score-label me-2 badge badge-pill badge-success">${indexName.replace("fs-", "")}</div>
-                    <span class="score-pill d-none">Score: ${score} MaxScore:${maxScore}  Score ${relevance}</span>
-                   
+
+            <div class="result-document-info">
+
+                <span class="result-title GetCrawlerId"
+                      role="button"
+                      tabindex="0"
+                      data-CrawlerId="${escapeHtml(indexName)}"
+                      data-FileName="${escapeHtml(Mainurl)}"
+                      title="${escapeHtml(Mainurl)}">
+
+                    ${escapeHtml(getDisplayName(Mainurl))}
+
+                </span>
+
+                <div class="result-meta">
+                    <i class="fa-regular fa-file-lines"></i>
+                    <span>Indexed Document</span>
                 </div>
+
             </div>
+
         </div>
 
-        <div class="result-snippet">
-            <ul>
-                ${result}  ............
-            </ul> 
+        <div class="result-right">
+
+            <span class="result-index-badge">
+                <i class="fa-solid fa-database"></i>
+                ${escapeHtml(indexName.replace("fs-", ""))}
+            </span>
+
+            <span class="score-pill d-none">
+                Score: ${escapeHtml(score)}
+                MaxScore: ${escapeHtml(maxScore)}
+                Relevance: ${escapeHtml(relevance)}
+            </span>
+
+        </div>
+
+    </div>
+
+    <div class="result-snippet">
+        <div class="result-snippet-content">
+            ${result}
         </div>
     </div>
-    `;
-                        $('#results').append(html);
+
+</div>
+`;
+
+                        $("#results").append(html);
                        
 
                     } else {
 
+                        let parsedUrl;
+
+                        try {
+                            parsedUrl = new URL(url.trim());
+                        } catch {
+                            parsedUrl = null;
+                        }
+
                         let html = `
-    <div class="google-result">
-        <div class="result-header">
-            <div class="result-left">
-                <a href="${url}" target="_blank" class="result-title" title="${url}"> <i class="fa fa-globe me-2"></i> ${new URL(url.trim()).origin} (${displayTitle})</a>
-              
+<div class="google-result modern-result-card">
+
+    <div class="result-header">
+
+        <div class="result-left">
+
+            <div class="result-document-icon web-icon">
+                <i class="fa-solid fa-globe"></i>
             </div>
-            <div class="result-right">
-                <div class="result-score">
-                     <div class="score-label me-2 badge badge-pill badge-success">${indexName.replace("fs-", "")}</div>
-                    <span class="score-pill d-none">Score: ${score} MaxScore:${maxScore}  Score ${relevance}</span>
-                   
+
+            <div class="result-document-info">
+
+                <a href="${parsedUrl && ['http:', 'https:'].includes(parsedUrl.protocol)
+                                ? escapeHtml(parsedUrl.href)
+                                : '#'}"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="result-title">
+
+                    ${escapeHtml(displayTitle || (parsedUrl ? parsedUrl.hostname : "Website"))}
+
+                </a>
+
+                <div class="result-meta result-url">
+                    <i class="fa-solid fa-link"></i>
+                    <span>${escapeHtml(parsedUrl ? parsedUrl.origin : "")}</span>
                 </div>
+
             </div>
+
         </div>
 
-        <div class="result-snippet">
-            <ul>
-                 ${result}   ............
-            </ul>
+        <div class="result-right">
+
+            <span class="result-index-badge">
+                <i class="fa-solid fa-database"></i>
+                ${escapeHtml(indexName.replace("fs-", ""))}
+            </span>
+
+            <span class="score-pill d-none">
+                Score: ${escapeHtml(score)}
+                MaxScore: ${escapeHtml(maxScore)}
+                Relevance: ${escapeHtml(relevance)}
+            </span>
+
         </div>
-        ${tableHtml}
+
     </div>
-    `;
-                        $('#results').append(html);
+
+    <div class="result-snippet">
+        <div class="result-snippet-content">
+            ${result}
+        </div>
+    </div>
+
+    ${tableHtml}
+
+</div>
+`;
+
+                        $("#results").append(html);
                     }
 
 
@@ -492,7 +621,24 @@ function renderPagination() {
     document.getElementById('paginationTop').innerHTML = buildButtons();
     document.getElementById('paginationBottom').innerHTML = buildButtons();
 }
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, function (char) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        }[char];
+    });
+}
 
+function getDisplayName(value, maxLength = 100) {
+    const text = String(value ?? "");
+    return text.length > maxLength
+        ? text.substring(0, maxLength) + "..."
+        : text;
+}
 document.addEventListener('click', function (e) {
     if (!e.target.classList.contains('page-btn')) return;
 
@@ -547,9 +693,9 @@ async function GetFilter(active, SearchableIndex) {
             let listItemddl = "";
            
             if (active == 0 || active =="All")
-                listItemddl += `<li class="filter active" title="All">All</li>`;
+                listItemddl += `<li class="filter mainfilter active" title="All">All</li>`;
             else
-                listItemddl += `<li class="filter" title="All">All</li>`;
+                listItemddl += `<li class="filter mainfilter" title="All">All</li>`;
             if (data.Data) {
                 let urls = data.Data;
                 if (SearchableIndex != null)
@@ -560,9 +706,9 @@ async function GetFilter(active, SearchableIndex) {
                     if (displayLabel != "" ) {
                         if (displayLabel == active)
                             // Using the .Url and .Abbr properties from your FilterItem model
-                            listItemddl += `<li class="filter active" title="${urls[i].index}">${urls[i].index.replace("fs-","")}</li>`;
+                            listItemddl += `<li class="filter mainfilter active" title="${urls[i].index}">${urls[i].index.replace("fs-","")}</li>`;
                         else
-                            listItemddl += `<li class="filter filtersWithSearch" title="${urls[i].index}">${urls[i].index.replace("fs-", "") }</li>`;
+                            listItemddl += `<li class="filter mainfilter filtersWithSearch" title="${urls[i].index}">${urls[i].index.replace("fs-", "") }</li>`;
                     }
                 }
                 urls = data.Data.filter(index => !SearchableIndex.includes(index.index));
@@ -571,10 +717,10 @@ async function GetFilter(active, SearchableIndex) {
                     let displayLabel = urls[i].index;
                     if (displayLabel != "") {
                      
-                            listItemddl += `<li class="filter" title="${urls[i].index}">${urls[i].index.replace("fs-", "")}</li>`;
+                        listItemddl += `<li class="filter mainfilter" title="${urls[i].index}">${urls[i].index.replace("fs-", "")}</li>`;
                     }
                 }
-                $(".filters").html(listItemddl);
+                $(".mainfilters").html(listItemddl);
                
                 
                   
