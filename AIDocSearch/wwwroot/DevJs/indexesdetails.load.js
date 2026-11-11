@@ -138,26 +138,12 @@ $(function () {
                 </span>
 
                  <button type="button"
-                            class="btn btn-outline-danger btn-sm confirmRestart d-none" data-crawler-id="${crawlerId}">
+                            class="btn btn-outline-secondary btn-sm confirmRestart d-none" data-crawler-id="${crawlerId}">
                             <i class="fas fa-sync-alt me-1"></i>
 
                         </button>
 
-                   <button type="button"
-        class="btn btn-outline-success btn-sm btnIndexpublic d-none"
-        title="Public"
-        data-crawler-id="${crawlerId}"
-        data-uuid="${uuid}">
-    <i class="fas fa-lock-open me-1"></i>
-</button>
-
-<button type="button"
-        class="btn btn-outline-danger btn-sm btnIndexprivate d-none"
-        title="Private"
-        data-crawler-id="${crawlerId}"
-        data-uuid="${uuid}">
-    <i class="fas fa-lock me-1"></i>
-</button>
+                 
             `;
 
                     let htmlCrawlerStatistics = `
@@ -179,22 +165,48 @@ $(function () {
 
                     <div class="card index-card border-0">
 
-                        <div class="card-header-custom">
-                            <div>
-                                <h5 class="mb-1">
-                                    ${(item.index || '').replace('fs-', '')}
-                                </h5>
-                            </div>
-                        </div>
+                      <div class="card-header-custom">
 
-                        <div class="crawler-status">
-                            <div class="status-left">
-                                ${spanHtml}
+    <div class="index-header-title">
+        <span class="index-title-icon">
+            <i class="fas fa-database"></i>
+        </span>
 
-                                
-                            </div>
-                           
-                        </div>
+        <div class="index-header-info">
+            <h5 class="mb-0">
+                ${(item.index || '').replace('fs-', '')}
+            </h5>
+
+            <div class="crawler-status">
+                <div class="status-left">
+                    ${spanHtml}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="index-header-actions">
+
+        <button type="button"
+                class="btn btn-outline-success btn-sm btnIndexpublic d-none"
+                title="Public"
+                data-crawler-id="${crawlerId}"
+                data-uuid="${uuid}">
+            <i class="fas fa-lock-open"></i>
+        </button>
+
+        <button type="button"
+                class="btn btn-outline-danger btn-sm btnIndexprivate d-none"
+                title="Private"
+                data-crawler-id="${crawlerId}"
+                data-uuid="${uuid}">
+            <i class="fas fa-lock"></i>
+        </button>
+
+    </div>
+</div>
+                        
+                       
 
                         <div class="card-body">
 
@@ -311,11 +323,7 @@ $(function () {
                                     ${(item.index || '').replace('fs-', '')}
                                 </h5>
                             </div>
-                        </div>
-                         <div class="crawler-status">
-                            <div class="status-left">
-
-                              <button type="button"
+                            <button type="button"
         class="btn btn-outline-success btn-sm btnIndexpublic d-none"
         title="Public"
         data-crawler-id="${crawlerId}"
@@ -330,10 +338,8 @@ $(function () {
         data-uuid="${uuid}">
     <i class="fas fa-lock me-1"></i>
 </button>
-                                
-                            </div>
-                           
                         </div>
+                        
                         <div class="card-body">
 
                             <div class="metrics-grid">

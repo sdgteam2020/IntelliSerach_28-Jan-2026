@@ -73,7 +73,42 @@ namespace Infrastructure.Shared.Services
                  (originalQuery.StartsWith("(") && originalQuery.EndsWith(")")));
 
             string searchText = originalQuery;
+            var mustQueries = new List<object>();
+            var shouldQueries = new List<object>();
 
+            var searchFields = new List<string>
+            {
+                "content^5",
+                "headings^4",
+                "table_rows.raw_text^2.5"
+            };
+            // Detect AND / OR / NOT or symbolic operators
+            bool isBooleanSearch =
+      Request.Type == 1 &&
+      Regex.IsMatch(
+          searchText,
+          @"\b(AND|OR)\b|[+|]",
+          RegexOptions.IgnoreCase
+      );
+
+            string booleanQuery = searchText;
+
+            if (isBooleanSearch)
+            {
+                booleanQuery = Regex.Replace(
+                    booleanQuery,
+                    @"\s+AND\s+",
+                    " + ",
+                    RegexOptions.IgnoreCase
+                );
+
+                booleanQuery = Regex.Replace(
+                    booleanQuery,
+                    @"\s+OR\s+",
+                    " | ",
+                    RegexOptions.IgnoreCase
+                );
+            }
             if (isQuotedSearch)
             {
                 searchText = originalQuery[1..^1].Trim();
@@ -84,44 +119,38 @@ namespace Infrastructure.Shared.Services
             {
                 searchText = searchText[1..^1].Trim();
             }
+           
 
             if (string.IsNullOrWhiteSpace(searchText))
             {
                 throw new ArgumentException("Search text cannot be empty.");
             }
 
-            var searchFields = new List<string>
-            {
-                "content^5",
-                "headings^4",
-                "table_rows.raw_text^2.5"
-            };
+           
 
             // Use exact original words. Don't remove stop words here.
-            var mustQueries = new List<object>();
-            var shouldQueries = new List<object>();
+          
 
 
 
 
 
             // Remove surrounding quotes for exact search
-            if (isQuotedSearch)
-            {
-                searchText = searchText.Substring(
-                    1,
-                    searchText.Length - 2
-                ).Trim();
-            }
+            //if (isQuotedSearch)
+            //{
+            //    searchText = searchText.Substring(
+            //        1,
+            //        searchText.Length - 2
+            //    ).Trim();
+            //}
 
 
-            // ============================================================
+            // =============================================
             // SEARCH TYPE
-            //
-            // Type 1 = Normal search
-            // Type 2 = Fuzzy search
-            // Type 3 = Exact/Phrase search
-            // ============================================================
+            // 1 = Normal / Boolean Search
+            // 2 = Fuzzy Search
+            // 3 = Exact Phrase Search
+            // =============================================
 
             if (isExactSearch)
             {
@@ -150,9 +179,20 @@ namespace Infrastructure.Shared.Services
                     }
                 });
             }
+            else if (isBooleanSearch)
+            {
+                mustQueries.Add(new
+                {
+                    simple_query_string = new
+                    {
+                        query = booleanQuery,
+                        fields = searchFields,
+                        default_operator = "and"
+                    }
+                });
+            }
             else
             {
-                // Normal search: require all meaningful query terms in one field.
                 string normalQuery = RemoveStopWords(searchText);
 
                 if (string.IsNullOrWhiteSpace(normalQuery))
@@ -171,7 +211,6 @@ namespace Infrastructure.Shared.Services
                     }
                 });
 
-                // Optional phrase match improves ranking; it does not decide eligibility.
                 shouldQueries.Add(new
                 {
                     multi_match = new

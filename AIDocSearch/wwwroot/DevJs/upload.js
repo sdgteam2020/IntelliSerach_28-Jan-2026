@@ -54,25 +54,24 @@ async function DeleteUpload(id) {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to delete record.');
+            
+            toastr.error('Failed to delete record.');
         }
 
         const data = await response.json();
         if (data.Code == 200) {
+           
             await Swal.fire({
                 icon: 'success',
                 title: 'Deleted!',
                 text: data.Message
             });
             // Reload page or refresh table
+            // Reload page or refresh table
             location.reload();
         } else {
-
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.Message
-            });
+            toastr.error(data.Message);
+            
         }
 
 

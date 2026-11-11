@@ -98,10 +98,10 @@ namespace Infrastructure.Repository
                     .Where(m => m.IndexName == CrawlerId);
 
                 // If not Admin, filter by UserId as well
-                if (!isAdmin)
-                {
-                    query = query.Where(m => m.UserId == parsedUserId);
-                }
+                //if (!isAdmin)
+                //{
+                //    query = query.Where(m => m.UserId == parsedUserId);
+                //}
 
                 // 4. Fetch matching records
                 var mappings = await query.ToListAsync();

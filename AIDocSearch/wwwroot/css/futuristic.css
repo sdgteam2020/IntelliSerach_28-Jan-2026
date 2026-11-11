@@ -28,13 +28,7 @@ body {
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* Navigation */
-.custom-navbar {
-    background: linear-gradient( 110deg, #071a38 0%, #064cba 52%, #1677ff 100% ) !important;
-    border-bottom: 1px solid rgba(0, 207, 255, 0.45) !important;
-    box-shadow: 0 5px 24px rgba(7, 26, 56, 0.20);
-    padding: 8px 14px;
-}
+
 
     .custom-navbar .navbar-brand img {
         max-height: 54px;
@@ -83,7 +77,7 @@ main.pb-3 {
 }
 
 .card-header {
-    background: linear-gradient( 110deg, #0b64dc, #168dff ) !important;
+    background: linear-gradient( 69deg, #324f76, #0f9bff ) !important;
     color: #ffffff !important;
     border-bottom: 1px solid rgba(0, 207, 255, 0.45) !important;
     font-weight: 700;
@@ -110,7 +104,7 @@ main.pb-3 {
         left: 0;
         right: 0;
         height: 3px;
-        background: linear-gradient( 90deg, #1677ff, #1458c7, #1677ff );
+        /*background: linear-gradient( 90deg, #1677ff, #1458c7, #1677ff );*/
         background-size: 200% 100%;
         opacity: 0.9;
     }
@@ -448,8 +442,7 @@ html.light-theme {
 
 /* Ensure navbar/footer contrast in light theme */
     html.light-theme .custom-navbar {
-        /*background: rgba(255, 255, 255, 0.95) !important;*/
-        background: #167bff !important;
+     
         border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
     }
 
@@ -795,15 +788,7 @@ body {
     border-bottom: none;
 }
 
-/* ============================================
-   Navbar Adjustments
-   ============================================ */
-.custom-navbar {
-    background: linear-gradient(90deg, rgba(8,12,30,0.95), rgba(12,18,42,0.95)) !important;
-   /* box-shadow: 0 2px 10px rgba(2,6,23,0.45);*/
-    border-bottom: 1px solid rgba(255,255,255,0.03) !important;
-    padding: 0.5rem 0.75rem;
-}
+
 
 /* Brand image smaller and aligned for professional look */
 .custom-navbar .navbar-brand img {
