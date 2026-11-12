@@ -563,3 +563,59 @@ function token() {
 }
 
 
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fontSizes = [90, 100, 110, 120, 130];
+    const defaultSize = 100;
+
+    const decreaseBtn = document.getElementById("fontDecrease");
+    const resetBtn = document.getElementById("fontReset");
+    const increaseBtn = document.getElementById("fontIncrease");
+
+    if (!decreaseBtn || !resetBtn || !increaseBtn) return;
+
+    let currentSize = Number(localStorage.getItem("intelFontSize")) || defaultSize;
+
+    if (!fontSizes.includes(currentSize)) {
+        currentSize = defaultSize;
+    }
+
+    function applyFontSize() {
+
+        document.documentElement.style.fontSize = currentSize + "%";
+
+        localStorage.setItem("intelFontSize", currentSize);
+
+        decreaseBtn.disabled = currentSize === fontSizes[0];
+        increaseBtn.disabled = currentSize === fontSizes[fontSizes.length - 1];
+
+        decreaseBtn.classList.toggle("active", currentSize < defaultSize);
+        resetBtn.classList.toggle("active", currentSize === defaultSize);
+        increaseBtn.classList.toggle("active", currentSize > defaultSize);
+    }
+
+    decreaseBtn.addEventListener("click", function () {
+        const index = fontSizes.indexOf(currentSize);
+
+        if (index > 0) {
+            currentSize = fontSizes[index - 1];
+            applyFontSize();
+        }
+    });
+
+    resetBtn.addEventListener("click", function () {
+        currentSize = defaultSize;
+        applyFontSize();
+    });
+
+    increaseBtn.addEventListener("click", function () {
+        const index = fontSizes.indexOf(currentSize);
+
+        if (index < fontSizes.length - 1) {
+            currentSize = fontSizes[index + 1];
+            applyFontSize();
+        }
+    });
+
+    applyFontSize();
+});

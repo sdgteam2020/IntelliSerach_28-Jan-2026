@@ -34,12 +34,15 @@
             $fileInput.val("");
             return;
         }
-
+        const indexName = $("#uploadFileTittle").html();
+        const uuid = $("#uploadFileuuid").html();
         const form = $("#uploadForm")[0];
         const formData = new FormData(form);
 
         // Works for both browse and drag/drop
         formData.set("FileName", file, file.name);
+        formData.set("IndexName", indexName);
+        formData.set("uuid", uuid);
 
         $("#uploadFileName").text(file.name);
         $("#uploadFileSize").text(
@@ -54,7 +57,7 @@
             background: "#1a73e8"
         });
 
-        $progressBox.css("display", "flex");
+        $progressBox.removeClass("d-none");
         $dropZone.addClass("uploading");
         $fileInput.prop("disabled", true);
 
@@ -133,7 +136,7 @@
 
                 if (status === "abort") {
                     toastr.info("Upload cancelled.");
-                    $progressBox.hide();
+                    $progressBox.addClass("d-none");
                     return;
                 }
 

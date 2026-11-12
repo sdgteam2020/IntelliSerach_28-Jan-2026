@@ -12,6 +12,9 @@ namespace Domain.DTOs.Requests
         [MaxFileNameLength(50)]
         [ValidFileName]
 
-        public IFormFile? FileName { get; set; }
+        public required IFormFile? FileName { get; set; }
+
+        public required string IndexName { get; set; }
+        public required string uuid { get; set; }
     }
 }

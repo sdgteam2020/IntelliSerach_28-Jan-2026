@@ -347,6 +347,24 @@ $(function () {
 
        
     });
+    $(document).on('click', '.btn-UploadFileTo-index', function (e) {
+
+        e.preventDefault();
+
+        const modalElement = document.getElementById('uploadPdfModal');
+
+        if (!modalElement) {
+            console.error("Upload modal is missing from the DOM.");
+            return;
+        }
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        let uuid = $(this).data('uuid');
+        $("#uploadFileTittle").html($(this).data('crawler-id').replace('fs-', ''));
+        $("#uploadFileuuid").html(uuid);
+
+        modal.show();
+    });
     $(document).on('click', '.btn-indexingstatistics-index', function () {
 
         ResetCrawlerDashboard();
@@ -2247,7 +2265,7 @@ function ResetCrawlerDashboard() {
 
 
     $("#indexunderProgress")
-        .text("0%");
+        .text("0");
 
 
 

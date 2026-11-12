@@ -673,4 +673,61 @@ footer {
         padding: 28px 12px;
     }
 }
-/***********************************************Uolpad Css***********************************************/
+/***********************************************end Uolpad Css***********************************************/
+
+
+/* Font Size Controls */
+.intel-font-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+}
+
+.intel-font-btn {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+    .intel-font-btn:hover {
+        background: rgba(37, 99, 235, 0.15);
+        color: #2563eb;
+    }
+
+    .intel-font-btn.active {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    .intel-font-btn sup {
+        font-size: 11px;
+        margin-left: 1px;
+    }
+
+    .intel-font-btn:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+    }
+/* Fixed font size */
+.intel-nav-links .nav-link {
+    font-size: 14px;
+}
+
+/* Responsive to root font-size changes */
+.intel-nav-links .nav-link {
+    font-size: 0.875rem;
+}
+

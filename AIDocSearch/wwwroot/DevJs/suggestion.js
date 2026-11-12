@@ -72,7 +72,9 @@ $(document).ready(function () {
         // Replace this line:
         // $('#searchInput').val($(this).text());
         // With this line to assign only the plain text (no HTML tags) to searchInput and replace \n with space:
-        $('#searchInput').val($(this).text().replace(/<[^>]*>/g, ' ').replace(/\n/g, ' '));
+        $('#searchInput').val(
+            $(this).text().replace(/\s+/g, ' ').trim()
+        );
 
         $('#suggestions').hide();
         // Optionally trigger search here

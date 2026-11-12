@@ -84,19 +84,7 @@ $(function () {
 
         html.push('<div class="row ">');
         html.push(`
-<div class="row mb-3">
-    <div class="col-md-4 ms-auto">
-        <div class="input-group">
-            <span class="input-group-text">
-               <i class="fa-solid fa-magnifying-glass"></i>
-            </span>
-            <input type="text"
-                   id="indexSearch"
-                   class="form-control"
-                   placeholder="Search..." />
-        </div>
-    </div>
-</div>
+
 
 
 `);
@@ -148,19 +136,35 @@ $(function () {
 
                     let htmlCrawlerStatistics = `
                 <button
-                    class="btn btn-outline-primary btn-sm btn-indexingstatistics-index text-nowrap"
+                    class="btn btn-outline-primary btn-sm btn-indexingstatistics-index text-nowrap" title="Statistics of ${(item.index || '').replace('fs-', '')}"
                     data-index="${item.index || ''}"
                     data-uuid="${item.uuid || ''}"
                     data-indexingstatistics-id="${item.index || ''}"
                     data-index-name="${(item.index || '').replace('fs-', '')}">
 
                     <i class="fa-solid fa-chart-column"></i>
-                    Indexer Stats
+                    Stats
                 </button>
+
+
+               <button
+                type="button"
+                class="btn btn-outline-danger btn-sm btn-UploadFileTo-index d-none text-nowrap fut-upload-btn" title="Upload To ${(item.index || '').replace('fs-', '')}"
+
+                data-crawler-id="${item.index || ''}"
+                data-uuid="${item.uuid || ''}"
+                data-indexingstatistics-id="${item.index || ''}"
+                data-index-name="${(item.index || '').replace('fs-', '')}">
+
+                <i class="fa-solid fa-plus"></i>
+                
+                </button>
+
+
             `;
 
                     html.push(`
-                <div class="col-12 col-md-6 col-xl-3 index-item"
+                <div class="col-12 col-md-6 col-xl-2 index-item"
                      data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
 
                     <div class="card index-card border-0">
@@ -169,7 +173,7 @@ $(function () {
 
     <div class="index-header-title">
         <span class="index-title-icon">
-            <i class="fas fa-database"></i>
+            <i class="fa-solid fa-server me-2"></i>
         </span>
 
         <div class="index-header-info">
@@ -259,12 +263,12 @@ $(function () {
 
                                 ${type === "Admin" ? `
                                     <button
-                                        class="btn btn-outline-primary btn-sm btn-assign-index text-nowrap"
+                                        class="btn btn-outline-primary btn-sm btn-assign-index text-nowrap" title="Users Assgin to ${(item.index || '').replace('fs-', '')}"
                                         data-index="${item.uuid || ''}"
                                         data-index-name="${(item.index || '').replace('fs-', '')}">
 
                                         <i class="fas fa-user-plus"></i>
-                                        Assign
+                                        
                                     </button>
                                 ` : ''}
 
@@ -312,17 +316,29 @@ $(function () {
                     let crawlerId = item.index || '';
                     let uuid = item.uuid || '';
                     html.push(`
-                <div class="col-12 col-md-6 col-xl-3 index-item"
+
+                    
+
+
+                <div class="col-12 col-md-6 col-xl-2 index-item"
                      data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
 
                     <div class="card index-card border-0">
 
                         <div class="card-header-custom">
-                            <div>
-                                <h5 class="mb-1">
-                                    ${(item.index || '').replace('fs-', '')}
-                                </h5>
-                            </div>
+                            <div class="index-header-title">
+        <span class="index-title-icon">
+            <i class="fa-solid fa-globe"></i>
+        </span>
+
+        <div class="index-header-info">
+            <h5 class="mb-0">
+                ${(item.index || '').replace('fs-', '')}
+            </h5>
+
+            
+        </div>
+    </div>
                             <button type="button"
         class="btn btn-outline-success btn-sm btnIndexpublic d-none"
         title="Public"
@@ -385,12 +401,12 @@ $(function () {
 
                                 ${type === "Admin" ? `
                                     <button
-                                        class="btn btn-outline-primary btn-sm btn-assign-index text-nowrap"
+                                        class="btn btn-outline-primary btn-sm btn-assign-index text-nowrap" title="Users Assgin to ${(item.index || '').replace('fs-', '')}"
                                         data-index="${item.uuid || ''}"
                                         data-index-name="${(item.index || '').replace('fs-', '')}">
 
                                         <i class="fas fa-user-plus"></i>
-                                        Assign
+                                       
                                     </button>
                                 ` : ''}
 
@@ -570,6 +586,11 @@ function updateCrawlerStatus(
         crawlerId +
         '"]'
     );
+    let $btnUploadFileToindex = $(
+        '.btn-UploadFileTo-index[data-crawler-id="' +
+        crawlerId +
+        '"]'
+    );
 
     if (connected) {
 
@@ -590,6 +611,7 @@ function updateCrawlerStatus(
                 'live-dot'
         );
         $restart_indexer.removeClass('d-none')
+        $btnUploadFileToindex.removeClass('d-none')
     }
     else {
         //console.log($indexingstatistics)
@@ -612,6 +634,7 @@ function updateCrawlerStatus(
         );
 
         $restart_indexer.addClass('d-none')
+        $btnUploadFileToindex.addClass('d-none')
     }
     // Automatically sort:
     // Live first -> Offline second

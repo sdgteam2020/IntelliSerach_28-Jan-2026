@@ -3,15 +3,28 @@
 @{
     ViewData["Title"] = "Elasticsearch Index Details";
 }
-@await Html.PartialAsync("_datatable", Model)
 
+@await Html.PartialAsync("_datatable", Model)
+<link href="~/css/indexdetails.css" rel="stylesheet" />
 <div class="container mt-1">
 
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4>Indexes Details</h4>
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+
+                    <!-- Left: Heading -->
+                    <h4 class="mb-0">Indexes Details</h4>
+
+                    <!-- Right: Search -->
+                    <div class="input-group w-25">
+                        
+                        <input type="text"
+                               id="indexSearch"
+                               class="form-control "
+                               placeholder="Search indexes..." />
+                    </div>
+
                 </div>
                 <div class="card-body">
                    
@@ -23,7 +36,7 @@
                     
 
                    
-                    <link href="~/css/indexdetails.css" rel="stylesheet" />
+                   
                     @Html.AntiForgeryToken()
 
                     <!-- Assign Modal (static in page) -->
@@ -169,7 +182,7 @@
             <div class="progress-title"><i class="fa-solid fa-database me-2"></i>Indexing Progress</div>
             <div class="row align-items-center g-3">
               <div class="col-md-3 d-none"><div class="progress-text d-none" id="progressText">0 of 0 files searchable</div></div>
-              <div class="col-10"><div class="progress"><div class="progress-bar" id="progressBar" role="progressbar" aria-label="Indexing progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0%"></div></div></div>
+              <div class="col-10"><div class="progress"><div class="progress-bar" id="progressBar" role="progressbar" aria-label="Indexing progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div></div></div>
               <div class="col-2 text-end"><span class="progress-percent" id="progressPercent">0%</span></div>
             </div>
           </div>
@@ -196,6 +209,7 @@
 
 
 
+@await Html.PartialAsync("_Upload")
 
 <script src="~/devjs/indexesdetails.js"></script>
 <script src="~/devjs/indexesdetails.assign.js"></script>

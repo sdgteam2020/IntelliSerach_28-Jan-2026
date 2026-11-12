@@ -5,6 +5,7 @@ using Application.Interfaces;
 using Application.Interfaces.Repository;
 using Domain.DTOs.Requests;
 using Domain.DTOs.Response;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -20,14 +21,15 @@ namespace AIDocSearch.Controllers
         private readonly IHubContext<CrawlerHub> _hub;
         private readonly ILogger<CentralFileServerController> _log;
         private readonly ICurrentUserService _currentUserService;
-
+        private readonly IWebHostEnvironment _env;
         private readonly IUserAccount _userAccount;
-        public FilesController(ConnectionManager cm, IHubContext<CrawlerHub> hub, ILogger<CentralFileServerController> log, ICurrentUserService currentUserService, IUserAccount userAccount)
+        public FilesController(ConnectionManager cm, IHubContext<CrawlerHub> hub, ILogger<CentralFileServerController> log, ICurrentUserService currentUserService, IWebHostEnvironment env, IUserAccount userAccount)
         {
             _cm = cm;
             _hub = hub;
             _log = log;
             _currentUserService = currentUserService;
+            _env = env;
             _userAccount = userAccount;
         }
         [HttpPost]
@@ -207,6 +209,162 @@ namespace AIDocSearch.Controllers
                     Message = "Invalid Base64 data"
                 });
             }
+        }
+
+        [Authorize]
+        [HttpPost]
+
+        public async Task<IActionResult> SendFileToClient(string crawlerId,string serverFilePath,CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(serverFilePath))
+                throw new ArgumentException("File path is empty.");
+
+            // Example input:
+            // /UploadForIndexing/kapoor/CommentsHistory_WM_20260615_165646.pdf
+
+            string relativePath = serverFilePath
+                .Replace('\\', '/')
+                .TrimStart('/');
+
+            const string allowedPrefix = "UploadForIndexing/";
+
+            if (!relativePath.StartsWith(
+                allowedPrefix,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Invalid file path.");
+            }
+
+            // Convert URL-style path into physical wwwroot path.
+            string webRoot = _env.WebRootPath
+                ?? throw new InvalidOperationException("wwwroot not configured.");
+
+            string allowedRoot = Path.GetFullPath(
+                Path.Combine(webRoot, "UploadForIndexing"));
+
+            string physicalPath = Path.GetFullPath(
+                Path.Combine(
+                    webRoot,
+                    relativePath.Replace('/', Path.DirectorySeparatorChar)));
+
+            // Ensure the resolved file remains inside UploadForIndexing.
+            string relativeCheck = Path.GetRelativePath(
+                allowedRoot, physicalPath);
+
+            if (relativeCheck == ".." ||
+                relativeCheck.StartsWith(
+                    ".." + Path.DirectorySeparatorChar,
+                    StringComparison.Ordinal) ||
+                Path.IsPathRooted(relativeCheck))
+            {
+                throw new InvalidOperationException("Invalid file location.");
+            }
+
+            //if (!File.Exists(physicalPath))
+            //    throw new FileNotFoundException(
+            //        "File not found in wwwroot.", physicalPath);
+
+            if (!_cm.TryGetConnectionId(crawlerId, out var connectionId))
+                throw new InvalidOperationException("Indexer not connected.");
+
+            string transferId = Guid.NewGuid().ToString("N");
+            string fileName = Path.GetFileName(physicalPath);
+
+            const int chunkSize = 64 * 1024;
+
+            using var stream = new FileStream(
+                physicalPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read);
+
+            long fileSize = stream.Length;
+
+            int totalChunks = checked(
+                (int)((fileSize + chunkSize - 1) / chunkSize));
+
+            await _hub.Clients.Client(connectionId).SendAsync(
+                "ReceiveServerFileStart",
+                transferId,
+                "1_"+fileName,
+                fileSize,
+                cancellationToken);
+
+            byte[] buffer = new byte[chunkSize];
+            int chunkIndex = 0;
+            int bytesRead;
+
+            while ((bytesRead = await stream.ReadAsync(
+                buffer, 0, buffer.Length, cancellationToken)) > 0)
+            {
+                string base64 = Convert.ToBase64String(
+                    buffer, 0, bytesRead);
+
+                await _hub.Clients.Client(connectionId).SendAsync(
+                    "ReceiveServerFileChunk",
+                    transferId,
+                    chunkIndex,
+                    base64,
+                    cancellationToken);
+
+                chunkIndex++;
+            }
+
+            DTOFileTransferResultResponse fileUploadStatus;
+
+            try
+            {
+                using var timeoutCts =
+                    CancellationTokenSource.CreateLinkedTokenSource(
+                        cancellationToken);
+
+                timeoutCts.CancelAfter(TimeSpan.FromSeconds(60));
+
+                fileUploadStatus = await _hub.Clients.Client(connectionId)
+                    .InvokeAsync<DTOFileTransferResultResponse>(
+                        "ReceiveServerFileComplete",
+                        transferId,
+                        totalChunks,
+                        timeoutCts.Token);
+
+                if (fileUploadStatus == null)
+                {
+                    fileUploadStatus = new DTOFileTransferResultResponse
+                    {
+                        TransferId = transferId,
+                        Success = false,
+                        ErrorCode = "NULL_RESPONSE",
+                        Message = "Client did not return a transfer result."
+                    };
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                fileUploadStatus = new DTOFileTransferResultResponse
+                {
+                    TransferId = transferId,
+                    Success = false,
+                    ErrorCode = "CONFIRMATION_TIMEOUT",
+                    Message = "File transfer confirmation timed out or was cancelled."
+                };
+            }
+            catch (Exception ex)
+            {
+                
+
+                fileUploadStatus = new DTOFileTransferResultResponse
+                {
+                    TransferId = transferId,
+                    Success = false,
+                    ErrorCode = "CONNECTION_ERROR",
+                    Message = "Unable to confirm file transfer status."
+                };
+            }
+
+            return Json(fileUploadStatus);
+          
+
+            
         }
         private static string GetContentType(string fileName)
         {

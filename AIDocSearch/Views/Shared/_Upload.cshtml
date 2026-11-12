@@ -11,13 +11,14 @@
             <div class="modal-header border-0">
                 <h5 class="modal-title" id="uploadPdfModalLabel">
                     <i class="fa-solid fa-cloud-arrow-up text-primary me-2"></i>
-                    Upload PDF
+                    Upload PDF To <span id="uploadFileTittle">IntelliSearch</span><span id="uploadFileuuid" class="d-none">xxx</span>
                 </h5>
 
                 <button type="button"
                         class="btn-close"
                         data-bs-dismiss="modal"
                         aria-label="Close"></button>
+
             </div>
 
             <div class="modal-body pt-0">
@@ -63,8 +64,8 @@
 
                     <!-- Upload Progress -->
                     <div id="uploadProgressBox"
-                         class="upload-progress-box"
-                         style="display:none;">
+                         class="upload-progress-box d-none"
+                         >
 
                         <div class="upload-file-icon">
                             <i class="fa-solid fa-file-pdf"></i>

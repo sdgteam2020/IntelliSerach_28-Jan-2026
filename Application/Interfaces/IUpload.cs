@@ -9,7 +9,7 @@ namespace Application.Interfaces
     public interface IUpload
     {
         Task<DTOGenericResponse<object>> UploadFileAsync(IFormFile file, string uploadPath, int UserId,string UserName);
-
+        Task<string?> ValidatePdfAsync(IFormFile file);
         Task<bool> FileDelete(string uploadPath,string FileName);
         Task<bool> CheckFileExits(string uploadPath, string FileName);
         Task<bool> CheckFileExits(string Path);

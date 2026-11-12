@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using System.Text.RegularExpressions;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Exceptions;
+using UglyToad.PdfPig.Logging;
 namespace Infrastructure.Shared.Services
 {
     public class Upload : IUpload
@@ -83,11 +84,17 @@ namespace Infrastructure.Shared.Services
                 return false;
             }
         }
-        private static async Task<string?> ValidatePdfAsync(IFormFile file)
+        public async Task<string?> ValidatePdfAsync(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return "The uploaded file is empty.";
+            // 5 MB = 5 * 1024 * 1024 bytes
+            const long MaxFileSize = 5 * 1024 * 1024;
 
+            if (file.Length > MaxFileSize)
+            {
+                return "File size must be less than 5 MB."  ;
+            }
             // Check the PDF header. A .pdf extension or MIME type alone isn't proof.
             byte[] header = new byte[5];
 
@@ -138,6 +145,7 @@ namespace Infrastructure.Shared.Services
                 return "The PDF is damaged, invalid, or cannot be opened.";
             }
         }
+       
         public async Task<DTOGenericResponse<object>> UploadFileAsync( IFormFile file,string uploadPath,int userId,string userName)
         {
             if (file == null)
@@ -156,16 +164,7 @@ namespace Infrastructure.Shared.Services
                 Directory.CreateDirectory(userFolder);
             }
 
-            // 5 MB = 5 * 1024 * 1024 bytes
-            const long MaxFileSize = 5 * 1024 * 1024;
-
-            if (file.Length > MaxFileSize)
-            {
-                return new DTOGenericResponse<object>(
-                    ConnKeyConstants.BadRequest,
-                    "File size must be less than 5 MB.",
-                    false);
-            }
+           
             string? validationError = await ValidatePdfAsync(file);
 
             if (validationError != null)
@@ -175,6 +174,7 @@ namespace Infrastructure.Shared.Services
             }
 
             string originalName = Path.GetFileNameWithoutExtension(file.FileName);
+
             string extension = Path.GetExtension(file.FileName);
 
             string fileName = $"{originalName}_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";

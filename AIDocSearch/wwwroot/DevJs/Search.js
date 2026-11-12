@@ -176,7 +176,7 @@ async function searchContent(reset = true,IsFilter) {
                 const data = JSON.parse(data1.Data);
                 const hits = data.hits.hits || [];
                 // totalHits = data.hits.total.value || 0;
-                totalHits = data.aggregations?.unique_results?.value ?? 0;
+               totalHits = data.aggregations?.unique_results?.value ?? 0;
                 const aggregations = data.aggregations.indexes_used.buckets;
 
                 var now = new Date();
