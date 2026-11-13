@@ -202,13 +202,13 @@ footer {
 
 .loader-container h4 {
     margin: 0 0 8px;
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 600;
     color: #1e293b;
 }
 
 .loader-container span {
-    font-size: 13px;
+    font-size: 0.8125rem;
     color: #64748b;
 }
 
@@ -300,7 +300,7 @@ footer {
         border-radius: 20px;
         background: #0d6efd;
         color: #fff;
-        font-size: 13px;
+        font-size: 0.8125rem;
         font-weight: 500;
     }
 
@@ -364,7 +364,7 @@ footer {
 }
 
 .file-name {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.4;
     /* Break long words */
@@ -395,7 +395,7 @@ footer {
     }
 
     .file-name {
-        font-size: 13px;
+        font-size: 0.8125rem;
     }
 
     .file-icon i {
@@ -412,7 +412,7 @@ footer {
    background-color:#ff0606
 }
 .GetCrawlerId {
-    font-size: 15px;
+    font-size: 0.9375rem;
     color: #1a0dab;
     text-decoration: none;
     display: block;
@@ -483,21 +483,21 @@ footer {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 17px;
+    font-size: 1.0625rem;
     font-weight: 600;
     color: #202124;
 }
 
     .upload-header-title i {
         color: #1a73e8;
-        font-size: 23px;
+        font-size: 1.4375rem;
     }
 
 .upload-limit {
     background: #f1f3f4;
     border-radius: 20px;
     padding: 5px 12px;
-    font-size: 12px;
+    font-size: 0.75rem;
     color: #5f6368;
 }
 
@@ -531,18 +531,18 @@ footer {
     align-items: center;
     justify-content: center;
     margin: 0 auto 16px;
-    font-size: 30px;
+    font-size: 1.875rem;
 }
 
 .upload-dropzone h5 {
-    font-size: 17px;
+    font-size: 1.0625rem;
     font-weight: 600;
     color: #202124;
     margin-bottom: 8px;
 }
 
 .upload-dropzone p {
-    font-size: 13px;
+    font-size: 0.8125rem;
     color: #6b7280;
     margin-bottom: 18px;
 }
@@ -556,7 +556,7 @@ footer {
     border: 1px solid #dadce0;
     border-radius: 22px;
     padding: 10px 24px;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 600;
     cursor: pointer;
     transition: .2s;
@@ -569,7 +569,7 @@ footer {
 
 .upload-hint {
     display: block;
-    font-size: 12px;
+    font-size: 0.75rem;
     color: #80868b;
     margin-top: 17px;
 }
@@ -594,7 +594,7 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 23px;
+    font-size: 1.4375rem;
     flex-shrink: 0;
 }
 
@@ -612,7 +612,7 @@ footer {
 }
 
 .upload-file-header {
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: #202124;
     margin-bottom: 10px;
@@ -647,7 +647,7 @@ footer {
 
 .upload-status {
     margin-top: 9px;
-    font-size: 11px;
+    font-size: 0.6875rem;
     color: #6b7280;
 }
 
@@ -655,7 +655,7 @@ footer {
     background: none;
     border: none;
     color: #80868b;
-    font-size: 16px;
+    font-size: 1rem;
     cursor: pointer;
     padding: 6px;
 }

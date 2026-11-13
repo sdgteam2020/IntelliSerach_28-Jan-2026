@@ -566,31 +566,41 @@ function token() {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    const fontSizes = [90, 100, 110, 120, 130];
-    const defaultSize = 100;
+    const fontSizes = [90, 120, 130, 140, 150];
+    const defaultSize = 120;
 
     const decreaseBtn = document.getElementById("fontDecrease");
     const resetBtn = document.getElementById("fontReset");
     const increaseBtn = document.getElementById("fontIncrease");
 
-    if (!decreaseBtn || !resetBtn || !increaseBtn) {
-        console.error("Font control buttons not found.");
-        return;
-    }
+    let currentSize = defaultSize;
 
-    let currentSize = Number(localStorage.getItem("intelFontSize")) || defaultSize;
+    try {
+        const savedSize = Number(localStorage.getItem("intelFontSize"));
 
-    if (!fontSizes.includes(currentSize)) {
-        currentSize = defaultSize;
+        if (fontSizes.includes(savedSize)) {
+            currentSize = savedSize;
+        }
+    } catch (error) {
+        console.warn("Unable to read the saved font size.", error);
     }
 
     function applyFontSize() {
 
         // Apply font size globally
         document.documentElement.style.fontSize = currentSize + "%";
+        document.documentElement.dataset.fontSize = currentSize;
 
         // Save selected size
-        localStorage.setItem("intelFontSize", currentSize);
+        try {
+            localStorage.setItem("intelFontSize", currentSize);
+        } catch (error) {
+            console.warn("Unable to save the selected font size.", error);
+        }
+
+        if (!decreaseBtn || !resetBtn || !increaseBtn) {
+            return;
+        }
 
         // Enable / disable controls
         decreaseBtn.disabled = currentSize === fontSizes[0];
@@ -600,9 +610,13 @@ document.addEventListener("DOMContentLoaded", function () {
         decreaseBtn.classList.toggle("active", currentSize < defaultSize);
         resetBtn.classList.toggle("active", currentSize === defaultSize);
         increaseBtn.classList.toggle("active", currentSize > defaultSize);
+
+        decreaseBtn.setAttribute("aria-pressed", currentSize < defaultSize);
+        resetBtn.setAttribute("aria-pressed", currentSize === defaultSize);
+        increaseBtn.setAttribute("aria-pressed", currentSize > defaultSize);
     }
 
-    decreaseBtn.addEventListener("click", function (e) {
+    decreaseBtn?.addEventListener("click", function (e) {
         e.preventDefault();
 
         const index = fontSizes.indexOf(currentSize);
@@ -613,14 +627,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    resetBtn.addEventListener("click", function (e) {
+    resetBtn?.addEventListener("click", function (e) {
         e.preventDefault();
 
         currentSize = defaultSize;
         applyFontSize();
     });
 
-    increaseBtn.addEventListener("click", function (e) {
+    increaseBtn?.addEventListener("click", function (e) {
         e.preventDefault();
 
         const index = fontSizes.indexOf(currentSize);

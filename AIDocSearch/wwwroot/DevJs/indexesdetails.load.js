@@ -149,14 +149,14 @@ $(function () {
 
                <button
                 type="button"
-                class="btn btn-outline-danger btn-sm btn-UploadFileTo-index d-none text-nowrap fut-upload-btn" title="Upload To ${(item.index || '').replace('fs-', '')}"
+                class="btn btn-outline-info btn-sm btn-UploadFileTo-index d-none text-nowrap fut-upload-btn" title="Upload To ${(item.index || '').replace('fs-', '')}"
 
                 data-crawler-id="${item.index || ''}"
                 data-uuid="${item.uuid || ''}"
                 data-indexingstatistics-id="${item.index || ''}"
                 data-index-name="${(item.index || '').replace('fs-', '')}">
-
-                <i class="fa-solid fa-plus"></i>
+                Upload
+                <i class="fa-solid fa-plus d-none"></i>
                 
                 </button>
 
@@ -164,7 +164,7 @@ $(function () {
             `;
 
                     html.push(`
-                <div class="col-12 col-md-6 col-xl-2 index-item"
+                <div class="col-12 col-md-6 col-xl-3 index-item"
                      data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
 
                     <div class="card index-card border-0">
@@ -320,7 +320,7 @@ $(function () {
                     
 
 
-                <div class="col-12 col-md-6 col-xl-2 index-item"
+                <div class="col-12 col-md-6 col-xl-3 index-item"
                      data-index-name="${((item.index || '').replace('fs-', '')).toLowerCase()}">
 
                     <div class="card index-card border-0">

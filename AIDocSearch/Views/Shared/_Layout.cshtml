@@ -11,6 +11,21 @@
   
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        (function () {
+            try {
+                const savedSize = Number(localStorage.getItem("intelFontSize"));
+                const validSizes = [90, 100, 110, 120, 130];
+
+                if (validSizes.includes(savedSize)) {
+                    document.documentElement.style.fontSize = savedSize + "%";
+                    document.documentElement.dataset.fontSize = savedSize;
+                }
+            } catch (error) {
+                // Continue with the default document font size when storage is unavailable.
+            }
+        })();
+    </script>
     <title>Indian Army IntelliSearch</title>
     <!--Bootstrap 4 CDN-->
     <link href="~/bootstrap/css/bootstrap.min.css" asp-append-version="true"  rel="stylesheet" />
@@ -204,7 +219,8 @@
                                 id="fontDecrease"
                                 class="intel-font-btn"
                                 title="Decrease font size"
-                                aria-label="Decrease font size">
+                                aria-label="Decrease font size"
+                                aria-pressed="false">
                             A<sup>−</sup>
                         </button>
 
@@ -212,7 +228,8 @@
                                 id="fontReset"
                                 class="intel-font-btn"
                                 title="Reset font size"
-                                aria-label="Reset font size">
+                                aria-label="Reset font size"
+                                aria-pressed="false">
                             A
                         </button>
 
@@ -220,7 +237,8 @@
                                 id="fontIncrease"
                                 class="intel-font-btn"
                                 title="Increase font size"
-                                aria-label="Increase font size">
+                                aria-label="Increase font size"
+                                aria-pressed="false">
                             A<sup>+</sup>
                         </button>
 

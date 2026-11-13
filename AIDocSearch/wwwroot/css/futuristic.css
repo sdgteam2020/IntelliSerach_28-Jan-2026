@@ -1330,14 +1330,14 @@ html.light-theme .btn-secondary {
 
 .intel-brand-name {
     color: #fff;
-    font-size: 17px;
+    font-size: 1.0625rem;
     font-weight: 750;
     letter-spacing: -.3px;
 }
 
 .intel-navbar-brand-text small {
     color: #dbeafe;
-    font-size: 10px;
+    font-size: 0.625rem;
     letter-spacing: .3px;
 }
 
@@ -1364,7 +1364,7 @@ html.light-theme .btn-secondary {
         color: rgba(255,255,255,.88) !important;
         border: 1px solid transparent !important;
         border-radius: 8px;
-        font-size: 12.5px;
+        font-size: 0.78125rem;
         font-weight: 600;
         white-space: nowrap;
         box-shadow: none !important;
@@ -1372,7 +1372,7 @@ html.light-theme .btn-secondary {
     }
 
         .intel-navbar .intel-nav-links .nav-link i {
-            font-size: 13px;
+            font-size: 0.8125rem;
             opacity: .9;
         }
 
@@ -1461,7 +1461,7 @@ html.light-theme .btn-secondary {
     background: rgba(255,255,255,.20);
     color: #fff;
     border-radius: 9px;
-    font-size: 14px;
+    font-size: 0.875rem;
 }
 
 .intel-user-information {
@@ -1473,7 +1473,7 @@ html.light-theme .btn-secondary {
 }
 
 .intel-user-name {
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 650;
     color: #fff;
     max-width: 190px;
@@ -1484,7 +1484,7 @@ html.light-theme .btn-secondary {
 
 .intel-user-role {
     color: #dbeafe;
-    font-size: 10px;
+    font-size: 0.625rem;
 }
 
 /* ==========================================
@@ -1508,7 +1508,7 @@ html.light-theme .btn-secondary {
         padding: 10px 12px;
         border-radius: 7px;
         color: #334155;
-        font-size: 12px;
+        font-size: 0.75rem;
         font-weight: 550;
         text-decoration: none;
         background: transparent;
@@ -1535,12 +1535,12 @@ html.light-theme .btn-secondary {
 }
 
     .intel-account-header strong {
-        font-size: 13px;
+        font-size: 0.8125rem;
         color: #1e293b;
     }
 
     .intel-account-header small {
-        font-size: 11px;
+        font-size: 0.6875rem;
         color: #64748b;
     }
 
@@ -1594,7 +1594,7 @@ html.light-theme .intel-navbar #themeToggle.intel-theme-btn {
 
     .intel-navbar .intel-nav-links .nav-link {
         padding: 8px 9px !important;
-        font-size: 12px;
+        font-size: 0.75rem;
     }
 
     .intel-user-name {
@@ -1647,6 +1647,6 @@ html.light-theme .intel-navbar #themeToggle.intel-theme-btn {
     }
 
     .intel-brand-name {
-        font-size: 15px;
+        font-size: 0.9375rem;
     }
 }

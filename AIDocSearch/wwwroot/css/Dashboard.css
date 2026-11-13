@@ -54,7 +54,7 @@
         align-items: center;
         gap: 7px;
         color: #507199;
-        font-size: 10px;
+        font-size: 0.625rem;
         font-weight: 750;
         letter-spacing: 1.1px;
         margin-bottom: 8px;
@@ -71,7 +71,7 @@
     .intel-dashboard .intel-brand h1 {
         margin: 0;
         color: #102747;
-        font-size: clamp(24px,2.3vw,33px);
+        font-size: clamp(1.5rem, 2.3vw, 2.0625rem);
         font-weight: 780;
         line-height: 1.18;
         letter-spacing: -.55px;
@@ -85,7 +85,7 @@
         margin: 9px 0 0;
         max-width: 450px;
         color: var(--intel-muted);
-        font-size: 12.5px;
+        font-size: 0.78125rem;
         line-height: 1.55;
     }
 
@@ -148,7 +148,7 @@
         background: transparent;
         box-shadow: none;
         padding: 7px 8px;
-        font-size: 13px;
+        font-size: 0.8125rem;
         color: var(--intel-text);
     }
 
@@ -174,7 +174,7 @@
         border: 0;
         background: var(--intel-primary);
         color: #fff;
-        font-size: 12px;
+        font-size: 0.75rem;
         font-weight: 650;
     }
 
@@ -188,7 +188,7 @@
         border: 1px solid #d9e9ff;
         background: #edf5ff;
         color: var(--intel-primary);
-        font-size: 16px;
+        font-size: 1rem;
     }
 
         .intel-dashboard .fut-upload-btn:hover {
@@ -210,7 +210,7 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        font-size: 10.5px;
+        font-size: 0.65625rem;
         color: var(--intel-muted);
         margin-right: 2px;
     }
@@ -224,7 +224,7 @@
         border: 1px solid var(--intel-line);
         border-radius: 99px;
         color: #536781;
-        font-size: 10.5px;
+        font-size: 0.65625rem;
         white-space: nowrap;
     }
 
@@ -253,7 +253,7 @@
 
         .intel-dashboard .intel-section-header h2 {
             margin: 0 0 3px;
-            font-size: 18px;
+            font-size: 1.125rem;
             line-height: 1.25;
             color: #162b4e;
             font-weight: 720;
@@ -262,7 +262,7 @@
         .intel-dashboard .intel-section-header p {
             margin: 0;
             color: var(--intel-muted);
-            font-size: 11.5px;
+            font-size: 0.71875rem;
         }
 
     .intel-dashboard .intel-section-indicator {
@@ -274,7 +274,7 @@
         border-radius: 20px;
         background: #fff;
         color: #52647e;
-        font-size: 10.5px;
+        font-size: 0.65625rem;
         white-space: nowrap;
     }
 
@@ -325,7 +325,7 @@
         width: 36px;
         height: 36px;
         border-radius: 10px;
-        font-size: 15px;
+        font-size: 0.9375rem;
     }
 
         .intel-dashboard .intel-card-icon.blue {
@@ -345,7 +345,7 @@
 
     .intel-dashboard .intel-card h3 {
         color: #1b2e4a;
-        font-size: 13.5px;
+        font-size: 0.84375rem;
         font-weight: 720;
         line-height: 1.25;
         margin: 0 0 3px;
@@ -354,7 +354,7 @@
     .intel-dashboard .intel-card-description {
         margin: 0;
         color: #7a899e;
-        font-size: 10.5px;
+        font-size: 0.65625rem;
         line-height: 1.35;
     }
 
@@ -387,18 +387,18 @@
         gap: 8px;
         min-width: 0;
         color: #52647b;
-        font-size: 11.5px;
+        font-size: 0.71875rem;
     }
 
         .intel-dashboard .intel-stat-label i {
             color: #69809e;
-            font-size: 12px;
+            font-size: 0.75rem;
         }
 
     .intel-dashboard .intel-stat-value {
         flex-shrink: 0;
         color: #155ed4;
-        font-size: 16px;
+        font-size: 1rem;
         font-weight: 750;
         font-variant-numeric: tabular-nums;
     }
@@ -416,7 +416,7 @@
         width: 29px;
         height: 29px;
         border-radius: 8px;
-        font-size: 12px;
+        font-size: 0.75rem;
     }
 
     .intel-dashboard .intel-activity-icon {
@@ -433,12 +433,12 @@
 
     .intel-dashboard .intel-data-label {
         color: #8492a9;
-        font-size: 10px;
+        font-size: 0.625rem;
     }
 
     .intel-dashboard .intel-data-text {
         color: #263c5a;
-        font-size: 11.5px;
+        font-size: 0.71875rem;
         font-weight: 600;
         overflow-wrap: anywhere;
     }
@@ -467,14 +467,14 @@
 
     .intel-dashboard .intel-tip-row strong {
         color: #293952;
-        font-size: 11px;
+        font-size: 0.6875rem;
         font-weight: 700;
         line-height: 1.35;
     }
 
     .intel-dashboard .intel-tip-row span {
         color: #72839b;
-        font-size: 10px;
+        font-size: 0.625rem;
         line-height: 1.35;
     }
 
@@ -486,7 +486,7 @@
         width: fit-content;
         background: #e9f0ff;
         color: #245cc8;
-        font-size: 10px;
+        font-size: 0.625rem;
         border-radius: 5px;
         overflow-wrap: anywhere;
     }
@@ -545,7 +545,7 @@
     }
 
     .intel-dashboard .intel-brand h1 {
-        font-size: 25px;
+        font-size: 1.5625rem;
     }
 
     .intel-dashboard .intel-cards-grid, .intel-dashboard .intel-tips-grid {
@@ -619,7 +619,7 @@
 
 .intel-dashboard .intel-eyebrow {
     justify-content: center;
-    font-size: 10px;
+    font-size: 0.625rem;
     letter-spacing: 1.6px;
     text-transform: uppercase;
     color: #5f7ea4;
@@ -635,7 +635,7 @@
 
 .intel-dashboard .intel-brand h1 {
     margin: 0;
-    font-size: clamp(30px, 4vw, 52px);
+    font-size: clamp(1.875rem, 4vw, 3.25rem);
     line-height: 1.15;
     font-weight: 700;
     color: #111827;
@@ -648,7 +648,7 @@
 .intel-dashboard .intel-brand p {
     margin: 10px auto 0;
     max-width: 680px;
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.7;
     color: #5f6b7a;
 }
@@ -696,7 +696,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 1.125rem;
     flex-shrink: 0;
     transition: background 0.2s ease, transform 0.2s ease;
 }
@@ -717,7 +717,7 @@
     box-shadow: none !important;
     background: transparent;
     padding: 0 6px;
-    font-size: 16px;
+    font-size: 1rem;
     color: #111827;
 }
 
@@ -738,7 +738,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s ease, transform 0.2s ease;
@@ -777,7 +777,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 12px;
+    font-size: 0.75rem;
     color: #64748b;
 }
 
@@ -789,7 +789,7 @@
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 0.75rem;
     color: #475569;
     transition: background 0.2s ease, border-color 0.2s ease;
 }
@@ -806,11 +806,11 @@
     }
 
     .intel-dashboard .intel-brand h1 {
-        font-size: 34px;
+        font-size: 2.125rem;
     }
 
     .intel-dashboard .intel-brand p {
-        font-size: 14px;
+        font-size: 0.875rem;
     }
 
     .intel-dashboard .fut-search-wrapper {
@@ -835,16 +835,16 @@
 
 @media (max-width: 480px) {
     .intel-dashboard .intel-brand h1 {
-        font-size: 28px;
+        font-size: 1.75rem;
     }
 
     .intel-dashboard .intel-eyebrow {
-        font-size: 9px;
+        font-size: 0.5625rem;
         letter-spacing: 1.2px;
     }
 
     .intel-dashboard .fut-search-input {
-        font-size: 14px;
+        font-size: 0.875rem;
     }
 
     .intel-dashboard .intel-search-hints {
@@ -852,7 +852,7 @@
     }
 
     .intel-dashboard .intel-hint {
-        font-size: 11px;
+        font-size: 0.6875rem;
         padding: 7px 11px;
     }
 }

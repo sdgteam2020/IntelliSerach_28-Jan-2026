@@ -1228,7 +1228,7 @@
             font-size: 11.5px;
             font-weight: 600;
             border-radius: 8px !important;
-            box-shadow: none !important;
+            /*box-shadow: none !important;*/
             transition: background .2s, transform .2s;
         }
 
