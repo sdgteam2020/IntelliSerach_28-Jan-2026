@@ -121,12 +121,14 @@ namespace AIDocSearch.Controllers
             if (!TryValidateModel(request))
                 return BadRequest(new { success = false, message = "Invalid request" });
 
+            bool isPrivate = await _indexUserMapping.IsPrivateIndex(request.IndexId);
             await _indexUserMapping.UserAssginAndDeAssignIndex(request);
             if (request.AllSelected)
             {
                     var allUsers = await _userAccount.GetActiveUsers();
                     request.UserIds = allUsers.Select(u => u.Id).ToList();
             }
+           
             // create mappings
             foreach (var uid in request.UserIds)
             {
@@ -135,7 +137,8 @@ namespace AIDocSearch.Controllers
                     IndexName=request.indexName,
                     IndexId = request.IndexId,
                     UserId = uid,
-                   
+                    IsPrivate = isPrivate   
+
                 };
                 await _indexUserMapping.AddWithCheckIndexId(map);
             }
@@ -309,8 +312,7 @@ namespace AIDocSearch.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public async Task<IActionResult> UpdateIndexPrivatePublic(
-    [FromBody] DTOIndexPublicPrivateRequest data)
+        public async Task<IActionResult> UpdateIndexPrivatePublic([FromBody] DTOIndexPublicPrivateRequest data)
         {
             int CurrentUserId = (int)_currentUserService.UserId;
             string RoleName = (string)_currentUserService.RoleName;

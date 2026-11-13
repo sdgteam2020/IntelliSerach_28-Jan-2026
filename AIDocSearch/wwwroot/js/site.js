@@ -563,6 +563,7 @@ function token() {
 }
 
 
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const fontSizes = [90, 100, 110, 120, 130];
@@ -572,7 +573,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const resetBtn = document.getElementById("fontReset");
     const increaseBtn = document.getElementById("fontIncrease");
 
-    if (!decreaseBtn || !resetBtn || !increaseBtn) return;
+    if (!decreaseBtn || !resetBtn || !increaseBtn) {
+        console.error("Font control buttons not found.");
+        return;
+    }
 
     let currentSize = Number(localStorage.getItem("intelFontSize")) || defaultSize;
 
@@ -582,19 +586,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function applyFontSize() {
 
+        // Apply font size globally
         document.documentElement.style.fontSize = currentSize + "%";
 
+        // Save selected size
         localStorage.setItem("intelFontSize", currentSize);
 
+        // Enable / disable controls
         decreaseBtn.disabled = currentSize === fontSizes[0];
         increaseBtn.disabled = currentSize === fontSizes[fontSizes.length - 1];
 
+        // Active button styling
         decreaseBtn.classList.toggle("active", currentSize < defaultSize);
         resetBtn.classList.toggle("active", currentSize === defaultSize);
         increaseBtn.classList.toggle("active", currentSize > defaultSize);
     }
 
-    decreaseBtn.addEventListener("click", function () {
+    decreaseBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+
         const index = fontSizes.indexOf(currentSize);
 
         if (index > 0) {
@@ -603,12 +613,16 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    resetBtn.addEventListener("click", function () {
+    resetBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+
         currentSize = defaultSize;
         applyFontSize();
     });
 
-    increaseBtn.addEventListener("click", function () {
+    increaseBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+
         const index = fontSizes.indexOf(currentSize);
 
         if (index < fontSizes.length - 1) {

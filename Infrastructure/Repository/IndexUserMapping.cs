@@ -41,7 +41,10 @@ namespace Infrastructure.Repository
             // Record already exists, so return the existing one
             return existing;
         }
-
+        public async Task<bool> IsPrivateIndex(string IndexId)
+        { 
+            return await _context.TrnIndexUserMapping.AnyAsync(i => i.IndexId == IndexId);
+        }
         public async Task<bool> CheckUserIndexingExists(int UserId, string IndexId, String RoleName)
         { // Admin has access to all indexes
             if (string.Equals(RoleName, "Admin", StringComparison.OrdinalIgnoreCase))

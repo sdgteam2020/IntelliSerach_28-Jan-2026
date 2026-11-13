@@ -686,6 +686,7 @@ footer {
     border-radius: 10px;
 }
 
+/* Font Control Buttons */
 .intel-font-btn {
     width: 34px;
     height: 34px;
@@ -696,38 +697,52 @@ footer {
     border-radius: 7px;
     background: transparent;
     color: inherit;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 700;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
 }
 
+    /* Hover Effect */
     .intel-font-btn:hover {
         background: rgba(37, 99, 235, 0.15);
         color: #2563eb;
     }
 
+    /* Active Button */
     .intel-font-btn.active {
         background: #2563eb;
         color: #fff;
     }
 
+    /* Superscript Font */
     .intel-font-btn sup {
-        font-size: 11px;
+        font-size: 0.6875rem;
         margin-left: 1px;
     }
 
+    /* Keyboard Focus */
     .intel-font-btn:focus-visible {
         outline: 2px solid #2563eb;
         outline-offset: 2px;
     }
-/* Fixed font size */
-.intel-nav-links .nav-link {
-    font-size: 14px;
-}
 
-/* Responsive to root font-size changes */
+    /* Disabled Buttons */
+    .intel-font-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+/* Navigation Links - Responsive Font Size */
 .intel-nav-links .nav-link {
     font-size: 0.875rem;
 }
 
+
+.intel-font-btn {
+    font-size: 0.875rem;
+}
+
+    .intel-font-btn sup {
+        font-size: 0.6875rem;
+    }
