@@ -30,9 +30,10 @@ $(document).ready(function () {
     $(document).on("input", "input[type='text'], textarea", function () {
 
         // Remove restricted special characters
-        var value = $(this).val();
+        let value = $(this).val();
 
-        var cleanValue = value.replace(/[@#$'!]/g, "");
+        let cleanValue = value.replace(/[@#$'!%^=]/g, "").replace(/ {2,}/g, " ");   // Allow only one consecutive space
+;
 
         if (value !== cleanValue) {
             $(this).val(cleanValue);
@@ -319,7 +320,7 @@ function GetCrawlerStatus(CrawlerId) {
 async function GetAllCrawlerStatus() {
 
 
-    valuesArray = [];
+    let valuesArray = [];
     const csrfToken = token();
     if (!csrfToken) {
         throw new Error("Anti-forgery token is missing.");
@@ -566,8 +567,8 @@ function token() {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    const fontSizes = [90, 120, 130, 140, 150];
-    const defaultSize = 120;
+    const fontSizes = [90, 100, 110, 120, 130];
+    const defaultSize = 100;
 
     const decreaseBtn = document.getElementById("fontDecrease");
     const resetBtn = document.getElementById("fontReset");

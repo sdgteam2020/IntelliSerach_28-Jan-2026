@@ -131,8 +131,8 @@ namespace Infrastructure.Shared.Services
                 bool containsText = document.GetPages()
                     .Any(page => !string.IsNullOrWhiteSpace(page.Text));
 
-                if (!containsText)
-                    return "The PDF is blank or contains no extractable text.";
+                //if (!containsText)
+                //    return "The PDF is blank or contains no extractable text.";
 
                 return null; // Valid for the checks above.
             }

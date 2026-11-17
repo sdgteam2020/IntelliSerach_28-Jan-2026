@@ -242,8 +242,8 @@ function BindWebScraping(Data) {
             Swal.fire({
                 position: "top-end",
                 icon: "success",
-                title: "Crawlering started",
-                text: Data.Message || "New Scrapy crawl started.",
+                title: "Crawling started",
+                text: Data.Message || "New crawl started.",
                 showConfirmButton: false,
                 timer: 3500
             });
@@ -257,8 +257,8 @@ function BindWebScraping(Data) {
             Swal.fire({
                 position: "top-end",
                 icon: "success",
-                title: "Crawlering completed",
-                text: Data.Message || "Crawlering completed successfully.",
+                title: "Crawling completed",
+                text: Data.Message || "Crawling completed successfully.",
                 showConfirmButton: false,
                 timer: 3500
             });
@@ -272,8 +272,8 @@ function BindWebScraping(Data) {
             Swal.fire({
                 position: "top-end",
                 icon: "error",
-                title: "Crawlering failed",
-                text: Data.Message || "Crawlering failed.",
+                title: "Crawling failed",
+                text: Data.Message || "Crawling failed.",
                 showConfirmButton: true
             });
 

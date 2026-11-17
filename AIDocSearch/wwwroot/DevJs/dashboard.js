@@ -4,7 +4,7 @@
     //     "fs-kapoor_40",
     //     "/UploadForIndexing/kapoor/CommentsHistory_WM_20260615_165646.pdf"
     // );
-
+    loadDocWebCount();
     let dattt = await getUserActivity("SearchHistory");
 
     if (dattt) {
@@ -14,7 +14,7 @@
         $(".spnRecentSearches").html(dattt.Data);
 
     }
-    loadDocWebCount();
+   
 });
 function sendFileToClient(crawlerId, fileName) {
 

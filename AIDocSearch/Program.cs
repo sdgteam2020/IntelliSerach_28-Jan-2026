@@ -83,6 +83,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     //options.Cookie.SameSite = SameSiteMode.Strict;
+
 });
 builder.Services.AddSelfInfrastructure();
 builder.Services.AddInfrastructure();
