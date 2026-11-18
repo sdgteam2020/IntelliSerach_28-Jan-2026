@@ -2,232 +2,246 @@
 using Application.Interfaces.Repository;
 using Domain.DTOs.Requests;
 using Domain.Entities;
-using Domain.Enums;
 using Infrastructure.Repository.GenericRepository;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
+
 namespace Infrastructure.Repository
 {
-    public class IndexUserMapping : GenericRepository<TrnIndexUserMapping>, IindexUserMapping
+    public class IndexUserMapping :
+        GenericRepository<TrnIndexUserMapping>, IindexUserMapping
     {
         protected new readonly ApplicationDbContext _context;
-        public IndexUserMapping(ApplicationDbContext context) : base(context)
+
+        public IndexUserMapping(ApplicationDbContext context)
+            : base(context)
         {
-            _context=context;
+            _context = context;
         }
 
-        public async Task<TrnIndexUserMapping> AddWithCheckIndexId(TrnIndexUserMapping data)
+        // 1. Assign index to user with duplicate check
+        public async Task<TrnIndexUserMapping> AddWithCheckIndexId(
+            TrnIndexUserMapping data)
         {
-            if (data == null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
+            ArgumentNullException.ThrowIfNull(data);
 
-            var existing = await _context.TrnIndexUserMapping.FirstOrDefaultAsync(x =>
+            if (data.IndexId <= 0 || data.UserId <= 0)
+                throw new ArgumentException("Invalid Index ID or User ID.");
+
+            var existing = await _context.TrnIndexUserMapping
+                .FirstOrDefaultAsync(x =>
                     x.IndexId == data.IndexId &&
                     x.UserId == data.UserId);
 
-            if (existing == null)
-            {
-                _context.TrnIndexUserMapping.Add(data);
-                await _context.SaveChangesAsync();
-                return data;
-            }
+            if (existing != null)
+                return existing;
 
-            // Record already exists, so return the existing one
-            return existing;
-        }
-        public async Task<bool> IsPrivateIndex(string IndexId)
-        { 
-            return await _context.TrnIndexUserMapping.AnyAsync(i => i.IndexId == IndexId);
-        }
-        public async Task<bool> CheckUserIndexingExists(int UserId, string IndexId, String RoleName)
-        { // Admin has access to all indexes
-            if (string.Equals(RoleName, "Admin", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
+            await _context.TrnIndexUserMapping.AddAsync(data);
+            await _context.SaveChangesAsync();
 
-            //if ((int)UsersId.Admin == UserId)
-            //    return true;
-          
-            return await _context.TrnIndexUserMapping.AnyAsync(i =>i.UserId == UserId && i.IndexId == IndexId);
+            return data;
         }
-        public async Task<bool> CheckUserIndexingExists(int UserId, string IndexId)
-        { // Admin has access to all indexes
-           
-            return await _context.TrnIndexUserMapping.AnyAsync(i => i.UserId == UserId && i.IndexId == IndexId);
-        }
-        public async Task<bool> UserAssginAndDeAssignIndex(DTOIndexAssignRequest Data)
+
+        // 2. Check index access with Role
+        public async Task<bool> CheckUserIndexingExists(
+            int UserId, string IndexId, string RoleName)
         {
+            if (UserId <= 0 || string.IsNullOrWhiteSpace(IndexId))
+                return false;
 
-            var existingMappings = _context.TrnIndexUserMapping
-     .Where(x => x.IndexId == Data.IndexId &&
-                 !Data.UserIds.Contains(x.UserId))
-     .ToList();
-
-            if (existingMappings.Any())
+            // Admin can access any existing index
+            if (string.Equals(RoleName, "Admin",
+                StringComparison.OrdinalIgnoreCase))
             {
-                _context.TrnIndexUserMapping.RemoveRange(existingMappings);
-                _context.SaveChanges();
+                return await _context.MIndexes
+                    .AnyAsync(x => x.Uuid == IndexId);
             }
+
+            return await CheckUserIndexingExists(IndexId);
+        }
+
+        // 3. Check index access without Role
+        public async Task<bool> CheckUserIndexingExists(
+           string IndexId)
+        {
+            if (string.IsNullOrWhiteSpace(IndexId))
+                return false;
+
+            return await _context.MIndexes
+                .AnyAsync(x =>
+                    
+                    x.Uuid== IndexId);
+        }
+
+        // 4. Assign and DeAssign users
+        public async Task<bool> UserAssginAndDeAssignIndex(
+     DTOIndexAssignRequest Data)
+        {
+            if (Data == null ||
+                string.IsNullOrWhiteSpace(Data.IndexId) ||
+                Data.UserIds == null)
+                return false;
+
+            var userIds = Data.UserIds.Distinct().ToHashSet();
+
+            if (userIds.Any(x => x <= 0))
+                return false;
+
+            // Get actual integer IndexId using UUID
+            var index = await _context.MIndexes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Uuid == Data.IndexId);
+
+            if (index == null)
+                return false;
+
+            int actualIndexId = index.IndexId;
+
+            // Get existing mappings
+            var existingMappings = await _context.TrnIndexUserMapping
+                .Where(x => x.IndexId == actualIndexId)
+                .ToListAsync();
+
+            // Remove unselected users
+            var removeMappings = existingMappings
+                .Where(x => !userIds.Contains(x.UserId))
+                .ToList();
+
+            if (removeMappings.Count > 0)
+            {
+                _context.TrnIndexUserMapping.RemoveRange(removeMappings);
+            }
+
+            // Get existing assigned user IDs
+            var existingUserIds = existingMappings
+                .Select(x => x.UserId)
+                .ToHashSet();
+
+            // Assign newly selected users
+            var newMappings = userIds
+                .Where(x => !existingUserIds.Contains(x))
+                .Select(x => new TrnIndexUserMapping
+                {
+                    IndexId = actualIndexId,
+                    UserId = x
+                })
+                .ToList();
+
+            if (newMappings.Count > 0)
+            {
+                await _context.TrnIndexUserMapping.AddRangeAsync(newMappings);
+            }
+
+            await _context.SaveChangesAsync();
 
             return true;
         }
-        public async Task<bool> UpdateIndexPrivatePublic(string CrawlerId,bool IsPrivate, string userId, string roleName)
+
+        // 5. Update Index Private/Public status
+        public async Task<bool> UpdateIndexPrivatePublic(
+            string CrawlerId,
+            bool IsPrivate,
+            string userId,
+            string roleName)
         {
-            try
-            {
-                // 1. Check if the role is Admin (ignoring case)
-                bool isAdmin = string.Equals(roleName, "Admin", StringComparison.OrdinalIgnoreCase);
+            bool isAdmin = string.Equals(
+                roleName, "Admin",
+                StringComparison.OrdinalIgnoreCase);
 
-                int parsedUserId = 0;
-
-                // 2. If not an Admin, parse and require a valid UserId
-                if (!isAdmin)
-                {
-                    if (!int.TryParse(userId, out parsedUserId))
-                    {
-                        return false; // Invalid user ID format for non-admin users
-                    }
-                }
-
-                // 3. Build the query dynamically based on the role
-                var query = _context.TrnIndexUserMapping
-                    .Where(m => m.IndexName == CrawlerId);
-
-                // If not Admin, filter by UserId as well
-                //if (!isAdmin)
-                //{
-                //    query = query.Where(m => m.UserId == parsedUserId);
-                //}
-
-                // 4. Fetch matching records
-                var mappings = await query.ToListAsync();
-
-                if (mappings == null || !mappings.Any())
-                {
-                    return false; // No records found to update
-                }
-
-                // 5. Determine the new state by toggling the current state of the first record
-                bool newPrivateState = !mappings.First().IsPrivate;
-
-                // 6. Apply the new state to all matching records
-                foreach (var mapping in mappings)
-                {
-                    mapping.IsPrivate = IsPrivate;
-                }
-
-                // 7. Save changes to the database
-                await _context.SaveChangesAsync();
-
-                return true;
-            }
-            catch (Exception)
-            {
-                // Optional: Add logging here (e.g., _logger.LogError(ex, ...))
+            // Only Admin can change global index privacy
+            if (!isAdmin)
                 return false;
-            }
+
+            if (string.IsNullOrWhiteSpace(CrawlerId))
+                return false;
+
+            var indexes = await _context.MIndexes
+                .Where(x => x.IndexName == CrawlerId.Replace("fs-",""))
+                .Take(2)
+                .ToListAsync();
+
+            // Reject missing or ambiguous index names
+            if (indexes.Count != 1)
+                return false;
+
+            var index = indexes[0];
+
+            index.IsPrivate = IsPrivate;
+
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
-        public async Task<string> GetAllPrivateIndex(string roleName, string userId)
+        // 6. Get all private indexes
+        public async Task<string> GetAllPrivateIndex(
+            string roleName, string userId)
         {
-            try
+            bool isAdmin = string.Equals(
+                roleName, "Admin",
+                StringComparison.OrdinalIgnoreCase);
+
+            var query = _context.MIndexes
+                .AsNoTracking()
+                .Where(x => x.IsPrivate);
+
+            if (!isAdmin)
             {
-                // 1. Check if the role is Admin (ignoring case)
-                bool isAdmin = string.Equals(roleName, "Admin", StringComparison.OrdinalIgnoreCase);
-
-                int parsedUserId = 0;
-
-                // 2. If not an Admin, parse and validate the UserId
-                if (!isAdmin)
+                if (!int.TryParse(userId, out int parsedUserId)
+                    || parsedUserId <= 0)
                 {
-                    if (!int.TryParse(userId, out parsedUserId))
+                    return JsonSerializer.Serialize(new
                     {
-                        return JsonSerializer.Serialize(new { success = false, message = "Invalid User ID format." });
-                    }
+                        success = false,
+                        message = "Invalid User ID."
+                    });
                 }
 
-                // 3. Build the query to get only private records (IsPrivate == true)
-                var query = _context.TrnIndexUserMapping
-                    .Where(m => m.IsPrivate);
-
-                // 4. If not Admin, restrict results to the specific UserId
-                if (!isAdmin)
-                {
-                    query = query.Where(m => m.UserId == parsedUserId);
-                }
-
-                // 5. Fetch the records (projecting to anonymous type or keeping entity)
-                var privateIndexes = await query
-                    .Select(m => new
-                    {
-                        m.IndexUserMapId,
-                        m.IndexId,
-                        m.IndexName,
-                        m.UserId,
-                        m.IsPrivate
-                    })
-                    .ToListAsync();
-
-                // 6. Serialize the list to a JSON string and return
-                return JsonSerializer.Serialize(new
-                {
-                    success = true,
-                    count = privateIndexes.Count,
-                    data = privateIndexes
-                });
+                query = query.Where(index =>
+                    _context.TrnIndexUserMapping.Any(mapping =>
+                        mapping.IndexId == index.IndexId &&
+                        mapping.UserId == parsedUserId));
             }
-            catch (Exception ex)
+
+            var privateIndexes = await query
+                .Select(x => new
+                {
+                    x.IndexId,
+                    x.IndexName,
+                    x.Uuid,
+                    x.IsPrivate
+                })
+                .ToListAsync();
+
+            return JsonSerializer.Serialize(new
             {
-                // Return error details as a JSON string
-                return JsonSerializer.Serialize(new
-                {
-                    success = false,
-                    error = ex.Message
-                });
-            }
+                success = true,
+                count = privateIndexes.Count,
+                data = privateIndexes
+            });
         }
 
-        public async Task<List<string>> GetPrivateIndexNoAcessThisuserId(string userId)
+        // 7. Get private indexes not accessible by current user
+        public async Task<List<string>> GetPrivateIndexNoAcessThisuserId(
+            string userId)
         {
-            try
+            if (!int.TryParse(userId, out int parsedUserId)
+                || parsedUserId <= 0)
             {
-                // 1. Parse string UserId to int
-                if (!int.TryParse(userId, out int parsedUserId))
-                {
-                    return new List<string>(); // Return empty list on invalid ID
-                }
-
-                // 2. Get the list of IndexNames that the current user already has marked as private
-                var currentUserPrivateIndexNames = await _context.TrnIndexUserMapping
-                    .Where(m => m.UserId == parsedUserId && m.IsPrivate)
-                    .Select(m => m.IndexName)
-                    .Distinct()
-                    .ToListAsync();
-
-                // 3. Query private index names from OTHER users, 
-                // while excluding any IndexNames that the current user already has set to private.
-                var privateIndexNames = await _context.TrnIndexUserMapping
-                    .Where(m => m.IsPrivate
-                                && m.UserId != parsedUserId
-                                && !currentUserPrivateIndexNames.Contains(m.IndexName))
-                    .Select(m => m.IndexName)
-                    .Distinct() // Ensures unique index names
-                    .ToListAsync();
-
-                return privateIndexNames;
+                throw new UnauthorizedAccessException(
+                    "Invalid User ID.");
             }
-            catch (Exception)
-            {
-                // Optional: Log exception here
-                return new List<string>();
-            }
+
+            return await _context.MIndexes
+                .AsNoTracking()
+                .Where(index =>
+                    index.IsPrivate &&
+                    !_context.TrnIndexUserMapping.Any(mapping =>
+                        mapping.IndexId == index.IndexId &&
+                        mapping.UserId == parsedUserId))
+                .Select(index => index.IndexName)
+                .Distinct()
+                .ToListAsync();
         }
     }
 }

@@ -1,5 +1,8 @@
-﻿mMsater(0, "RankId", 1, "");
-
+﻿
+function token() {
+    return $('input[name="__RequestVerificationToken"]').val();
+}
+mMsater(0, "RankId", 1, "");
 document.querySelector("form").addEventListener("submit", function (e) {
     e.preventDefault();
 

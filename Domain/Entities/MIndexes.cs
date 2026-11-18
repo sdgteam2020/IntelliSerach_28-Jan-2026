@@ -9,7 +9,7 @@ namespace Domain.Entities
     public class MIndexes : Common
     {
         [Key]
-        public int Id { get; set; }
+        public int IndexId { get; set; }
 
         [Required]
         [Display(Name = "Enter Index Name")]
@@ -18,7 +18,7 @@ namespace Domain.Entities
             @"^(?![0-9]+$)(?!\.+$)(?!_+$)[A-Za-z0-9._ ]+$",
             ErrorMessage = "Use letters, numbers, spaces, dots, or underscores. The value cannot contain only numbers, only dots, or only underscores."
         )]
-        public required string Index_Name { get; set; }
+        public required string IndexName { get; set; }
 
         [Required]
         [Display(Name = "Enter IP Address")]
@@ -32,6 +32,12 @@ namespace Domain.Entities
         [Required]
         [StringLength(200)]
         public required string Key { get; set; }
+
+        [Required]
+        [StringLength(200)]
+        public required string Uuid { get; set; }
+
+        public bool IsPrivate { get; set; } = false;
 
     }
 }

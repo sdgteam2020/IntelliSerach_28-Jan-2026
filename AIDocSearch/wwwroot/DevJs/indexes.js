@@ -68,11 +68,12 @@
                 let count = 1;
                 records.forEach(function (item) {
                     const id = getValue(item, "Id");
-                    const indexName = getValue(item, "Index_Name");
+                    const indexName = getValue(item, "IndexName");
                     const ipAddress = getValue(item, "IpAddress");
                     const key = getValue(item, "Key");
                     const createdOn = getValue(item, "CreatedOn");
                     const isActive = getValue(item, "IsActive");
+                    const IsPrivate = getValue(item, "IsPrivate");
                     // <button type="button"
                     //     class="btn btn-sm btn-warning btn-edit"
                     //     data-id="${escapeHtml(id)}">
@@ -88,6 +89,11 @@
                            <td>
                                 <span class="badge ${isActive ? "bg-success" : "bg-warning text-black"}">
                                     ${isActive ? "Active" : "Deactivate"}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge ${IsPrivate ? "bg-danger " : "bg-success"}">
+                                    ${IsPrivate ? "Private" : "Public"}
                                 </span>
                             </td>
                             <td>

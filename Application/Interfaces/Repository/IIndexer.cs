@@ -14,7 +14,8 @@ namespace Application.Interfaces.Repository
         Task<MIndexes?> GetActiveIndexById(int id);
         Task<List<MIndexes>> GetActiveIndexes();
         Task<bool> ActiveAndDeActiveIndex(int id, int? updatedBy);
-
+        Task<bool> IsPrivateIndex(string IndexId);
         Task<bool> IsRegisterCrawler(DTORegisterCrawler Data);
+        Task<int> GetIndexIdBUuid(string Uuid,string IndexName);
     }
 }

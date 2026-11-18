@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using static Org.BouncyCastle.Asn1.Cmp.Challenge;
 
 namespace AIDocSearch.Controllers
@@ -97,8 +98,17 @@ namespace AIDocSearch.Controllers
                     model.Password = _encryptionService.Decrypt(model.Password, GetSalt);
                     model.UserName = _encryptionService.Decrypt(model.UserName, GetSalt);
                 }
+                // Username validation
+                if (string.IsNullOrEmpty(model.UserName) ||
+                    !Regex.IsMatch(model.UserName, @"\A[a-zA-Z0-9_]+\z"))
+                {
+                    ModelState.AddModelError(nameof(model.UserName),
+                        "Username must contain only alphabets, numbers and underscore.");
+                }
+
                 if (!ModelState.IsValid)
                     return View(model);
+
 
                 // Get the user's IP address and the current request URL (for logging or auditing)
                 string ipAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
@@ -278,13 +288,14 @@ namespace AIDocSearch.Controllers
         [AllowAnonymous]
         public IActionResult Register()
         {
+          
             string GetSalt = _AESEncrytDecry.GenerateKey();
             HttpContext.Session.SetString(SessionKeySalt, GetSalt);
             ViewBag.hdns = GetSalt;
             ViewBag.UserName = TempData["UserName"] as string;
             ViewBag.RoleName = TempData["RoleName"] as string;
-            //if (string.IsNullOrEmpty(TempData["UserName"] as string))
-            //    return RedirectToAction("Login");
+            if (string.IsNullOrEmpty(TempData["UserName"] as string))
+                return RedirectToAction("Login");
             return View(new DTORegisterRequest());
         }
 

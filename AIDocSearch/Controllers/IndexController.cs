@@ -9,6 +9,7 @@ using Domain.DTOs.Requests;
 using Domain.DTOs.Response;
 using Domain.Entities;
 using Infrastructure;
+using Infrastructure.Repository;
 using Infrastructure.Shared.Helpers;
 using Infrastructure.Shared.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -31,6 +32,7 @@ namespace AIDocSearch.Controllers
         private readonly ICurrentUserService _currentUserService;
         private readonly IUserAccount _userAccount;
         private readonly IAESEncrytDecry _AESEncrytDecry;
+        private readonly IIndexer _indexerRepository;
         private readonly ConnectionManager _cm;
         private readonly IHubContext<CrawlerHub> _hub;
         public IndexController(
@@ -38,6 +40,7 @@ namespace AIDocSearch.Controllers
             IConfiguration configuration,
             IindexUserMapping indexUserMapping,
             IDateTimeService dateTimeService,
+            IIndexer indexerRepository,
             ICurrentUserService currentUserService, IAESEncrytDecry aESEncrytDecry,
             IUserAccount userAccount,
             ConnectionManager cm, IHubContext<CrawlerHub> hub)
@@ -49,6 +52,7 @@ namespace AIDocSearch.Controllers
             _currentUserService = currentUserService;
             _userAccount = userAccount;
             _AESEncrytDecry = aESEncrytDecry;
+            _indexerRepository = indexerRepository;
             _cm = cm;
             _hub = hub;
         }
@@ -121,23 +125,28 @@ namespace AIDocSearch.Controllers
             if (!TryValidateModel(request))
                 return BadRequest(new { success = false, message = "Invalid request" });
 
-            bool isPrivate = await _indexUserMapping.IsPrivateIndex(request.IndexId);
+           
             await _indexUserMapping.UserAssginAndDeAssignIndex(request);
             if (request.AllSelected)
             {
                     var allUsers = await _userAccount.GetActiveUsers();
                     request.UserIds = allUsers.Select(u => u.Id).ToList();
             }
-           
+            int IndexId = await _indexerRepository.GetIndexIdBUuid(request.IndexId, request.indexName);
+            if(IndexId==0)
+            return Json(new DTOGenericResponse<object>(
+               ConnKeyConstants.BadRequest,
+               ConnKeyConstants.BadRequestMessage,
+               null));
             // create mappings
             foreach (var uid in request.UserIds)
             {
                 var map = new TrnIndexUserMapping
                 {
-                    IndexName=request.indexName,
-                    IndexId = request.IndexId,
-                    UserId = uid,
-                    IsPrivate = isPrivate   
+                   
+                    IndexId = IndexId,
+                    UserId = uid
+                       
 
                 };
                 await _indexUserMapping.AddWithCheckIndexId(map);
@@ -312,8 +321,23 @@ namespace AIDocSearch.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public async Task<IActionResult> UpdateIndexPrivatePublic([FromBody] DTOIndexPublicPrivateRequest data)
+        public async Task<IActionResult> UpdateIndexPrivatePublic([FromBody] EncryptedRequest Payload)
         {
+            if(Payload==null)
+                return BadRequest(new
+                {
+                    Code = 400,
+                    Message = "Invalid request data"
+                });
+
+            //[FromBody] DTOIndexPublicPrivateRequest data
+            DTOIndexPublicPrivateRequest data = await _AESEncrytDecry.DecryptAESWithDTO<DTOIndexPublicPrivateRequest>(Payload.Data, SessionHeplers.GetObject<DTOSession>(HttpContext.Session, "Users").AESKey);
+            if (data == null)
+                return Json(new DTOGenericResponse<object>(ConnKeyConstants.BadRequest, ConnKeyConstants.BadRequestMessage, null));
+
+            if (!TryValidateModel(data))
+                return BadRequest(new { success = false, message = "Invalid request" });
+
             int CurrentUserId = (int)_currentUserService.UserId;
             string RoleName = (string)_currentUserService.RoleName;
 
@@ -337,24 +361,15 @@ namespace AIDocSearch.Controllers
                 : "Failed to make index Public.";
 
             bool ret = await _indexUserMapping
-                .CheckUserIndexingExists(CurrentUserId, data.uuid);
+                .CheckUserIndexingExists(data.uuid);
 
             if (!ret)
             {
-                var map = new TrnIndexUserMapping
+               
+                return BadRequest(new
                 {
-                    IndexName = data.CrawlerId,
-                    IndexId = data.uuid,
-                    UserId = CurrentUserId,
-                    IsPrivate = data.IsPrivate
-                };
-
-                await _indexUserMapping.AddWithCheckIndexId(map);
-
-                return Ok(new
-                {
-                    Code = 200,
-                    Message = successMessage
+                    Code = 400,
+                    Message = "Index not found in Your indexer"
                 });
             }
 

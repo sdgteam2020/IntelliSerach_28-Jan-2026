@@ -68,9 +68,11 @@ namespace Infrastructure.Repository
             var users = await (
                 from u in _context.Users
                         .Where(x => (x.Id != 1 || x.Id == UserId) && x.Active)
-                join map in _context.TrnIndexUserMapping
-                        .Where(x => x.IndexId == IndexId )
+               
+                 join map in _context.TrnIndexUserMapping
                     on u.Id equals map.UserId
+                join indexes in _context.MIndexes
+                   .Where(x => x.Uuid == IndexId) on map.IndexId equals indexes.IndexId
                 select u.UserName
             ).ToListAsync();
 
@@ -88,33 +90,55 @@ namespace Infrastructure.Repository
         }
         public async Task<DTODataTablesResponse<DTOUserDataResponse>> GetActive_ForIndex_Mapping_Users(DTODataTablesRequest request, string IndexId)
         {
-            var Data =
+           var Data =
     from u in _context.Users
-            .Where(x => x.Id != 1 && x.Active)
-            .OrderByDescending(x => x.Id)
-    join rank in _context.MRank on u.RankId equals rank.RankId
-    join role in _context.UserRoles.Where(x=>x.RoleId==2) on u.Id equals role.UserId
-    join map in _context.TrnIndexUserMapping
-            .Where(x => x.IndexId == IndexId)
-        on u.Id equals map.UserId into maps
+    where u.Id != 1 && u.Active
 
-    from map in maps.DefaultIfEmpty() // LEFT JOIN
+    join rank in _context.MRank
+        on u.RankId equals rank.RankId
+
+    join role in _context.UserRoles.Where(x => x.RoleId == 2)
+        on u.Id equals role.UserId
+
+    join mapping in
+        (
+            from m in _context.TrnIndexUserMapping
+            join idx in _context.MIndexes
+                on m.IndexId equals idx.IndexId
+            where idx.Uuid == IndexId
+            select new
+            {
+                m.UserId,
+                idx.Uuid
+            }
+        )
+        on u.Id equals mapping.UserId into maps
+
+    from map in maps.DefaultIfEmpty()
+
+    orderby u.Id descending
 
     select new DTOUserDataResponse
     {
         Id = u.Id,
         DomainId = u.UserName,
+
         RoleNames =
-            (from ur in _context.UserRoles.Where(x => x.UserId == u.Id)
-             join r in _context.Roles on ur.RoleId equals r.Id
+            (from ur in _context.UserRoles
+             join r in _context.Roles
+                 on ur.RoleId equals r.Id
+             where ur.UserId == u.Id
              select r.Name).ToList(),
+
         RankName = rank.RankAbbreviation,
-        IndexId = map != null ? map.IndexId : null,
+        IndexId = map != null ? map.Uuid : null,
         Name = u.Name,
         Active = u.Active
     };
 
-            var result = Data.AsQueryable();
+var result = await Data.ToListAsync();
+
+          
 
             var TotRec = await Data.CountAsync();
             //Apply filtering
@@ -165,10 +189,12 @@ namespace Infrastructure.Repository
                 where user.Id != 1 && user.Active && user.Id == userId
                 join mapping in _context.TrnIndexUserMapping
                     on user.Id equals mapping.UserId
+                    join indexes in _context.MIndexes
+                    on mapping.IndexId equals indexes.IndexId
                 select new DTOIndexUserGetByUserIdResponse
                 {
-                    IndexId = mapping.IndexId,
-                    IndexName = mapping.IndexName
+                    IndexId = indexes.Uuid,
+                    IndexName = indexes.IndexName
                 })
                 .Distinct()
                 .ToListAsync();

@@ -21,11 +21,11 @@ namespace Infrastructure.Repository
         }
         public async Task<MIndexes> Addindexes(MIndexes Data)
         {
-            if (Data.Id == 0)
+            if (Data.IndexId == 0)
             {
                 return await AddWithReturn(Data);
             }
-            else if (Data.Id > 0)
+            else if (Data.IndexId > 0)
             {
                 await UpdateWithReturn(Data);
                 return Data;
@@ -34,7 +34,7 @@ namespace Infrastructure.Repository
         }
         public async Task<bool> SoftDeleteIndex(int id, int? updatedBy)
         {
-            var entity = await _context.MIndexes.Where(x => x.Id == id && !x.IsDeleted).FirstOrDefaultAsync();
+            var entity = await _context.MIndexes.Where(x => x.IndexId == id && !x.IsDeleted).FirstOrDefaultAsync();
 
             if (entity == null)
                 return false;
@@ -50,7 +50,7 @@ namespace Infrastructure.Repository
         {
             return _context.MIndexes
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+                .FirstOrDefaultAsync(x => x.IndexId == id && !x.IsDeleted);
         }
         public Task<List<MIndexes>> GetActiveIndexes()
         {
@@ -64,7 +64,7 @@ namespace Infrastructure.Repository
         public async Task<bool> ActiveAndDeActiveIndex(int id, int? updatedBy)
         {
             var entity = await _context.MIndexes
-                .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+                .FirstOrDefaultAsync(x => x.IndexId == id && !x.IsDeleted);
 
             if (entity == null)
                 return false;
@@ -76,7 +76,10 @@ namespace Infrastructure.Repository
             await _context.SaveChangesAsync();
             return true;
         }
-
+        public async Task<bool> IsPrivateIndex(string IndexId)
+        {
+            return await _context.MIndexes.AnyAsync(i => i.Uuid == IndexId && i.IsPrivate == true);
+        }
         public async Task<bool> IsRegisterCrawler(DTORegisterCrawler Data)
         {
             if (Data == null ||
@@ -91,10 +94,41 @@ namespace Infrastructure.Repository
             crawlerId = crawlerId.Replace("fs-", "");
 
             bool ret= await _context.MIndexes.AnyAsync(i =>
-                i.Index_Name.ToLower() == crawlerId.ToLower() &&
+                i.IndexName.ToLower() == crawlerId.ToLower() &&
                 i.Key.ToLower() == Data.IndexerKey.ToLower() &&
                 i.IpAddress == Data.SystemIp && i.IsActive==true);
             return ret;
+        }
+
+        public async Task<int> GetIndexIdBUuid(string Uuid, string IndexName)
+        {
+            if (string.IsNullOrWhiteSpace(Uuid))
+                return 0;
+
+            // Check existing UUID in database starts with fs-
+            var index = await _context.MIndexes
+                .FirstOrDefaultAsync(x =>
+                    x.IndexName == IndexName.Replace("fs-","") &&
+                    x.Uuid.StartsWith("fs-") &&
+                    !x.IsDeleted &&
+                    x.IsActive);
+
+            // Update existing UUID with new UUID
+            if (index != null && index.Uuid != Uuid)
+            {
+                index.Uuid = Uuid;
+
+                await _context.SaveChangesAsync();
+            }
+
+            // Return IndexId using updated UUID
+            return await _context.MIndexes
+                .Where(x =>
+                    x.Uuid == Uuid &&
+                    !x.IsDeleted &&
+                    x.IsActive)
+                .Select(x => x.IndexId)
+                .FirstOrDefaultAsync();
         }
     }
 }

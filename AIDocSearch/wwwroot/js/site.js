@@ -27,19 +27,7 @@ $(document).ready(function () {
         "hideMethod": "fadeOut"
     }
    
-    $(document).on("input", "input[type='text'], textarea", function () {
 
-        // Remove restricted special characters
-        let value = $(this).val();
-
-        let cleanValue = value.replace(/[@#$'!%^=]/g, "").replace(/ {2,}/g, " ");   // Allow only one consecutive space
-;
-
-        if (value !== cleanValue) {
-            $(this).val(cleanValue);
-        }
-
-    });
 
 });
 $("#loading").hide();

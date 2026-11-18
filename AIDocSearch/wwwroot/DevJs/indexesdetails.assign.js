@@ -169,8 +169,11 @@ $(function () {
         // select all checkbox handler (toggle)
         $modal.off('change.assign').on('change.assign', '#assignSelectAll', function () {
             let checked = $(this).is(':checked');
-
+            
             $modal.find('.assignUserChk').prop('checked', checked);
+
+            if (!checked)
+                selectedUsers.clear();
         });
 
         $modal.off('click.assign').on('click.assign', '#assignSave', function () {
@@ -436,7 +439,7 @@ $(function () {
             Number($("#indexedOcr_Files").text().replace(/,/g, "").trim());
         if (indexedOcr_Files > 0) {
             GetDocDetailsByIndexName($(".spanindexNameForDashboard").html(), $(".spanuuidForDashboard").html(), 1)
-            $(".filesViewType").html("OCR Enabled");
+            $(".filesViewType").html("OCR Based");
         }
 
     })
@@ -447,7 +450,7 @@ $(function () {
 
         if (indexedNotOcr_Files > 0) {
             GetDocDetailsByIndexName($(".spanindexNameForDashboard").html(), $(".spanuuidForDashboard").html(), 2)
-            $(".filesViewType").html("Text Extraction");
+            $(".filesViewType").html("Text Based");
         }
 
     })
@@ -505,7 +508,7 @@ $(function () {
 
             success: function (response) {
 
-                if (response != null &&
+                if (response != null && response.data &&
                     response.data.DTOStatisticsHits &&
                     response.data.DTOStatisticsHits.length > 0 &&
                     response.data.DTOStatisticsHits[0]._source) {

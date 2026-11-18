@@ -8,24 +8,10 @@
 @inject IConfiguration configuration;
 <html lang="en" class="light-theme">
 <head>
-  
+    
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script>
-        (function () {
-            try {
-                const savedSize = Number(localStorage.getItem("intelFontSize"));
-                const validSizes = [90, 100, 110, 120, 130];
-
-                if (validSizes.includes(savedSize)) {
-                    document.documentElement.style.fontSize = savedSize + "%";
-                    document.documentElement.dataset.fontSize = savedSize;
-                }
-            } catch (error) {
-                // Continue with the default document font size when storage is unavailable.
-            }
-        })();
-    </script>
+   
     <title>Indian Army IntelliSearch</title>
     <!--Bootstrap 4 CDN-->
     <link href="~/bootstrap/css/bootstrap.min.css" asp-append-version="true"  rel="stylesheet" />
@@ -362,7 +348,7 @@
     <script src="~/js/futuristic.js" asp-append-version="true" defer></script>
     <script src="~/js/site.js" asp-append-version="true" defer></script>
     <script src="~/devjs/loadaes.js" asp-append-version="true" defer></script>
-   
+    <script src="~/devjs/commonvalidation.js" asp-append-version="true" defer></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

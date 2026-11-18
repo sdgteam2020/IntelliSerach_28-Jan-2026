@@ -315,6 +315,22 @@ $(function () {
                 .forEach(function (item) {
                     let crawlerId = item.index || '';
                     let uuid = item.uuid || '';
+                    
+    //                             <button type="button"
+    //         class="btn btn-outline-success btn-sm btnIndexpublic d-none"
+    //         title="Public"
+    //         data-crawler-id="${crawlerId}"
+    //         data-uuid="${uuid}">
+    //     <i class="fas fa-lock-open me-1"></i>
+    // </button>
+
+    // <button type="button"
+    //         class="btn btn-outline-danger btn-sm btnIndexprivate d-none"
+    //         title="Private"
+    //         data-crawler-id="${crawlerId}"
+    //         data-uuid="${uuid}">
+    //     <i class="fas fa-lock me-1"></i>
+    // </button>
                     html.push(`
 
                     
@@ -338,22 +354,15 @@ $(function () {
 
             
         </div>
-    </div>
-                            <button type="button"
-        class="btn btn-outline-success btn-sm btnIndexpublic d-none"
-        title="Public"
-        data-crawler-id="${crawlerId}"
-        data-uuid="${uuid}">
-    <i class="fas fa-lock-open me-1"></i>
-</button>
+        </div>
+                                <span 
+            class="btn-outline-info btn-sm"
+            title="Public"
+           >
+        <i class="fas fa-lock-open me-1"></i>
+    </span>
 
-<button type="button"
-        class="btn btn-outline-danger btn-sm btnIndexprivate d-none"
-        title="Private"
-        data-crawler-id="${crawlerId}"
-        data-uuid="${uuid}">
-    <i class="fas fa-lock me-1"></i>
-</button>
+   
                         </div>
                         
                         <div class="card-body">
@@ -700,9 +709,7 @@ function UpdateIndexPrivatePublic(CrawlerId, uuid,IsPrivate) {
     }
 
     $("#loading").show();
-
     fetch('/IntelliSearch/Index/UpdateIndexPrivatePublic', {
-
         method: 'POST',
 
         headers: {
@@ -710,8 +717,9 @@ function UpdateIndexPrivatePublic(CrawlerId, uuid,IsPrivate) {
             'RequestVerificationToken': csrfToken
         },
 
-        body: JSON.stringify(data)
-
+        body: JSON.stringify({
+            Data: encryptPayloadData(JSON.stringify(data))
+        })
     })
         .then(async response => {
 
@@ -793,7 +801,7 @@ function GetAllPrivateIndexes() {
             let privateUUIDs = new Set(
                 privateIndexes
                     .filter(x => x.IsPrivate === true || x.isPrivate === true)
-                    .map(x => String(x.IndexId ?? x.indexId).trim())
+                    .map(x => String(x.Uuid ?? x.Uuid).trim())
             );
 
             console.log("Private UUIDs:", privateUUIDs);

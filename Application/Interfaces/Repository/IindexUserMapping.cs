@@ -13,10 +13,10 @@ namespace Application.Interfaces.Repository
         Task<bool> UserAssginAndDeAssignIndex(DTOIndexAssignRequest Data);
 
         Task<bool> CheckUserIndexingExists(int UserId,string IndexId,String RoleName);
-        Task<bool> CheckUserIndexingExists(int UserId, string IndexId);
+        Task<bool> CheckUserIndexingExists(string IndexId);
         Task<bool> UpdateIndexPrivatePublic(string CrawlerId,bool IsPrivate, string userId, string roleName);
         Task<string> GetAllPrivateIndex(string roleName, string userId);
-        Task<bool> IsPrivateIndex(string IndexId);
+        
         Task<List<string>> GetPrivateIndexNoAcessThisuserId(string userId);
         // Task<string[]> GetAllIndexUserWise(int? UserId);
     }

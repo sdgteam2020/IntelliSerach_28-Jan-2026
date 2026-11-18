@@ -36,7 +36,7 @@
                     <img src="~/images/logo.png"
                          alt="Logo"
                          class="app-logo mx-auto d-block" />
-                    <h3>Log in</h3>
+                    <h3>Registration</h3>
                     @* <div class="d-flex justify-content-end social_icon">
                         <span><i class="fa-solid fa-file-pdf"></i></span>
                         <span><i class="fa-solid fa-file-word"></i></span>
@@ -50,7 +50,7 @@
                         <div class="form-group row mb-3">
                             <label asp-for="UserName" class="col-sm-3 col-form-label text-white"></label>
                             <div class="col-sm-9">
-                                <input asp-for="UserName" class="form-control" />
+                                <input asp-for="UserName" class="form-control" value="@ViewBag.UserName" />
                                 <span asp-validation-for="UserName" class="text-danger"></span>
                             </div>
                         </div>
@@ -124,3 +124,4 @@
 <script src="~/devjs/mtable.js"></script>
 <script src="~/sweetalert2/sweetalert2.min.js"></script>
 <script src="~/devjs/registration.js"></script>
+<script src="~/devjs/commonvalidation.js"></script>

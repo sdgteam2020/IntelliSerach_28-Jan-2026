@@ -643,8 +643,8 @@ namespace AIDocSearch.Controllers
             var activeRecords = await _iIndexer.GetActiveIndexes();
 
             if (activeRecords.Any(x =>
-                (x.Index_Name.Equals(name, StringComparison.OrdinalIgnoreCase) ||
-                x.IpAddress.Equals(ipAddress, StringComparison.OrdinalIgnoreCase)) && x.Id!= request.Id))
+                (x.IndexName.Equals(name, StringComparison.OrdinalIgnoreCase) ||
+                x.IpAddress.Equals(ipAddress, StringComparison.OrdinalIgnoreCase)) && x.IndexId != request.Id))
             {
                 return Conflict(new
                 {
@@ -658,7 +658,7 @@ namespace AIDocSearch.Controllers
             if (request.Id>0)
             {
                 var Updateentity = await _iIndexer.GetById(request.Id);
-                Updateentity.Index_Name = name;
+                Updateentity.IndexName = name;
                 Updateentity.IpAddress = ipAddress;
                 Updateentity.UpdatedOn = now;
                 Updateentity.UpdatedBy = userId;
@@ -667,29 +667,31 @@ namespace AIDocSearch.Controllers
                 return Ok(new
                 {
                     message = "Index Updated successfully.",
-                    id = updated.Id
+                    id = updated.IndexId
                 });
             }
-           var entity = new MIndexes
+            var entity = new MIndexes
             {
-                Id = request.Id,
-                Index_Name = name,
+                IndexId = request.Id,
+                IndexName = name,
                 IpAddress = ipAddress,
                 Key = Guid.NewGuid().ToString(),
                 IsActive = true,
                 IsDeleted = false,
                 CreatedOn = now,
-                UpdatedBy=userId,
+                UpdatedBy = userId,
                 CreatedBy = userId,
+                IsPrivate = false,
+                Uuid = "fs-" + Guid.NewGuid().ToString()
 
-           };
+            };
 
             var created = await _iIndexer.Addindexes(entity);
 
             return Ok(new
             {
                 message = "Index added successfully.",
-                id = created.Id
+                id = created.IndexId
             });
 
 
@@ -709,8 +711,8 @@ namespace AIDocSearch.Controllers
             // Do not return the secret Key to the browser.
             return Json(new
             {
-                item.Id,
-                item.Index_Name,
+                item.IndexId,
+                item.IndexName,
                 item.IpAddress,
                 item.CreatedOn,
                 item.IsActive
@@ -738,7 +740,7 @@ namespace AIDocSearch.Controllers
                 return NotFound(new { message = "Index record was not found." });
 
             var getdata = await _iIndexer.GetById(id);
-            _cm.RemoveBycrawlerId("fs-" + getdata.Index_Name);
+            _cm.RemoveBycrawlerId("fs-" + getdata.IndexName);
 
             return Ok(new { message = "Index deleted successfully." });
         }
@@ -754,7 +756,7 @@ namespace AIDocSearch.Controllers
                 return NotFound(new { message = "Index record was not found." });
 
            var getdata= await _iIndexer.GetById(id);
-            _cm.RemoveBycrawlerId("fs-" + getdata.Index_Name);
+            _cm.RemoveBycrawlerId("fs-" + getdata.IndexName);
 
 
             return Ok(new { message = "Index status updated successfully." });

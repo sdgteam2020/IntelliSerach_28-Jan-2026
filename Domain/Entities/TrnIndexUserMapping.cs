@@ -15,16 +15,15 @@ namespace Domain.Entities
         public int IndexUserMapId { get; set; }
         [Required]
         [StringLength(200)]
-        public required string IndexId { get; set; }
-        [Required]
-        [StringLength(200)]
-        public required string IndexName { get; set; }
+        public required int IndexId { get; set; }
+        [ForeignKey(nameof(IndexId))]
+        public MIndexes? Index { get; set; }
+
         [Required]
         public int UserId { get; set; }
 
         [ForeignKey(nameof(UserId))]
         public ApplicationUser? AspUserId { get; set; }
 
-        public bool IsPrivate { get; set; }=false;
     }
 }

@@ -1,5 +1,5 @@
 /*!
- * Font Awesome Free 6.7.2 by @fontawesome - ###S###fontawesome.com
+ *  by @fontawesome - ###S###fontawesome.com
  * License - ###S###fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
  * Copyright 2024 Fonticons, Inc.
  */
